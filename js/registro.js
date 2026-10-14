@@ -56,7 +56,7 @@ mostrarConfirmar.addEventListener("click", function () {
 
 
 // ========================================
-// VALIDAR FORMULARIO
+// VALIDAR FORMULARIO Y ENVIAR AL BACKEND
 // ========================================
 
 formulario.addEventListener("submit", function (event) {
@@ -68,6 +68,18 @@ formulario.addEventListener("submit", function (event) {
     // ====================================
     // OBTENER DATOS
     // ====================================
+
+    const nombres = 
+        document.getElementById("nombre") ? document.getElementById("nombre").value.trim() : "";
+
+    const apellidoPaterno = 
+        document.getElementById("apellidoPaterno") ? document.getElementById("apellidoPaterno").value.trim() : "";
+
+    const apellidoMaterno = 
+        document.getElementById("apellidoMaterno") ? document.getElementById("apellidoMaterno").value.trim() : "";
+
+    const correo = 
+        document.getElementById("correo") ? document.getElementById("correo").value.trim() : "";
 
     const telefono =
         document.getElementById("telefono").value.trim();
@@ -165,23 +177,41 @@ formulario.addEventListener("submit", function (event) {
 
 
     // ====================================
-    // TODO CORRECTO
+    // ENVIAR DATOS A LA API
     // ====================================
 
-    mostrarExito(
-        "¡Cuenta creada correctamente!"
-    );
+    const datosRegistro = {
+        nombres: nombres,
+        apellido_paterno: apellidoPaterno,
+        apellido_materno: apellidoMaterno,
+        telefono: telefono,
+        correo: correo,
+        contrasena: passwordValor
+    };
 
-
-    // ====================================
-    // DESPUÉS DE CREAR LA CUENTA
-    // ====================================
-
-    setTimeout(function () {
-
-        window.location.href = "login.html";
-
-    }, 2000);
+    fetch('/api/registro', {
+        method: 'POST',
+        headers: { 
+            'Content-Type': 'application/json' 
+        },
+        body: JSON.stringify(datosRegistro)
+    })
+    .then(function(respuesta) {
+        return respuesta.json();
+    })
+    .then(function(data) {
+        if (data.error) {
+            mostrarError("Error: " + data.error);
+        } else {
+            mostrarExito("¡Cuenta creada correctamente!");
+            setTimeout(function () {
+                window.location.href = "login.html";
+            }, 2000);
+        }
+    })
+    .catch(function(error) {
+        mostrarError("Error al conectar con el servidor. Intenta de nuevo.");
+    });
 
 });
 
