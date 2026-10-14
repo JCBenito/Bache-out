@@ -1,0 +1,625 @@
+/* =========================================
+   CONFIGURACIÓN GENERAL
+========================================= */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f8f9;
+    color: #24343b;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+
+/* =========================================
+   ENCABEZADO
+========================================= */
+
+.barra-principal {
+    width: 100%;
+    height: 85px;
+    background-color: #E9FFFB;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 45px;
+}
+
+.marca {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #173F4A;
+    font-size: 25px;
+    font-weight: bold;
+}
+
+.logo {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+}
+
+
+/* =========================================
+   BARRA DE NAVEGACIÓN
+========================================= */
+
+.barra-navegacion {
+    width: 100%;
+    min-height: 58px;
+    background-color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 35px;
+    border-bottom: 1px solid #dce5e7;
+}
+
+.barra-navegacion a {
+    position: relative;
+    text-decoration: none;
+    color: #0f3d46;
+    font-size: 13px;
+    font-weight: bold;
+    padding: 20px 5px;
+    transition: 0.3s;
+}
+
+.barra-navegacion a:hover {
+    color: #159a9c;
+}
+
+.barra-navegacion a.activo {
+    color: #159a9c;
+}
+
+.barra-navegacion a.activo::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 10px;
+    width: 100%;
+    height: 3px;
+    background-color: #159a9c;
+    border-radius: 5px;
+}
+
+
+/* =========================================
+   CONTENIDO PRINCIPAL
+========================================= */
+
+.inicio {
+    width: 100%;
+    padding: 45px 30px 60px;
+}
+
+
+/* =========================================
+   PRESENTACIÓN
+========================================= */
+
+.inicio-presentacion {
+    position: relative;
+    overflow: hidden;
+
+    max-width: 1150px;
+    min-height: 390px;
+
+    margin: 0 auto 60px;
+    padding: 60px;
+
+    background-color: #E9FFFB;
+    border-radius: 25px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+
+/* CÍRCULO DECORATIVO */
+
+.inicio-presentacion::before {
+    content: "";
+
+    position: absolute;
+
+    width: 300px;
+    height: 300px;
+
+    background-color: rgba(21, 154, 156, 0.12);
+
+    border-radius: 50%;
+
+    left: -120px;
+    top: -120px;
+}
+
+
+/* OTRO CÍRCULO DECORATIVO */
+
+.inicio-presentacion::after {
+    content: "";
+
+    position: absolute;
+
+    width: 220px;
+    height: 220px;
+
+    background-color: rgba(114, 214, 212, 0.20);
+
+    border-radius: 50%;
+
+    right: -90px;
+    bottom: -100px;
+}
+
+
+/* =========================================
+   TEXTO DE PRESENTACIÓN
+========================================= */
+
+.inicio-texto {
+    position: relative;
+    z-index: 2;
+
+    max-width: 650px;
+}
+
+.etiqueta {
+    display: inline-block;
+
+    margin-bottom: 15px;
+
+    color: #159a9c;
+
+    font-size: 13px;
+    font-weight: bold;
+    letter-spacing: 2px;
+}
+
+.inicio-texto h1 {
+    color: #0f3d46;
+
+    font-size: 45px;
+    line-height: 1.15;
+
+    margin-bottom: 20px;
+}
+
+.inicio-texto h1 span {
+    color: #159a9c;
+}
+
+.inicio-texto p {
+    max-width: 620px;
+
+    color: #53666d;
+
+    font-size: 16px;
+    line-height: 1.7;
+
+    margin-bottom: 30px;
+}
+
+
+/* =========================================
+   BOTONES DE INICIO
+========================================= */
+
+.botones-inicio {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.btn-reportar,
+.btn-conocer {
+    display: inline-block;
+
+    padding: 13px 24px;
+
+    border-radius: 8px;
+
+    text-decoration: none;
+
+    font-size: 14px;
+    font-weight: bold;
+
+    transition: 0.3s;
+}
+
+.btn-reportar {
+    background-color: #159a9c;
+    color: white;
+}
+
+.btn-reportar:hover {
+    background-color: #117f81;
+}
+
+.btn-conocer {
+    background-color: white;
+    color: #159a9c;
+
+    border: 1px solid #159a9c;
+}
+
+.btn-conocer:hover {
+    background-color: #159a9c;
+    color: white;
+}
+
+
+/* =========================================
+   LOGO DE LA PRESENTACIÓN
+========================================= */
+
+.inicio-logo {
+    position: relative;
+    z-index: 2;
+
+    width: 300px;
+    height: 300px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.inicio-logo img {
+    width: 230px;
+    height: 230px;
+
+    object-fit: contain;
+}
+
+
+/* =========================================
+   SECCIÓN ¿CÓMO FUNCIONA?
+========================================= */
+
+.inicio-informacion {
+    max-width: 1150px;
+    margin: 0 auto 60px;
+}
+
+.titulo-seccion {
+    text-align: center;
+    margin-bottom: 35px;
+}
+
+.titulo-seccion span {
+    display: block;
+
+    margin-bottom: 10px;
+
+    color: #159a9c;
+
+    font-size: 12px;
+    font-weight: bold;
+
+    letter-spacing: 2px;
+}
+
+.titulo-seccion h2 {
+    color: #0f3d46;
+
+    font-size: 30px;
+}
+
+
+/* =========================================
+   TARJETAS
+========================================= */
+
+.inicio-tarjetas {
+    display: grid;
+
+    grid-template-columns: repeat(3, 1fr);
+
+    gap: 25px;
+}
+
+.inicio-card {
+    background-color: white;
+
+    padding: 30px;
+
+    border-radius: 15px;
+
+    border: 1px solid #e0e8e9;
+
+    transition: 0.3s;
+}
+
+.inicio-card:hover {
+    transform: translateY(-5px);
+
+    box-shadow: 0 8px 20px rgba(15, 61, 70, 0.08);
+}
+
+.numero {
+    width: 45px;
+    height: 45px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin-bottom: 20px;
+
+    background-color: #E9FFFB;
+
+    color: #159a9c;
+
+    border-radius: 50%;
+
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.inicio-card h3 {
+    color: #0f3d46;
+
+    font-size: 20px;
+
+    margin-bottom: 12px;
+}
+
+.inicio-card p {
+    color: #65757b;
+
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+
+/* =========================================
+   SECCIÓN PROPÓSITO
+========================================= */
+
+.inicio-proposito {
+    position: relative;
+    overflow: hidden;
+
+    max-width: 1150px;
+    min-height: 280px;
+
+    margin: 0 auto;
+
+    padding: 50px;
+
+    background-color: #0f3d46;
+
+    border-radius: 25px;
+
+    display: flex;
+    align-items: center;
+}
+
+
+/* CÍRCULO DECORATIVO */
+
+.inicio-proposito::after {
+    content: "";
+
+    position: absolute;
+
+    width: 280px;
+    height: 280px;
+
+    background-color: rgba(114, 214, 212, 0.10);
+
+    border-radius: 50%;
+
+    right: -100px;
+    top: -100px;
+}
+
+.inicio-proposito-contenido {
+    position: relative;
+    z-index: 2;
+
+    max-width: 700px;
+}
+
+.inicio-proposito-contenido > span {
+    display: block;
+
+    margin-bottom: 12px;
+
+    color: #72d6d4;
+
+    font-size: 12px;
+    font-weight: bold;
+
+    letter-spacing: 2px;
+}
+
+.inicio-proposito h2 {
+    color: white;
+
+    font-size: 30px;
+    line-height: 1.3;
+
+    margin-bottom: 15px;
+}
+
+.inicio-proposito p {
+    color: #d4e3e5;
+
+    font-size: 15px;
+    line-height: 1.7;
+
+    margin-bottom: 25px;
+}
+
+.btn-crear {
+    display: inline-block;
+
+    padding: 13px 24px;
+
+    background-color: #72d6d4;
+    color: #0f3d46;
+
+    border-radius: 8px;
+
+    text-decoration: none;
+
+    font-size: 14px;
+    font-weight: bold;
+
+    transition: 0.3s;
+}
+
+.btn-crear:hover {
+    background-color: white;
+}
+
+
+/* =========================================
+   TABLET
+========================================= */
+
+@media (max-width: 900px) {
+
+    .barra-navegacion {
+        gap: 18px;
+    }
+
+    .barra-navegacion a {
+        font-size: 12px;
+    }
+
+    .inicio-presentacion {
+        padding: 45px;
+    }
+
+    .inicio-texto h1 {
+        font-size: 38px;
+    }
+
+    .inicio-logo {
+        width: 230px;
+        height: 230px;
+    }
+
+    .inicio-logo img {
+        width: 180px;
+        height: 180px;
+    }
+
+    .inicio-tarjetas {
+        gap: 15px;
+    }
+
+}
+
+
+/* =========================================
+   CELULAR
+========================================= */
+
+@media (max-width: 700px) {
+
+    .barra-principal {
+        height: 75px;
+        padding: 0 20px;
+    }
+
+    .marca {
+        font-size: 21px;
+    }
+
+    .logo {
+        width: 42px;
+        height: 42px;
+    }
+
+    .barra-navegacion {
+        flex-wrap: wrap;
+        gap: 5px 15px;
+
+        padding: 10px 15px;
+    }
+
+    .barra-navegacion a {
+        padding: 10px 3px;
+        font-size: 11px;
+    }
+
+    .barra-navegacion a.activo::after {
+        bottom: 3px;
+    }
+
+    .inicio {
+        padding: 25px 15px 40px;
+    }
+
+    .inicio-presentacion {
+        flex-direction: column;
+
+        text-align: center;
+
+        padding: 40px 25px;
+
+        margin-bottom: 45px;
+    }
+
+    .inicio-texto {
+        max-width: 100%;
+    }
+
+    .inicio-texto h1 {
+        font-size: 34px;
+    }
+
+    .inicio-texto p {
+        font-size: 14px;
+    }
+
+    .botones-inicio {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .inicio-logo {
+        width: 180px;
+        height: 180px;
+
+        margin-top: 25px;
+    }
+
+    .inicio-logo img {
+        width: 150px;
+        height: 150px;
+    }
+
+    .inicio-tarjetas {
+        grid-template-columns: 1fr;
+    }
+
+    .titulo-seccion h2 {
+        font-size: 25px;
+    }
+
+    .inicio-proposito {
+        padding: 40px 25px;
+    }
+
+    .inicio-proposito h2 {
+        font-size: 25px;
+    }
+
+}
