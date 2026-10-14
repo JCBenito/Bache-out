@@ -31,7 +31,7 @@ mostrarPassword.addEventListener("click", function () {
 
 
 // ================================
-// VALIDAR INICIO DE SESIÓN
+// VALIDAR Y PROCESAR INICIO DE SESIÓN
 // ================================
 
 formulario.addEventListener("submit", function (event) {
@@ -59,7 +59,7 @@ formulario.addEventListener("submit", function (event) {
     if (usuarioValor === "") {
 
         mensaje.textContent =
-            "Error: ingresa tu correo electrónico";
+            "Error: ingresa tu correo electrónico o teléfono";
 
         mensaje.style.display = "block";
 
@@ -76,7 +76,7 @@ formulario.addEventListener("submit", function (event) {
     if (passwordValor === "") {
 
         mensaje.textContent =
-            "Error: ingresa tu contraseñ";
+            "Error: ingresa tu contraseña";
 
         mensaje.style.display = "block";
 
@@ -87,28 +87,46 @@ formulario.addEventListener("submit", function (event) {
 
 
     // ================================
-    // DATOS CORRECTOS
+    // PETICIÓN A LA API (BACKEND / DB)
     // ================================
 
-    mensaje.classList.add("exito");
+    fetch('/api/login', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            usuario: usuarioValor,
+            contrasena: passwordValor
+        })
+    })
+    .then(function (respuesta) {
+        return respuesta.json();
+    })
+    .then(function (data) {
+        if (data.error) {
+            mensaje.textContent = "Error: " + data.error;
+            mensaje.style.display = "block";
+        } else {
+            // Guardar datos del usuario en la sesión local
+            sessionStorage.setItem("sesionIniciada", "true");
+            if (data.usuario) {
+                sessionStorage.setItem("usuarioId", data.usuario.id);
+                sessionStorage.setItem("usuarioNombre", data.usuario.nombre);
+            }
 
-    mensaje.textContent =
-        "Inicio de sesión correctos";
+            mensaje.classList.add("exito");
+            mensaje.textContent = "✓ Inicio de sesión exitoso. Redirigiendo...";
+            mensaje.style.display = "block";
 
-    mensaje.style.display = "block";
+            setTimeout(function () {
+                window.location.href = "Reporte.html";
+            }, 1000);
+        }
+    })
+    .catch(function (error) {
+        mensaje.textContent = "Error al conectar con el servidor. Intenta de nuevo.";
+        mensaje.style.display = "block";
+    });
 
-
-    // ================================
-    // Pagina de inicio
-    // ==============================
-
-    setTimeout(function () {
-
-        window.location.href = "Index.html";
-
-    }, 1000);
-
-    sessionStorage.setItem("sesionIniciada", "true");
-
-    window.location.href = "Index.html";
 });
