@@ -1,0 +1,800 @@
+/* =========================================
+   CONFIGURACIÓN GENERAL
+========================================= */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f8f9;
+    color: #24343b;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+
+/* =========================================
+   ENCABEZADO
+========================================= */
+
+.barra-principal {
+    width: 100%;
+    height: 85px;
+    background-color: #E9FFFB;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 0 45px;
+    position: relative;
+}
+
+
+/* =========================================
+   LOGO Y NOMBRE CENTRADOS
+========================================= */
+
+.marca {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    color: #173F4A;
+    font-size: 25px;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+
+.logo {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+}
+
+
+/* =========================================
+   BOTÓN INICIAR SESIÓN
+========================================= */
+
+.btn-sesion {
+    display: inline-block;
+    text-decoration: none;
+    color: white;
+    background-color: #72d6d4;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+
+.btn-sesion:hover {
+    background-color: #159a9c;
+}
+
+
+/* =========================================
+   BARRA DE NAVEGACIÓN
+========================================= */
+
+.barra-navegacion {
+    width: 100%;
+    min-height: 58px;
+    background-color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 35px;
+    border-bottom: 1px solid #dce5e7;
+}
+
+
+.barra-navegacion a {
+    position: relative;
+    text-decoration: none;
+    color: #0f3d46;
+    font-size: 13px;
+    font-weight: bold;
+    padding: 20px 5px;
+    transition: 0.3s;
+}
+
+
+.barra-navegacion a:hover {
+    color: #159a9c;
+}
+
+
+.barra-navegacion a.activo {
+    color: #159a9c;
+}
+
+
+.barra-navegacion a.activo::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 10px;
+    width: 100%;
+    height: 3px;
+    background-color: #159a9c;
+    border-radius: 5px;
+}
+
+
+/* =========================================
+   CONTENEDOR
+========================================= */
+
+.nosotros {
+    width: 90%;
+    max-width: 1150px;
+    margin: 0 auto;
+    padding: 55px 0 80px;
+}
+
+
+/* =========================================
+   PRESENTACIÓN
+========================================= */
+
+.presentacion {
+    min-height: 430px;
+
+    background-color: #E9FFFB;
+
+    border-radius: 22px;
+
+    padding: 55px 65px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    overflow: hidden;
+
+    position: relative;
+}
+
+
+.presentacion::after {
+    content: "";
+
+    position: absolute;
+
+    width: 300px;
+
+    height: 300px;
+
+    background-color: rgba(21, 154, 156, 0.2);
+
+    border-radius: 50%;
+
+    right: -100px;
+
+    bottom: -150px;
+}
+
+
+.presentacion-texto {
+    width: 60%;
+
+    position: relative;
+
+    z-index: 2;
+}
+
+
+.etiqueta {
+    display: inline-block;
+
+    color: rgba(4, 29, 29, 0.2);
+
+    font-size: 13px;
+
+    font-weight: bold;
+
+    letter-spacing: 2px;
+
+    margin-bottom: 18px;
+}
+
+
+.presentacion h1 {
+    color: rgb(63, 75, 84);
+
+    font-size: 48px;
+
+    line-height: 1.15;
+
+    margin-bottom: 22px;
+}
+
+
+.presentacion h1 span {
+    color: #72d6d4;
+}
+
+
+.presentacion p {
+    max-width: 650px;
+
+    color: rgb(61, 69, 76);
+
+    font-size: 17px;
+
+    line-height: 1.8;
+}
+
+
+/* =========================================
+   LOGO DE PRESENTACIÓN
+========================================= */
+
+.presentacion-circulo {
+    width: 35%;
+
+    display: flex;
+
+    justify-content: center;
+
+    position: relative;
+
+    z-index: 2;
+}
+
+
+.circulo img {
+    width: 270px;
+
+    height: auto;
+
+    object-fit: contain;
+}
+
+
+/* =========================================
+   TÍTULOS DE SECCIÓN
+========================================= */
+
+.titulo-seccion {
+    margin-bottom: 40px;
+}
+
+
+.titulo-seccion span {
+    color: #159a9c;
+
+    font-size: 13px;
+
+    font-weight: bold;
+
+    letter-spacing: 2px;
+}
+
+
+.titulo-seccion h2 {
+    color: #0f3d46;
+
+    font-size: 36px;
+
+    line-height: 1.2;
+
+    margin-top: 10px;
+}
+
+
+.centrado {
+    text-align: center;
+}
+
+
+.centrado h2 {
+    margin-left: auto;
+
+    margin-right: auto;
+}
+
+
+/* =========================================
+   HISTORIA
+========================================= */
+
+.historia {
+    padding: 90px 0;
+}
+
+
+.historia-contenido {
+    display: grid;
+
+    grid-template-columns: repeat(3, 1fr);
+
+    gap: 25px;
+}
+
+
+.historia-card {
+    background-color: white;
+
+    padding: 32px 28px;
+
+    border-radius: 16px;
+
+    border: 1px solid #e1e8ea;
+
+    box-shadow:
+        0 5px 20px rgba(15, 61, 70, 0.05);
+
+    transition: 0.3s;
+}
+
+
+.historia-card:hover {
+    transform: translateY(-6px);
+
+    box-shadow:
+        0 12px 30px rgba(15, 61, 70, 0.1);
+}
+
+
+.numero {
+    width: 48px;
+
+    height: 48px;
+
+    border-radius: 50%;
+
+    background-color: #e0f4f3;
+
+    color: #159a9c;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    font-weight: bold;
+
+    margin-bottom: 22px;
+}
+
+
+.historia-card h3 {
+    color: #0f3d46;
+
+    font-size: 21px;
+
+    margin-bottom: 13px;
+}
+
+
+.historia-card p {
+    color: #637479;
+
+    font-size: 15px;
+
+    line-height: 1.7;
+}
+
+
+/* =========================================
+   PROPUESTA
+========================================= */
+
+.propuesta {
+    background-color: white;
+
+    border-radius: 20px;
+
+    padding: 55px;
+
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    gap: 70px;
+
+    box-shadow:
+        0 7px 25px rgba(15, 61, 70, 0.07);
+
+    border-left: 5px solid #159a9c;
+}
+
+
+.propuesta-texto h2 {
+    color: #0f3d46;
+
+    font-size: 36px;
+
+    line-height: 1.2;
+
+    margin-bottom: 22px;
+}
+
+
+.propuesta-texto p {
+    color: #637479;
+
+    font-size: 16px;
+
+    line-height: 1.8;
+
+    margin-bottom: 14px;
+}
+
+
+/* =========================================
+   PASOS
+========================================= */
+
+.propuesta-pasos {
+    display: flex;
+
+    flex-direction: column;
+
+    justify-content: center;
+}
+
+
+.paso {
+    display: flex;
+
+    align-items: center;
+
+    gap: 18px;
+}
+
+
+.paso-icono {
+    width: 52px;
+
+    height: 52px;
+
+    flex-shrink: 0;
+
+    border-radius: 50%;
+
+    background-color: #0f3d46;
+
+    color: white;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    font-size: 14px;
+
+    font-weight: bold;
+}
+
+
+.paso h3 {
+    color: #0f3d46;
+
+    font-size: 19px;
+
+    margin-bottom: 5px;
+}
+
+
+.paso p {
+    color: #718187;
+
+    font-size: 14px;
+}
+
+
+.linea {
+    width: 2px;
+
+    height: 28px;
+
+    background-color: #dce5e7;
+
+    margin-left: 25px;
+}
+
+
+/* =========================================
+   PROPÓSITO
+========================================= */
+
+.proposito {
+    background-color: #E9FFFB;
+
+    border-radius: 22px;
+
+    padding: 70px 50px;
+
+    text-align: center;
+
+    position: relative;
+
+    overflow: hidden;
+}
+
+
+.proposito::before {
+    content: "";
+
+    position: absolute;
+
+    width: 250px;
+
+    height: 250px;
+
+    background-color: rgba(21, 154, 156, 0.18);
+
+    border-radius: 50%;
+
+    left: -100px;
+
+    top: -100px;
+}
+
+
+.proposito::after {
+    content: "";
+
+    position: absolute;
+
+    width: 200px;
+
+    height: 200px;
+
+    background-color: rgba(244, 124, 104, 0.12);
+
+    border-radius: 50%;
+
+    right: -80px;
+
+    bottom: -80px;
+}
+
+
+.proposito-contenido {
+    max-width: 750px;
+
+    margin: auto;
+
+    position: relative;
+
+    z-index: 2;
+}
+
+
+.proposito-contenido > span {
+    color: #72d6d4;
+
+    font-size: 13px;
+
+    font-weight: bold;
+
+    letter-spacing: 2px;
+}
+
+
+.proposito h2 {
+    color: rgb(99, 95, 95);
+
+    font-size: 38px;
+
+    line-height: 1.2;
+
+    margin: 18px 0;
+}
+
+
+.proposito p {
+    color: #3e4647;
+
+    font-size: 16px;
+
+    line-height: 1.8;
+
+    margin-bottom: 30px;
+}
+
+
+.btn-proposito {
+    display: inline-block;
+
+    text-decoration: none;
+
+    color: white;
+
+    background-color: #72d6d4;
+
+    padding: 12px 24px;
+
+    border-radius: 8px;
+
+    font-weight: bold;
+
+    transition: 0.3s;
+}
+
+
+.btn-proposito:hover {
+    background-color: #D5DBDB;
+}
+
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width: 800px) {
+
+    .barra-principal {
+        padding: 0 25px;
+    }
+
+
+    .marca {
+        font-size: 22px;
+    }
+
+
+    .logo {
+        width: 42px;
+        height: 42px;
+    }
+
+
+    .btn-sesion {
+        padding: 10px 18px;
+        font-size: 14px;
+    }
+
+
+    .presentacion {
+        padding: 45px;
+        flex-direction: column;
+        gap: 35px;
+        text-align: center;
+    }
+
+
+    .presentacion-texto {
+        width: 100%;
+    }
+
+
+    .presentacion-circulo {
+        width: 100%;
+    }
+
+
+    .historia-contenido {
+        grid-template-columns: 1fr;
+    }
+
+
+    .propuesta {
+        grid-template-columns: 1fr;
+        gap: 40px;
+        padding: 40px;
+    }
+
+}
+
+
+@media (max-width: 550px) {
+
+    .barra-principal {
+        height: 75px;
+        padding: 0 15px;
+    }
+
+
+    .marca {
+        font-size: 19px;
+        gap: 8px;
+    }
+
+
+    .logo {
+        width: 38px;
+        height: 38px;
+    }
+
+
+    .btn-sesion {
+        padding: 9px 12px;
+        font-size: 12px;
+    }
+
+
+    .presentacion {
+        padding: 35px 25px;
+    }
+
+
+    .presentacion h1 {
+        font-size: 36px;
+    }
+
+
+    .titulo-seccion h2 {
+        font-size: 30px;
+    }
+
+
+    .propuesta {
+        padding: 30px 25px;
+    }
+
+
+    .propuesta-texto h2 {
+        font-size: 30px;
+    }
+
+
+    .proposito {
+        padding: 55px 25px;
+    }
+
+
+    .proposito h2 {
+        font-size: 31px;
+    }
+
+}
+
+/* =========================================
+   NAVEGACIÓN RESPONSIVA
+   Mismo comportamiento que index.html
+========================================= */
+
+/* TABLET */
+@media (max-width: 900px) {
+
+    .barra-navegacion {
+        gap: 18px;
+    }
+
+    .barra-navegacion a {
+        font-size: 12px;
+    }
+
+}
+
+
+/* CELULAR */
+@media (max-width: 700px) {
+
+    .barra-navegacion {
+        width: 100%;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 5px 15px;
+        padding: 10px 15px;
+    }
+
+    .barra-navegacion a {
+        padding: 10px 3px;
+        font-size: 11px;
+    }
+
+    .barra-navegacion a.activo::after {
+        bottom: 3px;
+    }
+
+}

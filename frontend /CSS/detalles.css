@@ -1,0 +1,1231 @@
+/* =========================================
+   CONFIGURACIÓN GENERAL
+========================================= */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f8f9;
+    color: #24343b;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+
+/* =========================================
+   ENCABEZADO
+========================================= */
+
+.barra-principal {
+    width: 100%;
+    height: 85px;
+    background-color: #E9FFFB;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 45px;
+}
+
+.marca {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #173F4A;
+    font-size: 25px;
+    font-weight: bold;
+}
+
+.logo {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+}
+
+
+/* =========================================
+   BARRA DE NAVEGACIÓN
+========================================= */
+
+.barra-navegacion {
+    width: 100%;
+    min-height: 58px;
+
+    background-color: white;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 35px;
+
+    border-bottom: 1px solid #dce5e7;
+}
+
+.barra-navegacion a {
+    position: relative;
+
+    text-decoration: none;
+
+    color: #0f3d46;
+
+    font-size: 13px;
+    font-weight: bold;
+
+    padding: 20px 5px;
+
+    transition: 0.3s;
+}
+
+.barra-navegacion a:hover {
+    color: #159a9c;
+}
+
+.barra-navegacion a.activo {
+    color: #159a9c;
+}
+
+.barra-navegacion a.activo::after {
+    content: "";
+
+    position: absolute;
+
+    left: 0;
+    bottom: 10px;
+
+    width: 100%;
+    height: 3px;
+
+    background-color: #159a9c;
+
+    border-radius: 5px;
+}
+
+
+/* =========================================
+   PÁGINA DE REPORTES
+========================================= */
+
+.pagina-reportes {
+    width: 100%;
+
+    padding: 45px 30px 60px;
+}
+
+
+/* =========================================
+   ENCABEZADO
+========================================= */
+
+.encabezado-reportes {
+    max-width: 850px;
+
+    margin: 0 auto 35px;
+
+    text-align: center;
+}
+
+.etiqueta-reportes {
+    display: inline-block;
+
+    margin-bottom: 12px;
+
+    color: #159a9c;
+
+    font-size: 12px;
+    font-weight: bold;
+
+    letter-spacing: 2px;
+}
+
+.encabezado-reportes h1 {
+    color: #0f3d46;
+
+    font-size: 38px;
+
+    margin-bottom: 15px;
+}
+
+.encabezado-reportes p {
+    color: #65757b;
+
+    font-size: 15px;
+    line-height: 1.7;
+}
+
+
+/* =========================================
+   LISTA DE REPORTES
+========================================= */
+
+.lista-reportes {
+    max-width: 850px;
+
+    margin: 0 auto;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 20px;
+}
+
+
+/* =========================================
+   TARJETA DEL REPORTE
+========================================= */
+
+.tarjeta-reporte {
+    position: relative;
+    overflow: hidden;
+
+    background-color: white;
+
+    border: 1px solid #e0e8e9;
+
+    border-radius: 20px;
+
+    box-shadow: 0 8px 25px rgba(15, 61, 70, 0.06);
+}
+
+.tarjeta-reporte::before {
+    content: "";
+
+    position: absolute;
+
+    width: 150px;
+    height: 150px;
+
+    background-color: rgba(21, 154, 156, 0.05);
+
+    border-radius: 50%;
+
+    right: -70px;
+    top: -70px;
+
+    pointer-events: none;
+}
+
+
+/* =========================================
+   RESUMEN DEL REPORTE
+========================================= */
+
+.resumen-reporte {
+    position: relative;
+    z-index: 2;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 25px;
+
+    padding: 30px;
+}
+
+
+/* =========================================
+   INFORMACIÓN
+========================================= */
+
+.informacion-reporte {
+    min-width: 0;
+}
+
+.etiqueta-folio {
+    display: block;
+
+    margin-bottom: 7px;
+
+    color: #7b898e;
+
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.informacion-reporte h2 {
+    color: #0f3d46;
+
+    font-size: 24px;
+
+    margin-bottom: 10px;
+}
+
+.ubicacion {
+    color: #24343b;
+
+    font-size: 14px;
+    line-height: 1.5;
+
+    margin-bottom: 5px;
+}
+
+.fecha {
+    color: #7b898e;
+
+    font-size: 12px;
+}
+
+
+/* =========================================
+   ACCIONES
+========================================= */
+
+.acciones-reporte {
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: flex-end;
+
+    gap: 12px;
+
+    flex-shrink: 0;
+}
+
+
+/* =========================================
+   ESTADOS
+========================================= */
+
+.estado {
+    display: inline-block;
+
+    padding: 8px 15px;
+
+    border-radius: 20px;
+
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.estado-pendiente {
+    background-color: #FFF0D6;
+
+    color: #B97800;
+}
+
+.estado-reparando {
+    background-color: #DCEFFA;
+
+    color: #287AA8;
+}
+
+.estado-resuelto {
+    background-color: #DDF4E7;
+
+    color: #318255;
+}
+
+.estado-cancelado {
+    background-color: #F9DEDE;
+
+    color: #B43D3D;
+}
+
+
+/* =========================================
+   BOTÓN VER DETALLES
+========================================= */
+
+.btn-detalles {
+    min-width: 130px;
+
+    padding: 11px 17px;
+
+    background-color: #159a9c;
+
+    color: white;
+
+    border: 1px solid #159a9c;
+
+    border-radius: 8px;
+
+    font-size: 13px;
+    font-weight: bold;
+
+    cursor: pointer;
+
+    transition: 0.3s;
+}
+
+.btn-detalles:hover {
+    background-color: #117f81;
+
+    border-color: #117f81;
+}
+
+
+/* =========================================
+   DETALLES
+========================================= */
+
+.detalles-reporte {
+    position: relative;
+    z-index: 2;
+
+    display: none;
+
+    padding: 0 30px 30px;
+
+    border-top: 1px solid #e3eaeb;
+}
+
+.tarjeta-reporte.abierto .detalles-reporte {
+    display: block;
+}
+
+
+/* =========================================
+   SECCIONES
+========================================= */
+
+.seccion-detalle {
+    padding-top: 28px;
+
+    margin-bottom: 30px;
+}
+
+.seccion-detalle h3,
+.seguimiento h3 {
+    color: #0f3d46;
+
+    font-size: 17px;
+
+    margin-bottom: 16px;
+}
+
+
+/* =========================================
+   FOTOGRAFÍA
+========================================= */
+
+.foto-reporte {
+    display: block;
+
+    width: 100%;
+    max-width: 500px;
+
+    height: 260px;
+
+    object-fit: cover;
+
+    border-radius: 10px;
+
+    border: 1px solid #d7e2e4;
+}
+
+
+/* =========================================
+   DATOS
+========================================= */
+
+.dato {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 5px;
+
+    padding: 13px 0;
+
+    border-bottom: 1px solid #e3eaeb;
+}
+
+.dato span {
+    color: #7b898e;
+
+    font-size: 12px;
+}
+
+.dato strong {
+    color: #24343b;
+
+    font-size: 14px;
+    font-weight: normal;
+
+    line-height: 1.5;
+}
+
+
+/* =========================================
+   SEGUIMIENTO
+========================================= */
+
+.seguimiento {
+    padding-top: 25px;
+
+    border-top: 1px solid #e3eaeb;
+}
+
+.barra-seguimiento {
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    width: 100%;
+
+    max-width: 650px;
+
+    margin: 30px auto 5px;
+}
+
+.paso {
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    gap: 8px;
+
+    min-width: 100px;
+
+    color: #9aa9ad;
+
+    font-size: 12px;
+
+    text-align: center;
+}
+
+.circulo {
+    width: 38px;
+    height: 38px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background-color: #dce5e7;
+
+    border-radius: 50%;
+
+    color: #65757b;
+
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.linea {
+    width: 90px;
+    height: 4px;
+
+    margin-bottom: 25px;
+
+    background-color: #dce5e7;
+
+    border-radius: 5px;
+}
+
+
+/* =========================================
+   PENDIENTE - NARANJA
+========================================= */
+
+.tarjeta-reporte[data-estado="pendiente"] .paso.actual .circulo {
+    background-color: #F5A623;
+
+    color: white;
+}
+
+.tarjeta-reporte[data-estado="pendiente"] .paso.actual span {
+    color: #B97800;
+
+    font-weight: bold;
+}
+
+
+/* =========================================
+   EN REPARACIÓN - AZUL
+========================================= */
+
+.tarjeta-reporte[data-estado="reparando"] .paso.completado .circulo,
+.tarjeta-reporte[data-estado="reparando"] .paso.actual .circulo {
+    background-color: #5DADE2;
+
+    color: white;
+}
+
+.tarjeta-reporte[data-estado="reparando"] .paso.completado span,
+.tarjeta-reporte[data-estado="reparando"] .paso.actual span {
+    color: #287AA8;
+
+    font-weight: bold;
+}
+
+.tarjeta-reporte[data-estado="reparando"] .linea.completada {
+    background-color: #5DADE2;
+}
+
+
+/* =========================================
+   RESUELTO - VERDE
+========================================= */
+
+.tarjeta-reporte[data-estado="resuelto"] .paso.completado .circulo,
+.tarjeta-reporte[data-estado="resuelto"] .paso.actual .circulo {
+    background-color: #58C985;
+
+    color: white;
+}
+
+.tarjeta-reporte[data-estado="resuelto"] .paso.completado span,
+.tarjeta-reporte[data-estado="resuelto"] .paso.actual span {
+    color: #318255;
+
+    font-weight: bold;
+}
+
+.tarjeta-reporte[data-estado="resuelto"] .linea.completada {
+    background-color: #58C985;
+}
+
+
+/* =========================================
+   CANCELADO
+========================================= */
+
+.mensaje-cancelado {
+    display: flex;
+
+    align-items: center;
+
+    gap: 15px;
+
+    margin-top: 28px;
+
+    padding: 18px;
+
+    background-color: #fff4f4;
+
+    border-left: 4px solid #d9534f;
+
+    border-radius: 8px;
+}
+
+.circulo-cancelado {
+    width: 38px;
+    height: 38px;
+
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background-color: #d9534f;
+
+    border-radius: 50%;
+
+    color: white;
+
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.mensaje-cancelado h3 {
+    color: #a83d3a;
+
+    font-size: 16px;
+
+    margin-bottom: 5px;
+}
+
+.mensaje-cancelado p {
+    color: #65757b;
+
+    font-size: 13px;
+
+    line-height: 1.5;
+}
+
+
+/* =========================================
+   TABLET
+========================================= */
+
+@media (max-width: 900px) {
+
+    .barra-navegacion {
+        gap: 18px;
+    }
+
+    .barra-navegacion a {
+        font-size: 12px;
+    }
+
+    .lista-reportes {
+        max-width: 850px;
+    }
+
+    .resumen-reporte {
+        padding: 28px;
+    }
+
+}
+
+
+/* =========================================
+   CELULAR
+========================================= */
+
+@media (max-width: 700px) {
+
+    .barra-principal {
+        height: 75px;
+
+        padding: 0 20px;
+    }
+
+    .marca {
+        font-size: 21px;
+    }
+
+    .logo {
+        width: 42px;
+        height: 42px;
+    }
+
+    .barra-navegacion {
+        flex-wrap: wrap;
+
+        gap: 5px 15px;
+
+        padding: 10px 15px;
+    }
+
+    .barra-navegacion a {
+        padding: 10px 3px;
+
+        font-size: 11px;
+    }
+
+    .barra-navegacion a.activo::after {
+        bottom: 3px;
+    }
+
+    .pagina-reportes {
+        padding: 30px 15px 45px;
+    }
+
+    .encabezado-reportes h1 {
+        font-size: 30px;
+    }
+
+    .encabezado-reportes p {
+        font-size: 14px;
+    }
+
+    .resumen-reporte {
+        flex-direction: column;
+
+        align-items: flex-start;
+
+        padding: 25px 20px;
+
+        gap: 20px;
+    }
+
+    .acciones-reporte {
+        width: 100%;
+
+        align-items: flex-start;
+    }
+
+    .btn-detalles {
+        width: 100%;
+    }
+
+    .detalles-reporte {
+        padding: 0 20px 25px;
+    }
+
+    .foto-reporte {
+        height: 220px;
+    }
+
+    .barra-seguimiento {
+        width: 100%;
+    }
+
+    .paso {
+        min-width: 65px;
+
+        font-size: 10px;
+    }
+
+    .circulo {
+        width: 32px;
+        height: 32px;
+
+        font-size: 11px;
+    }
+
+    .linea {
+        width: 30px;
+    }
+
+    .mensaje-cancelado {
+        align-items: flex-start;
+    }
+
+}
+/* =========================================
+   RESUMEN DE REPORTES
+========================================= */
+
+.resumen-reportes {
+    width: 100%;
+    max-width: 850px;
+
+    margin: 0 auto 25px;
+
+    display: flex;
+
+    justify-content: center;
+    align-items: stretch;
+
+    gap: 15px;
+}
+
+
+/* =========================================
+   CONTADORES
+========================================= */
+
+.contador-reporte {
+    position: relative;
+
+    width: 190px;
+    min-height: 105px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+    justify-content: center;
+
+    padding: 18px 12px;
+
+    background-color: #FFFFFF;
+
+    border: 1px solid #e0e8e9;
+
+    border-radius: 14px;
+
+    box-shadow: 0 5px 15px rgba(15, 61, 70, 0.07);
+
+    text-align: center;
+
+    overflow: hidden;
+}
+
+
+/* =========================================
+   FRANJA DE COLOR
+========================================= */
+
+.contador-reporte::before {
+    content: "";
+
+    position: absolute;
+
+    top: 0;
+    left: 0;
+
+    width: 100%;
+    height: 5px;
+
+    background-color: #2C3E50;
+}
+
+
+/* =========================================
+   NÚMERO
+========================================= */
+
+.contador-reporte .numero {
+    display: block;
+
+    margin-bottom: 7px;
+
+    color: #2C3E50;
+
+    font-family: 'Montserrat', sans-serif;
+
+    font-size: 28px;
+
+    font-weight: 800;
+}
+
+
+/* =========================================
+   TEXTO
+========================================= */
+
+.contador-reporte .texto {
+    color: #65757b;
+
+    font-size: 12px;
+
+    font-weight: 600;
+
+    line-height: 1.3;
+}
+
+
+/* =========================================
+   TOTAL
+========================================= */
+
+.contador-reporte.total::before {
+    background-color: #2C3E50;
+}
+
+.contador-reporte.total .numero {
+    color: #2C3E50;
+}
+
+
+/* =========================================
+   PENDIENTES
+========================================= */
+
+.contador-reporte.pendiente::before {
+    background-color: #F5A623;
+}
+
+.contador-reporte.pendiente .numero {
+    color: #B97800;
+}
+
+
+/* =========================================
+   EN REPARACIÓN
+========================================= */
+
+.contador-reporte.reparando::before {
+    background-color: #5DADE2;
+}
+
+.contador-reporte.reparando .numero {
+    color: #287AA8;
+}
+
+
+/* =========================================
+   RESUELTOS
+========================================= */
+
+.contador-reporte.resuelto::before {
+    background-color: #58C985;
+}
+
+.contador-reporte.resuelto .numero {
+    color: #318255;
+}
+
+
+/* =========================================
+   EFECTO AL PASAR EL CURSOR
+========================================= */
+
+.contador-reporte {
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.contador-reporte:hover {
+    transform: translateY(-3px);
+
+    box-shadow: 0 8px 20px rgba(15, 61, 70, 0.10);
+}
+
+
+/* =========================================
+   FILTRO
+========================================= */
+
+.filtro-reportes {
+    width: 100%;
+    max-width: 850px;
+
+    margin: 0 auto 25px;
+
+    display: flex;
+
+    justify-content: flex-end;
+
+    align-items: center;
+
+    gap: 12px;
+}
+
+.filtro-reportes label {
+    color: #24343b;
+
+    font-size: 13px;
+
+    font-weight: bold;
+}
+
+.filtro-reportes select {
+    min-width: 190px;
+
+    padding: 10px 12px;
+
+    background-color: white;
+
+    color: #24343b;
+
+    border: 1px solid #d7e2e4;
+
+    border-radius: 7px;
+
+    font-family: Arial, sans-serif;
+
+    font-size: 12px;
+
+    outline: none;
+
+    cursor: pointer;
+
+    transition: 0.3s;
+}
+
+.filtro-reportes select:focus {
+    border-color: #159a9c;
+
+    box-shadow: 0 0 0 2px rgba(21, 154, 156, 0.10);
+}
+
+
+/* =========================================
+   OCULTAR TARJETAS
+========================================= */
+
+.tarjeta-reporte.oculto {
+    display: none;
+}
+
+
+/* =========================================
+   TABLET
+========================================= */
+
+@media (max-width: 900px) {
+
+    .resumen-reportes {
+        flex-wrap: wrap;
+    }
+
+    .contador-reporte {
+        width: 180px;
+    }
+
+}
+
+
+/* =========================================
+   CELULAR
+========================================= */
+
+@media (max-width: 600px) {
+
+    .resumen-reportes {
+        display: grid;
+
+        grid-template-columns: repeat(2, 1fr);
+
+        gap: 10px;
+    }
+
+    .contador-reporte {
+        width: 100%;
+
+        min-height: 85px;
+    }
+
+    .contador-reporte .numero {
+        font-size: 23px;
+    }
+
+    .contador-reporte .texto {
+        font-size: 10px;
+    }
+
+    .filtro-reportes {
+        flex-direction: column;
+
+        align-items: stretch;
+
+        gap: 8px;
+    }
+
+    .filtro-reportes select {
+        width: 100%;
+    }
+
+}
+
+/* =========================================
+   COLORES DE LOS CONTADORES
+========================================= */
+
+.contador-reporte.pendiente .numero {
+    color: #B97800;
+}
+
+
+.contador-reporte.reparando .numero {
+    color: #287AA8;
+}
+
+
+.contador-reporte.resuelto .numero {
+    color: #318255;
+}
+
+
+.contador-reporte.cancelado .numero {
+    color: #B43D3D;
+}
+
+
+
+/* =========================================
+   FILTRO
+========================================= */
+
+.filtro-reportes {
+    width: 100%;
+    max-width: 850px;
+
+    margin: 0 auto 25px;
+
+    display: flex;
+
+    justify-content: flex-end;
+
+    align-items: center;
+
+    gap: 12px;
+}
+
+
+.filtro-reportes label {
+    color: #24343b;
+
+    font-size: 13px;
+
+    font-weight: bold;
+}
+
+
+.filtro-reportes select {
+    min-width: 190px;
+
+    padding: 10px 12px;
+
+    background-color: white;
+
+    color: #24343b;
+
+    border: 1px solid #d7e2e4;
+
+    border-radius: 7px;
+
+    font-family: Arial, sans-serif;
+
+    font-size: 12px;
+
+    outline: none;
+
+    cursor: pointer;
+
+    transition: 0.3s;
+}
+
+
+.filtro-reportes select:focus {
+    border-color: #159a9c;
+
+    box-shadow: 0 0 0 2px rgba(21, 154, 156, 0.10);
+}
+
+
+
+/* =========================================
+   REPORTE OCULTO POR FILTRO
+========================================= */
+
+.tarjeta-reporte.oculto {
+    display: none;
+}
+
+
+
+/* =========================================
+   TABLET
+========================================= */
+
+@media (max-width: 900px) {
+
+    .resumen-reportes {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+}
+
+
+
+/* =========================================
+   CELULAR
+========================================= */
+
+@media (max-width: 700px) {
+
+    .resumen-reportes {
+        grid-template-columns: repeat(2, 1fr);
+
+        gap: 10px;
+    }
+
+
+    .contador-reporte {
+        min-height: 80px;
+    }
+
+
+    .contador-reporte .numero {
+        font-size: 22px;
+    }
+
+
+    .contador-reporte .texto {
+        font-size: 10px;
+    }
+
+
+    .filtro-reportes {
+        flex-direction: column;
+
+        align-items: stretch;
+
+        gap: 8px;
+    }
+
+
+    .filtro-reportes select {
+        width: 100%;
+    }
+
+}
