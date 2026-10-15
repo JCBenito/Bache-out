@@ -1,0 +1,596 @@
+/* =========================================
+   CONFIGURACIÓN GENERAL
+========================================= */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f8f9;
+    color: #24343b;
+}
+
+
+/* =========================================
+   ENCABEZADO
+========================================= */
+
+.barra-principal {
+    width: 100%;
+    height: 85px;
+    background-color: #E9FFFB;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 45px;
+}
+
+.marca {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #173F4A;
+    font-size: 25px;
+    font-weight: bold;
+}
+
+.logo {
+    width: 48px !important;
+    height: 48px !important;
+    object-fit: contain;
+    display: block;
+}
+
+
+/* =========================================
+   BARRA DE NAVEGACIÓN
+========================================= */
+
+.barra-navegacion {
+    width: 100%;
+    min-height: 58px;
+    background-color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 35px;
+    border-bottom: 1px solid #dce5e7;
+}
+
+.barra-navegacion a {
+    position: relative;
+    padding: 20px 5px;
+    text-decoration: none;
+    color: #0f3d46;
+    font-size: 13px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.barra-navegacion a:hover {
+    color: #159a9c;
+}
+
+.barra-navegacion a.activo {
+    color: #159a9c;
+}
+
+.barra-navegacion a.activo::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 10px;
+    width: 100%;
+    height: 3px;
+    background-color: #159a9c;
+    border-radius: 5px;
+}
+
+
+/* =========================================
+   MAPA INTERACTIVO
+========================================= */
+
+.pagina-mapa {
+    width: 90%;
+    max-width: 1150px;
+    margin: 0 auto;
+    padding: 45px px 80px;
+}
+
+
+/* =========================================
+   ENCABEZADO DEL MAPA
+========================================= */
+
+.encabezado-mapa {
+    text-align: center;
+    margin-bottom: 28px;
+}
+
+.etiqueta-mapa {
+    display: inline-block;
+
+    margin-bottom: 8px;
+
+    color: #159a9c;
+
+    font-size: 12px;
+    font-weight: bold;
+
+    letter-spacing: 2px;
+}
+
+.encabezado-mapa h1 {
+    margin-bottom: 8px;
+
+    color: #173F4A;
+
+    font-size: 38px;
+    font-weight: bold;
+}
+
+.encabezado-mapa p {
+    max-width: 600px;
+
+    margin: 0 auto;
+
+    color: #66777d;
+
+    font-size: 14px;
+
+    line-height: 1.6;
+}
+
+
+/* =========================================
+   FILTROS
+========================================= */
+
+.controles-mapa {
+    width: 100%;
+
+    display: flex;
+    align-items: center;
+
+    gap: 15px;
+
+    margin-bottom: 15px;
+}
+
+.filtro {
+    display: flex;
+    align-items: center;
+
+    gap: 8px;
+}
+
+.filtro label {
+    color: #173F4A;
+
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.filtro select {
+    height: 40px;
+
+    min-width: 160px;
+
+    padding: 0 12px;
+
+    border: 1px solid #d5e1e3;
+
+    border-radius: 7px;
+
+    background-color: white;
+
+    color: #344950;
+
+    font-size: 13px;
+
+    outline: none;
+
+    cursor: pointer;
+}
+
+.filtro select:focus {
+    border-color: #159a9c;
+}
+
+
+/* =========================================
+   BOTÓN MI UBICACIÓN
+========================================= */
+
+.btn-mi-ubicacion {
+    height: 40px;
+
+    margin-left: auto;
+
+    padding: 0 18px;
+
+    border: 1px solid #159a9c;
+
+    border-radius: 7px;
+
+    background-color: white;
+
+    color: #159a9c;
+
+    font-size: 13px;
+    font-weight: bold;
+
+    cursor: pointer;
+
+    transition: 0.3s;
+}
+
+.btn-mi-ubicacion:hover {
+    background-color: #159a9c;
+
+    color: white;
+}
+
+
+/* =========================================
+   CONTENEDOR DEL MAPA
+========================================= */
+
+.contenedor-mapa {
+    width: 100%;
+    height: 560px;
+
+    overflow: hidden;
+
+    border: 1px solid #d7e2e4;
+
+    border-radius: 12px;
+
+    background-color: #e5e5e5;
+}
+
+.mapa-google {
+    width: 100%;
+    height: 100%;
+}
+
+
+/* =========================================
+   INFORMACIÓN DE LOS BACHES
+========================================= */
+
+.info-bache {
+    min-width: 230px;
+
+    padding: 4px;
+}
+
+.info-bache h3 {
+    margin: 0 0 8px;
+
+    color: #173F4A;
+
+    font-size: 16px;
+}
+
+.info-bache p {
+    margin: 5px 0;
+
+    color: #53666d;
+
+    font-size: 13px;
+
+    line-height: 1.5;
+}
+
+.info-estado {
+    display: inline-block;
+
+    margin-bottom: 7px;
+
+    padding: 5px 9px;
+
+    border-radius: 20px;
+
+    font-size: 11px;
+    font-weight: bold;
+}
+
+
+/* =========================================
+   LEYENDA
+========================================= */
+
+.leyenda-mapa {
+    width: 100%;
+
+    margin-top: 15px;
+
+    padding: 15px 18px;
+
+    background-color: white;
+
+    border: 1px solid #dce5e7;
+
+    border-radius: 10px;
+}
+
+.leyenda-mapa h2 {
+    margin-bottom: 12px;
+
+    color: #173F4A;
+
+    font-size: 14px;
+}
+
+.elementos-leyenda {
+    display: flex;
+    align-items: center;
+
+    flex-wrap: wrap;
+
+    gap: 20px;
+}
+
+.elemento-leyenda {
+    display: flex;
+    align-items: center;
+
+    gap: 7px;
+
+    color: #53666d;
+
+    font-size: 12px;
+}
+
+.punto {
+    width: 11px;
+    height: 11px;
+
+    display: inline-block;
+
+    border-radius: 50%;
+}
+
+
+/* =========================================
+   COLORES DE ESTADOS
+========================================= */
+
+.estado-pendiente {
+    background-color: #f39c12;
+}
+
+.estado-reparacion {
+    background-color: #3498db;
+}
+
+.estado-resuelto {
+    background-color: #27ae60;
+}
+
+.estado-cancelado {
+    background-color: #e74c3c;
+}
+
+
+/* =========================================
+   SECCIÓN REPORTAR
+========================================= */
+
+.seccion-reportar {
+    width: 100%;
+
+    margin-top: 18px;
+
+    padding: 22px 25px;
+
+    background-color: #E9FFFB;
+
+    border-radius: 10px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 20px;
+}
+
+.seccion-reportar h2 {
+    margin-bottom: 5px;
+
+    color: #173F4A;
+
+    font-size: 18px;
+}
+
+.seccion-reportar p {
+    color: #53666d;
+
+    font-size: 13px;
+
+    line-height: 1.5;
+}
+
+.btn-reportar-mapa {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    height: 40px;
+
+    padding: 0 20px;
+
+    border-radius: 7px;
+
+    background-color: #159a9c;
+
+    color: white;
+
+    text-decoration: none;
+
+    font-size: 13px;
+    font-weight: bold;
+
+    white-space: nowrap;
+
+    transition: 0.3s;
+}
+
+.btn-reportar-mapa:hover {
+    background-color: #117f81;
+}
+
+
+/* =========================================
+   TABLET
+========================================= */
+
+@media (max-width: 900px) {
+
+    .barra-navegacion {
+        gap: 20px;
+    }
+
+    .barra-navegacion a {
+        font-size: 12px;
+    }
+
+    .controles-mapa {
+        flex-wrap: wrap;
+    }
+
+    .btn-mi-ubicacion {
+        margin-left: 0;
+    }
+
+    .contenedor-mapa {
+        height: 500px;
+    }
+
+}
+
+
+/* =========================================
+   CELULAR
+========================================= */
+
+@media (max-width: 700px) {
+
+    .barra-principal {
+        height: 75px;
+
+        padding: 0 20px;
+    }
+
+    .marca {
+        font-size: 21px;
+    }
+
+    .logo {
+        width: 42px !important;
+        height: 42px !important;
+    }
+
+
+    .barra-navegacion {
+        min-height: auto;
+
+        padding: 10px;
+
+        gap: 15px;
+
+        flex-wrap: wrap;
+    }
+
+    .barra-navegacion a {
+        padding: 8px 3px;
+
+        font-size: 11px;
+    }
+
+    .barra-navegacion a.activo::after {
+        bottom: 2px;
+    }
+
+
+    .pagina-mapa {
+        padding: 35px 18px 50px;
+    }
+
+
+    .encabezado-mapa h1 {
+        font-size: 27px;
+    }
+
+
+    .encabezado-mapa p {
+        font-size: 13px;
+    }
+
+
+    .controles-mapa {
+        display: flex;
+
+        flex-direction: column;
+
+        align-items: stretch;
+
+        gap: 10px;
+    }
+
+
+    .filtro {
+        width: 100%;
+
+        justify-content: space-between;
+    }
+
+
+    .filtro select {
+        flex: 1;
+
+        min-width: 0;
+    }
+
+
+    .btn-mi-ubicacion {
+        width: 100%;
+
+        margin-left: 0;
+    }
+
+
+    .contenedor-mapa {
+        height: 430px;
+
+        border-radius: 10px;
+    }
+
+
+    .elementos-leyenda {
+        gap: 12px 20px;
+    }
+
+
+    .seccion-reportar {
+        flex-direction: column;
+
+        text-align: center;
+    }
+
+
+    .btn-reportar-mapa {
+        width: 100%;
+    }
+
+}
