@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reportes | Bache-Out Administrador</title>
+<link rel="stylesheet" href="css/comun.css">
+<link rel="stylesheet" href="css/reportes.css">
+<script>(function(){var s=null;try{s=sessionStorage.getItem("bo_sesion")}catch(e){}if(!s&&/(^|;)bo_sesion=/.test(window.name))s=1;if(!s){document.documentElement.style.display="none";location.replace("login.html")}})()</script>
+</head>
+<body data-pag="reportes" data-hero="1">
+<main>
+  <div class="card">
+    <h2>Todos los reportes</h2>
+    <div class="tools">
+      <input id="q" type="search" placeholder="Buscar por folio, colonia o ciudadano" aria-label="Buscar reportes">
+      <select id="fEstado" aria-label="Filtrar por estado">
+        <option value="">Todos los estados</option>
+        <option value="pendiente">Pendiente</option>
+        <option value="reparacion">En reparación</option>
+        <option value="resuelto">Resuelto</option>
+      </select>
+    </div>
+    <div class="tw"><table id="tAll"></table></div>
+  </div>
+</main>
+<script src="js/comun.js"></script>
+<script src="js/reportes.js"></script>
+</body>
+</html>

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Iniciar sesión | Bache-Out Administrador</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Montserrat:wght@800&display=swap">
+<link rel="stylesheet" href="css/comun.css">
+<link rel="stylesheet" href="css/login1.css">
+</head>
+<body>
+<section id="login" aria-label="Inicio de sesión del administrador">
+  <div class="lcard">
+    <div class="logo"><svg width="28" height="28" viewBox="0 0 32 32" aria-hidden="true"><path d="M3 22c0-3 6-9 14-9s12 3 12 6-6 7-13 7S3 25 3 22z" fill="#1f4f94"/><path d="M16 2a6 6 0 0 0-6 6c0 5 6 11 6 11s6-6 6-11a6 6 0 0 0-6-6z" fill="#e53935"/><circle cx="16" cy="8" r="2.2" fill="#fff"/></svg>Bache-Out</div>
+
+    <!-- Iniciar sesión -->
+    <form id="fLogin" novalidate>
+      <h1>Iniciar sesión</h1>
+      <p class="sub">Acceso exclusivo para administradores</p>
+      <label for="lCorreo">Correo electrónico</label>
+      <input id="lCorreo" type="email" inputmode="email" autocomplete="username" placeholder="correo@ejemplo.com" required>
+      <label for="lPass">Contraseña</label>
+      <div class="pw"><input id="lPass" type="password" autocomplete="current-password" placeholder="Ingresa tu contraseña" required><button type="button" data-ver="lPass">Mostrar</button></div>
+      <button type="button" class="forgot" id="goRec">¿Olvidaste tu contraseña?</button>
+      <button class="lbtn" type="submit">Iniciar sesión</button>
+      <div class="lmsg" id="lMsg" role="alert"></div>
+      <div class="lfoot">¿Problemas para entrar? Contacta al responsable del sistema.</div>
+    </form>
+
+    <!-- Cambiar contraseña -->
+    <form id="fRec1" novalidate hidden>
+      <h1>Cambiar contraseña</h1>
+      <p class="sub">Escribe tu correo y elige una nueva contraseña</p>
+      <label for="rCorreo">Correo electrónico</label>
+      <input id="rCorreo" type="email" inputmode="email" autocomplete="username" placeholder="correo@ejemplo.com" required>
+      <label for="rNueva">Nueva contraseña</label>
+      <div class="pw"><input id="rNueva" type="password" autocomplete="new-password" placeholder="Mínimo 4 caracteres"><button type="button" data-ver="rNueva">Mostrar</button></div>
+      <label for="rConf">Confirmar contraseña</label>
+      <div class="pw"><input id="rConf" type="password" autocomplete="new-password" placeholder="Repite la contraseña"><button type="button" data-ver="rConf">Mostrar</button></div>
+      <button class="lbtn" type="submit">Cambiar contraseña</button>
+      <div class="lmsg" id="r1Msg" role="alert"></div>
+      <button type="button" class="lback" data-back>Volver a iniciar sesión</button>
+    </form>
+  </div>
+</section>
+<script src="js/loginadmin.js"></script>
+</body>
+</html>
