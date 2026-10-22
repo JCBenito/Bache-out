@@ -5,8 +5,118 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Iniciar sesión | Bache-Out Administrador</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Montserrat:wght@800&display=swap">
-<link rel="stylesheet" href="css/comun.css">
-<link rel="stylesheet" href="css/login1.css">
+<style>
+/* Bache-Out · Estilos compartidos: colores, encabezado, menú, tarjetas, tabla, gráficas y ventanas */
+:root{
+  --bg:#f4f8f8; --mint:#e4fffb; --mint-2:#c9f1ec; --teal:#17a09b; --teal-d:#0f807c;
+  --ink:#0b3a45; --muted:#5b7078; --line:#d5e6e5; --white:#fff;
+  --ok:#8fd9a8; --ok-t:#1d6b3a; --rep:#8cc4ee; --rep-t:#1b4f7c; --pen:#ffbb77; --pen-t:#8a4a0a;
+}
+*{box-sizing:border-box;margin:0}
+body{font-family:"Segoe UI",Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink);font-size:14px}
+button,select,input{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--teal);outline-offset:2px}
+.top{background:var(--mint);text-align:center;padding:14px 16px;display:flex;align-items:center;justify-content:center;gap:10px;position:relative}
+.top b{font-size:20px}
+.admin-tag{position:absolute;right:24px;top:50%;transform:translateY(-50%);display:flex;gap:10px;align-items:center;font-weight:600}
+.avatar{width:32px;height:32px;border-radius:50%;background:var(--teal);color:#fff;display:grid;place-items:center;font-size:13px}
+nav{background:var(--white);border-bottom:1px solid var(--line);display:flex;justify-content:center;gap:34px;padding:0 16px;overflow-x:auto}
+main{max-width:1180px;margin:0 auto;padding:24px 16px 48px}
+.hero{background:var(--mint);border-radius:22px;padding:28px 36px;margin-bottom:22px;position:relative;overflow:hidden;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+.hero::before{content:"";position:absolute;left:0;top:0;width:110px;height:110px;background:var(--mint-2);border-radius:0 0 110px 0}
+.hero>*{position:relative}
+.hero h1{font-size:30px}
+.hero h1 span{color:var(--teal)}
+.hero p{color:var(--muted);margin-top:6px}
+.btn{background:var(--teal);color:#fff;border:1px solid var(--teal);border-radius:6px;padding:9px 18px;font-weight:600;cursor:pointer}
+.btn:hover{background:var(--teal-d)}
+.btn.ghost{background:#fff;color:var(--teal)}
+.btn.ghost:hover{background:var(--mint)}
+.card{background:var(--white);border-radius:16px;padding:18px;box-shadow:0 2px 10px rgba(11,58,69,.07)}
+.card h2{font-size:16px;margin-bottom:12px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:16px;margin-bottom:22px}
+.kpi{border-radius:16px;padding:16px 18px;background:var(--white);box-shadow:0 2px 10px rgba(11,58,69,.07);border-left:6px solid var(--teal)}
+.kpi.ok{border-color:var(--ok)}
+.kpi.rep{border-color:var(--rep)}
+.kpi.pen{border-color:var(--pen)}
+.kpi.can{border-color:#f08a82}
+.kpi small{color:var(--muted);font-weight:600}
+.kpi strong{display:block;font-size:34px;margin:4px 0 0}
+.kpi span{color:var(--muted);font-size:12px}
+.grid{display:grid;grid-template-columns:1.25fr 1fr;gap:16px;margin-bottom:16px}
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:560px}
+th{text-align:left;font-size:12px;color:var(--muted);padding:8px;border-bottom:2px solid var(--line)}
+td{padding:10px 8px;border-bottom:1px solid var(--line)}
+tbody tr:hover{background:var(--mint)}
+.badge{display:inline-block;border-radius:999px;padding:3px 12px;font-size:12px;font-weight:700}
+.b-resuelto{background:var(--ok);color:var(--ok-t)}
+.b-reparacion{background:var(--rep);color:var(--rep-t)}
+.b-pendiente{background:var(--pen);color:var(--pen-t)}
+.b-cancelado{background:#f6c4bf;color:#8c1d18}
+.link{background:none;border:1px solid var(--line);border-radius:999px;padding:4px 12px;cursor:pointer;font-size:12px;background:#fff}
+.link:hover{border-color:var(--teal);color:var(--teal)}
+.empty{padding:28px;text-align:center;color:var(--muted)}
+.legend{display:flex;gap:14px;margin-top:10px;font-size:12px;color:var(--muted);flex-wrap:wrap}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px}
+.bars{display:flex;flex-direction:column;gap:10px}
+.bar{display:grid;grid-template-columns:110px 1fr 28px;align-items:center;gap:8px;font-size:13px}
+.bar div{background:#edf3f3;border-radius:6px;height:20px}
+.bar div i{display:block;height:100%;background:var(--teal);border-radius:6px;transition:width .4s}
+.donut-wrap{display:flex;align-items:center;gap:20px;flex-wrap:wrap;justify-content:center}
+.donut{width:170px;height:170px;border-radius:50%;display:grid;place-items:center}
+.donut div{width:100px;height:100px;border-radius:50%;background:#fff;display:grid;place-items:center;text-align:center;font-weight:700;font-size:22px;line-height:1}
+.donut small{display:block;font-size:11px;font-weight:400;color:var(--muted)}
+dialog{border:0;border-radius:18px;padding:24px;width:min(460px,92vw);box-shadow:0 20px 50px rgba(11,58,69,.3)}
+dialog::backdrop{background:rgba(11,58,69,.45)}
+dialog h3{margin-bottom:4px;font-size:20px}
+dialog dl{display:grid;grid-template-columns:110px 1fr;gap:8px;margin:14px 0}
+dialog dt{color:var(--muted)}
+dialog dd{font-weight:600}
+dialog select{width:100%;padding:9px;border:1px solid var(--line);border-radius:8px;margin:6px 0 16px}
+.row{display:flex;gap:10px;justify-content:flex-end}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--ink);color:#fff;padding:10px 18px;border-radius:8px;transition:transform .25s}
+.toast.on{transform:translateX(-50%) translateY(0)}
+@media(max-width:900px){.kpis{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}.admin-tag span{display:none}.hero{padding:22px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+.lpin{width:26px;height:26px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.35)}
+.me{width:18px;height:18px;border-radius:50%;background:#1f6fe5;border:3px solid #fff;box-shadow:0 0 0 6px rgba(31,111,229,.25)}
+.leaflet-popup-content{font-family:inherit;color:var(--ink)}
+.leaflet-popup-content .link{margin-top:8px}
+[hidden]{display:none!important}
+.acts{display:flex;gap:6px;flex-wrap:wrap}
+nav a{padding:14px 2px;font-weight:600;font-size:13px;color:var(--ink);text-decoration:none;border-bottom:3px solid transparent;white-space:nowrap}
+nav a:hover{color:var(--teal)}
+nav a[aria-current=page]{color:var(--teal);border-color:var(--teal)}
+a.admin-tag{text-decoration:none;color:inherit;border-radius:999px;padding:4px 6px 4px 12px}
+a.admin-tag:hover{background:var(--mint-2)}
+a.btn{text-decoration:none;display:inline-block}
+</style>
+<style>
+/* Bache-Out · Página login.html */
+#login{min-height:100vh;background:var(--mint);display:grid;place-items:center;padding:24px;font-family:Inter,"Segoe UI",Helvetica,Arial,sans-serif}
+.lcard{background:#fff;border-radius:28px;width:min(100%,520px);padding:44px 44px 36px;box-shadow:0 24px 50px rgba(15,129,144,.14)}
+.lcard .logo{display:flex;align-items:center;justify-content:center;gap:8px;font-weight:700;color:var(--ink);margin-bottom:14px}
+.lcard h1{font-family:Montserrat,Inter,sans-serif;font-weight:800;font-size:34px;text-align:center;color:#17414d}
+.lcard .sub{text-align:center;color:#6f8790;margin:8px 0 26px;font-size:15px}
+.lcard label{display:block;font-weight:700;color:#17414d;margin:16px 0 8px}
+.lcard input{width:100%;border:1.5px solid #cfdcdc;border-radius:12px;padding:14px 16px;font-size:16px;background:#fff}
+.lcard input:focus{border-color:#0f8190;outline:3px solid rgba(15,129,144,.2)}
+.lcard input[aria-invalid=true]{border-color:#b3261e}
+.pw{position:relative}
+.pw input{padding-right:92px}
+.pw button{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:0;color:#0f8190;font-weight:700;cursor:pointer;padding:8px}
+.lcard .forgot{display:block;margin:14px 0 0 auto;background:none;border:0;color:#0f8190;font-weight:700;cursor:pointer;padding:4px}
+.lbtn{width:100%;margin-top:22px;background:#0f8190;color:#fff;border:0;border-radius:12px;padding:16px;font-size:17px;font-weight:700;cursor:pointer}
+.lbtn:hover{background:#0c6b78}
+.lbtn:disabled{opacity:.55;cursor:not-allowed}
+.lmsg{margin-top:14px;padding:10px 12px;border-radius:10px;font-size:14px;background:#fdecea;color:#8c1d18}
+.lmsg.ok{background:#e3f6ea;color:#1d6b3a}
+.lmsg:empty{display:none}
+.lfoot{border-top:1px solid #e3ebeb;margin-top:26px;padding-top:18px;text-align:center;color:#6f8790;font-size:14px}
+.lback{background:none;border:0;color:#0f8190;font-weight:700;cursor:pointer;margin-top:14px;display:block;margin-inline:auto}
+@media(max-width:520px){.lcard{padding:30px 22px}.lcard h1{font-size:28px}}
+</style>
 </head>
 <body>
 <section id="login" aria-label="Inicio de sesión del administrador">
@@ -43,6 +153,81 @@
     </form>
   </div>
 </section>
-<script src="js/loginadmin.js"></script>
+<script>
+/* Bache-Out · Login del administrador */
+
+/* IMPORTANTE: esto es una demostración en el navegador. En producción valida
+   el correo y la contraseña en tu servidor (fetch a tu API) y usa cookies de sesión seguras. */
+const ADMINS = [{ correo: "admin@bache-out.mx", pass: "admin123" }];
+const ACCESO_ABIERTO = true; /* true = entra cualquier correo y contraseña (solo para pruebas). Ponlo en false para exigir los correos de ADMINS. */
+/* Página a la que se entra después de iniciar sesión (cámbiala si renombraste resumen.html) */
+const PAGINA_INICIO = "resumen.html";
+
+/* Sesión: usa sessionStorage y, si el navegador lo bloquea (pasa al abrir archivos con doble clic), window.name */
+function leerSesion() {
+  try { const s = sessionStorage.getItem("bo_sesion"); if (s) return s; } catch (e) {}
+  const m = /(?:^|;)bo_sesion=([^;]*)/.exec(window.name || ""); return m ? decodeURIComponent(m[1]) : null;
+}
+function guardarSesion(c) { try { sessionStorage.setItem("bo_sesion", c); } catch (e) {} window.name = "bo_sesion=" + encodeURIComponent(c); }
+function borrarSesion() { try { sessionStorage.removeItem("bo_sesion"); } catch (e) {} window.name = ""; }
+
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const emailOk = v => /^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(v);
+const passGuardada = c => { try { return localStorage.getItem("bo_pass_" + c); } catch (e) { return null; } };
+const autenticar = (c, p) => {
+  if (ACCESO_ABIERTO) return true;
+  const a = ADMINS.find(x => x.correo === c);
+  return !!a && p === (passGuardada(c) || a.pass);
+};
+const msg = (id, t, ok) => { const e = $(id); e.textContent = t; e.classList.toggle("ok", !!ok); };
+
+function panel(id) {
+  ["fLogin", "fRec1"].forEach(f => $("#" + f).hidden = f !== id);
+  ["lMsg", "r1Msg"].forEach(m => msg("#" + m, ""));
+  $({ fLogin: "#lCorreo", fRec1: "#rCorreo" }[id]).focus();
+}
+
+/* Si ya hay sesión, pasa directo al panel */
+const sesion = leerSesion();
+if (sesion) location.replace(PAGINA_INICIO);
+
+$$("[data-ver]").forEach(b => b.onclick = () => {
+  const i = $("#" + b.dataset.ver), ver = i.type === "password";
+  i.type = ver ? "text" : "password"; b.textContent = ver ? "Ocultar" : "Mostrar";
+});
+$("#goRec").onclick = () => { $("#rCorreo").value = $("#lCorreo").value.trim(); panel("fRec1"); };
+$$("[data-back]").forEach(b => b.onclick = () => panel("fLogin"));
+
+$("#fLogin").onsubmit = e => {
+  e.preventDefault();
+  const c = $("#lCorreo").value.trim().toLowerCase(), p = $("#lPass").value;
+  $("#lCorreo").removeAttribute("aria-invalid");
+  if (!emailOk(c)) { $("#lCorreo").setAttribute("aria-invalid", "true"); msg("#lMsg", "Escribe tu correo, por ejemplo nombre@dominio.mx."); return; }
+  if (!p) { msg("#lMsg", "Escribe tu contraseña."); return; }
+  if (autenticar(c, p)) {
+    guardarSesion(c);
+    location.href = PAGINA_INICIO;
+  } else {
+    msg("#lMsg", "Correo o contraseña incorrectos. Revisa que estén bien escritos."); $("#lPass").select();
+  }
+};
+
+/* Cambiar contraseña (sin código) */
+$("#fRec1").onsubmit = e => {
+  e.preventDefault();
+  const c = $("#rCorreo").value.trim().toLowerCase(), n = $("#rNueva").value, c2 = $("#rConf").value;
+  if (!emailOk(c)) { msg("#r1Msg", "Escribe tu correo, por ejemplo nombre@dominio.mx."); return; }
+  if (!ACCESO_ABIERTO && !ADMINS.some(a => a.correo === c)) { msg("#r1Msg", "Ese correo no tiene acceso de administrador."); return; }
+  if (n.length < 4) { msg("#r1Msg", "La contraseña debe tener al menos 4 caracteres."); return; }
+  if (n !== c2) { msg("#r1Msg", "Las contraseñas no coinciden."); return; }
+  try { localStorage.setItem("bo_pass_" + c, n); } catch (e) {} /* aquí tu servidor guarda la nueva contraseña */
+  $("#lCorreo").value = c; $("#lPass").value = ""; ["rNueva", "rConf"].forEach(i => $("#" + i).value = "");
+  panel("fLogin"); msg("#lMsg", "Contraseña cambiada. Ya puedes iniciar sesión.", true); $("#lPass").focus();
+};
+
+if (new URLSearchParams(location.search).get("salio")) msg("#lMsg", "Cerraste sesión correctamente.", true);
+$("#lCorreo").focus();
+</script>
 </body>
 </html>
