@@ -76,7 +76,7 @@ formulario.addEventListener("submit", function (event) {
         mostrarMensaje("Inicio de sesión correcto.", true);
 
         // Entrar a la página principal.
-        window.location.href = "Index.html";
+        window.location.href = "index.html";
 
     } catch (error) {
 
