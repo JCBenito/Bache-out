@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mapa interactivo | Bache-Out Administrador</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+
+
+
+  <link rel="stylesheet" href="css/comun.css">
+  <link rel="stylesheet" href="css/mapa.css">
+</head>
+<body data-pag="mapa" data-hero="1">
+<main>
+  <div class="card">
+    <h2>Mapa interactivo en tiempo real</h2>
+    <div class="mapbar">
+      <div class="st" id="geoStatus" role="status"><i class="dot"></i>Solicitando tu ubicación…</div>
+      <select id="mapFiltro" aria-label="Filtrar pines por estado">
+        <option value="">Todos los estados</option>
+        <option value="pendiente">Pendiente</option>
+        <option value="reparacion">En reparación</option>
+        <option value="resuelto">Resuelto</option>
+        <option value="cancelado">Cancelado</option>
+      </select>
+      <button class="btn" id="btnCentrar">Centrar en mi ubicación</button>
+      <button class="btn ghost" id="btnTodos">Ver todos los reportes</button>
+    </div>
+    <div id="liveMap"></div>
+    <div class="legend" data-legend></div>
+  </div>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+
+
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  <script src="js/comun.js"></script>
+  <script src="js/mapa.js"></script>
+</body>
+</html>
