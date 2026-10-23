@@ -9,12 +9,9 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
-app.use(express.static('frontend'));
 
-// Ruta principal: Mostrar "nosotros.html" por defecto
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'frontend', 'nosotros.html'));
-});
+// Indicamos que el archivo por defecto al entrar a la carpeta frontend sea nosotros.html
+app.use(express.static('frontend', { index: 'nosotros.html' }));
 
 // API: REGISTRO DE USUARIO
 app.post('/api/registro', async (req, res) => {
