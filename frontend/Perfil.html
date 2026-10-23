@@ -1,0 +1,410 @@
+
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Bache-Out | Mi Perfil</title>
+
+    <link rel="stylesheet" href="css/perfil.css">
+</head>
+
+<body>
+
+    <!-- ENCABEZADO -->
+    <header class="barra-principal">
+
+        <div class="marca">
+            <img src="img/Logo.png" alt="Logo de Bache-Out" class="logo">
+            <span>Bache-Out</span>
+        </div>
+
+    </header>
+
+
+    <!-- NAVEGACIÓN -->
+    <nav class="barra-navegacion">
+
+        <a href="nosotros.html">Nosotros</a>
+        <a href="index.html">Inicio</a>
+        <a href="Reporte.html">Reportar bache</a>
+        <a href="Detalles.html">Mis reportes</a>
+        <a href="Mapa.html">Mapa interactivo</a>
+        <a href="Perfil.html" class="activo">Mi perfil</a>
+
+    </nav>
+
+
+    <!-- CONTENIDO -->
+    <main class="pagina-perfil">
+
+        <!-- ENCABEZADO DE LA PÁGINA -->
+        <section class="encabezado-perfil">
+
+            <span class="etiqueta-perfil">CUENTA</span>
+
+            <h1>Mi perfil</h1>
+
+            <p>
+                Consulta y administra la información de tu cuenta en Bache-Out.
+            </p>
+
+        </section>
+
+
+        <!-- CONTENEDOR DEL PERFIL -->
+        <section class="contenedor-perfil">
+
+
+            <!-- INFORMACIÓN DEL USUARIO -->
+            <div class="cabecera-usuario">
+
+                <div class="foto-perfil">
+
+                    <div class="foto-circulo">
+
+                        <img
+                            src="img/perfil-default.png"
+                            alt="Foto de perfil"
+                            id="fotoPerfil"
+                        >
+
+                    </div>
+
+
+                    <div class="acciones-foto">
+
+                        <label
+                            for="inputFoto"
+                            class="cambiar-foto"
+                        >
+                            Cambiar foto
+                        </label>
+
+                        <button
+                            type="button"
+                            class="eliminar-foto"
+                            id="btnEliminarFoto"
+                        >
+                            Eliminar foto
+                        </button>
+
+                    </div>
+
+
+                    <input
+                        type="file"
+                        id="inputFoto"
+                        accept="image/*"
+                    >
+
+                </div>
+
+
+                <div class="informacion-usuario">
+
+                    <h2 id="nombreMostrar">
+                        Juan Carlos Pérez López
+                    </h2>
+
+                    <p>Ciudadano</p>
+
+                </div>
+
+            </div>
+
+
+            <!-- INFORMACIÓN PERSONAL -->
+            <div class="seccion-perfil">
+
+                <div class="titulo-seccion">
+
+                    <h3>Información personal</h3>
+
+                    <button
+                        type="button"
+                        class="btn-editar"
+                        id="btnEditar"
+                    >
+                        Editar perfil
+                    </button>
+
+                </div>
+
+
+                <div class="datos-perfil">
+
+                    <div class="campo-perfil">
+
+                        <label for="nombres">
+                            Nombre(s)
+                        </label>
+
+                        <input
+                            type="text"
+                            id="nombres"
+                            value="Juan Carlos"
+                            disabled
+                        >
+
+                    </div>
+
+
+                    <div class="campo-perfil">
+
+                        <label for="apellidoPaterno">
+                            Apellido paterno
+                        </label>
+
+                        <input
+                            type="text"
+                            id="apellidoPaterno"
+                            value="Pérez"
+                            disabled
+                        >
+
+                    </div>
+
+
+                    <div class="campo-perfil">
+
+                        <label for="apellidoMaterno">
+                            Apellido materno
+                        </label>
+
+                        <input
+                            type="text"
+                            id="apellidoMaterno"
+                            value="López"
+                            disabled
+                        >
+
+                    </div>
+
+
+                    <div class="campo-perfil">
+
+                        <label for="correo">
+                            Correo electrónico
+                        </label>
+
+                        <input
+                            type="email"
+                            id="correo"
+                            value="juancarlos@gmail.com"
+                            disabled
+                        >
+
+                    </div>
+
+
+                    <div class="campo-perfil">
+
+                        <label for="telefono">
+                            Número de teléfono
+                        </label>
+
+                        <input
+                            type="tel"
+                            id="telefono"
+                            value="744 123 4567"
+                            disabled
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <!-- BOTONES DE EDICIÓN -->
+                <div
+                    class="acciones-edicion"
+                    id="accionesEdicion"
+                >
+
+                    <button
+                        type="button"
+                        class="btn-cancelar"
+                        id="btnCancelar"
+                    >
+                        Cancelar
+                    </button>
+
+                    <button
+                        type="button"
+                        class="btn-guardar"
+                        id="btnGuardar"
+                    >
+                        Guardar cambios
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <!-- SEGURIDAD -->
+            <div class="seccion-perfil seguridad">
+
+                <div class="titulo-seguridad">
+
+                    <h3>Seguridad</h3>
+
+                    <button
+                        type="button"
+                        class="btn-cambiar"
+                        id="btnMostrarContrasena"
+                    >
+                        Cambiar contraseña
+                    </button>
+
+                </div>
+
+
+                <!-- FORMULARIO PARA CAMBIAR CONTRASEÑA -->
+                <div
+                    class="formulario-contrasena"
+                    id="formularioContrasena"
+                >
+
+                    <!-- CONTRASEÑA ACTUAL -->
+                    <div class="campo-perfil campo-contrasena">
+
+                        <label for="contrasenaActual">
+                            Contraseña actual
+                        </label>
+
+                        <div class="contenedor-input-contrasena">
+
+                            <input
+                                type="password"
+                                id="contrasenaActual"
+                                placeholder="Ingresa tu contraseña actual"
+                            >
+
+                            <button
+                                type="button"
+                                class="btn-mostrar"
+                            >
+                                Mostrar
+                            </button>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- NUEVA CONTRASEÑA -->
+                    <div class="campo-perfil campo-contrasena">
+
+                        <label for="nuevaContrasena">
+                            Nueva contraseña
+                        </label>
+
+                        <div class="contenedor-input-contrasena">
+
+                            <input
+                                type="password"
+                                id="nuevaContrasena"
+                                placeholder="Ingresa tu nueva contraseña"
+                            >
+
+                            <button
+                                type="button"
+                                class="btn-mostrar"
+                            >
+                                Mostrar
+                            </button>
+
+                        </div>
+
+                        <small>
+                            La contraseña debe cumplir con estos requisitos:
+                        </small>
+
+                        <ul>
+                            <li>Mínimo 8 caracteres.</li>
+                            <li>Al menos un número.</li>
+                            <li>
+                                Al menos un símbolo, por ejemplo:
+                                ! @ # $ %.
+                            </li>
+                        </ul>
+
+                    </div>
+
+
+                    <!-- CONFIRMAR NUEVA CONTRASEÑA -->
+                    <div class="campo-perfil campo-contrasena">
+
+                        <label for="confirmarContrasena">
+                            Confirmar nueva contraseña
+                        </label>
+
+                        <div class="contenedor-input-contrasena">
+
+                            <input
+                                type="password"
+                                id="confirmarContrasena"
+                                placeholder="Confirma tu nueva contraseña"
+                            >
+
+                            <button
+                                type="button"
+                                class="btn-mostrar"
+                            >
+                                Mostrar
+                            </button>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- MENSAJE DE VALIDACIÓN -->
+                    <p
+                        id="mensajeContrasena"
+                        class="mensaje-contrasena"
+                    ></p>
+
+
+                    <!-- GUARDAR CONTRASEÑA -->
+                    <button
+                        type="button"
+                        class="btn-guardar-contrasena"
+                        id="btnGuardarContrasena"
+                    >
+                        Guardar contraseña
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <!-- CERRAR SESIÓN -->
+            <div class="seccion-salida">
+
+                <button
+                    type="button"
+                    class="btn-salir"
+                    id="btnCerrarSesion"
+                >
+                    Cerrar sesión
+                </button>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- JAVASCRIPT -->
+    <script src="js/perfil.js"></script>
+
+</body>
+
+</html>

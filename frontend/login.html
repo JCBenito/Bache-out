@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bache-Out | Iniciar sesión</title>
+
+    
+    <link rel="stylesheet" href="css/login.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+    <!-- ENCABEZADO -->
+    <header class="barra-principal">
+
+        <div class="marca">
+            <img src="img/Logo.png" alt="Logo de Bache-Out" class="logo">
+
+            <span>Bache-Out</span>
+        </div>
+
+
+    </header>
+
+
+    <!-- CONTENIDO -->
+    <main class="login-pagina">
+
+        <section class="login-tarjeta">
+
+            <!-- TÍTULO -->
+            <div class="login-titulo">
+
+                <h1>Iniciar sesión</h1>
+
+                <p>
+                    Ingresa a tu cuenta para continuar
+                </p>
+
+            </div>
+
+
+            <!-- FORMULARIO -->
+            <form id="formularioLogin">
+
+                <!-- CORREO O TELÉFONO -->
+                <div class="campo">
+
+                    <label for="usuario">
+                        Correo electrónico o número telefónico
+                    </label>
+
+                    <input
+                        type="text"
+                        id="usuario"
+                        name="usuario"
+                        placeholder="Correo o número telefónico"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- CONTRASEÑA -->
+                <div class="campo">
+
+                    <label for="password">
+                        Contraseña
+                    </label>
+
+                    <div class="password-contenedor">
+
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            placeholder="Ingresa tu contraseña"
+                            required
+                        >
+
+                        <button
+                            type="button"
+                            id="mostrarPassword"
+                        >
+                            Mostrar
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <!-- RECUPERAR CONTRASEÑA -->
+                <div class="recuperar">
+
+                    <a href="recuperar.html">
+                        ¿Olvidaste tu contraseña?
+                    </a>
+
+                </div>
+
+
+                <!-- MENSAJE -->
+                <p
+                    id="mensaje"
+                    class="mensaje"
+                ></p>
+
+
+                <!-- BOTÓN -->
+                <button
+                    type="submit"
+                    class="btn-login"
+                >
+                    Iniciar sesión
+                </button>
+
+            </form>
+
+
+            <!-- REGISTRO -->
+            <div class="crear-cuenta">
+
+                <p>
+                    ¿No tienes una cuenta?
+
+                    <a href="registro.html">
+                        Crear cuenta
+                    </a>
+                </p>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- JAVASCRIPT -->
+    <script src="js/login.js"></script>
+    
+
+</body>
+
+</html>

@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Bache-Out | Mapa interactivo</title>
+
+    <link rel="stylesheet" href="css/mapa.css" >
+
+</head>
+
+
+<body>
+
+
+    <!-- =========================================
+         ENCABEZADO
+    ========================================== -->
+
+    <header class="barra-principal">
+
+        <div class="marca">
+
+            <img
+                src="img/Logo.png"
+                alt="Logo de Bache-Out"
+                class="logo"
+            >
+
+            <span>Bache-Out</span>
+
+        </div>
+
+    </header>
+
+
+
+    <!-- =========================================
+         BARRA DE NAVEGACIÓN
+    ========================================== -->
+
+    <nav class="barra-navegacion">
+
+
+
+        <a href="nosotros.html">
+            Nosotros
+        </a>
+        <a href="index.html">
+            Inicio
+        </a>
+
+        <a href="Reporte.html">
+            Reportar bache
+        </a>
+
+        <a href="detalles.html">
+            Mis reportes
+        </a>
+
+        <a href="Mapa.html" class="activo">
+            Mapa interactivo
+        </a>
+
+        <a href="Perfil.html">
+            Mi Perfil
+        </a>
+
+    </nav>
+
+
+
+    <!-- =========================================
+         CONTENIDO PRINCIPAL
+    ========================================== -->
+
+    <main class="pagina-mapa">
+
+
+        <!-- =========================================
+             ENCABEZADO DEL MAPA
+        ========================================== -->
+
+        <section class="encabezado-mapa">
+
+            <span class="etiqueta-mapa">
+                UBICAR BACHE
+            </span>
+
+            <h1>
+                Mapa de baches
+            </h1>
+
+            <p>
+                Consulta los reportes de baches registrados
+                en diferentes zonas de Acapulco.
+            </p>
+
+        </section>
+
+
+
+        <!-- =========================================
+             FILTROS
+        ========================================== -->
+
+        <section class="controles-mapa">
+
+
+            <div class="filtro">
+
+                <label for="filtroEstado">
+                    Estado
+                </label>
+
+                <select id="filtroEstado">
+
+                    <option value="todos">
+                        Todos
+                    </option>
+
+                    <option value="Pendiente">
+                        Pendiente
+                    </option>
+
+                    <option value="En reparación">
+                        En reparación
+                    </option>
+
+                    <option value="Resuelto">
+                        Resuelto
+                    </option>
+
+                    <option value="Cancelado">
+                        Cancelado
+                    </option>
+
+                </select>
+
+            </div>
+
+
+
+            <div class="filtro">
+
+                <label for="filtroColonia">
+                    Colonia
+                </label>
+
+                <select id="filtroColonia">
+
+                    <option value="todas">
+                        Todas
+                    </option>
+
+                    <option value="La Libertad">
+                        La Libertad
+                    </option>
+
+                    <option value="La Progreso">
+                        La Progreso
+                    </option>
+
+                    <option value="Barrios Históricos">
+                        Barrios Históricos
+                    </option>
+
+                </select>
+
+            </div>
+
+
+
+            <button
+                type="button"
+                id="btnMiUbicacion"
+                class="btn-mi-ubicacion"
+            >
+                Mi ubicación
+            </button>
+            
+        </section>
+
+
+
+        <!-- =========================================
+             MAPA
+        ========================================== -->
+
+        <section class="contenedor-mapa">
+
+            <div
+                id="mapa"
+                class="mapa-google"
+            ></div>
+
+        </section>
+
+
+
+        <!-- =========================================
+             LEYENDA
+        ========================================== -->
+
+        <section class="leyenda-mapa">
+
+            <h2>
+                Estados de los reportes
+            </h2>
+
+
+            <div class="elementos-leyenda">
+
+
+                <div class="elemento-leyenda">
+
+                    <span class="punto estado-pendiente"></span>
+
+                    <span>
+                        Pendiente
+                    </span>
+
+                </div>
+
+
+                <div class="elemento-leyenda">
+
+                    <span class="punto estado-reparacion"></span>
+
+                    <span>
+                        En reparación
+                    </span>
+
+                </div>
+
+
+                <div class="elemento-leyenda">
+
+                    <span class="punto estado-resuelto"></span>
+
+                    <span>
+                        Resuelto
+                    </span>
+
+                </div>
+
+
+                <div class="elemento-leyenda">
+
+                    <span class="punto estado-cancelado"></span>
+
+                    <span>
+                        Cancelado
+                    </span>
+
+                </div>
+
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =========================================
+             BOTÓN REPORTAR
+        ========================================== -->
+
+        <section class="seccion-reportar">
+
+            <div>
+
+                <h2>
+                    ¿Encontraste un bache?
+                </h2>
+
+                <p>
+                    Ayuda a mantener actualizada la información
+                    de las calles de tu comunidad.
+                </p>
+
+            </div>
+
+
+            <a
+                href="Reporte.html"
+                class="btn-reportar-mapa"
+            >
+                Reportar un bache
+            </a>
+
+        </section>
+
+
+    </main>
+
+
+
+    <!-- =========================================
+         JAVASCRIPT DEL MAPA
+    ========================================== -->
+
+    <script src="js/mapa.js"></script>
+
+    <script>
+        if (sessionStorage.getItem("sesionIniciada") !== "true") {
+            window.location.href = "login.html";
+        }
+    </script>
+
+    <!-- =========================================
+         GOOGLE MAPS
+    ========================================== -->
+
+    <script
+        async
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyANqOUmpDJjwCNj_mEymy3naJb9lOBthG8&loading=async&callback=initMap"
+    ></script>
+
+
+</body>
+
+</html>

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Bache-Out | Recuperar contraseña</title>
+
+    <link rel="stylesheet" href="css/recuperar.css">
+</head>
+
+<body>
+
+    <!-- ENCABEZADO -->
+    <header class="barra-principal">
+
+        <div class="marca">
+            <img src="img/Logo.png" alt="Logo de Bache-Out" class="logo">
+            <span>Bache-Out</span>
+        </div>
+
+    </header>
+
+
+    <!-- CONTENIDO -->
+    <main class="contenedor-recuperar">
+
+        <section class="tarjeta-recuperar">
+
+            <span class="etiqueta">SOPORTE TÉCNICO</span>
+
+            <h1>Restablecer contraseña</h1>
+
+            <p class="descripcion">
+                Ingresa tu correo electrónico para continuar con la recuperación de tu cuenta.
+            </p>
+
+
+            <form id="formularioRecuperar">
+
+                <div class="campo">
+
+                    <label for="datoUsuario">
+                        Correo electrónico
+                    </label>
+
+                    <input
+                        type="text"
+                        id="datoUsuario"
+                        placeholder="ejemplo@gmail.com"
+                        required
+                    >
+
+                    <small id="mensajeError"></small>
+
+                </div>
+
+
+                <button type="submit" class="btn-continuar">
+                    Continuar
+                </button>
+
+            </form>
+
+
+            <a href="login.html" class="volver">
+                Volver a iniciar sesión
+            </a>
+
+        </section>
+
+    </main>
+
+
+    <script src="js/recuperar.js"></script>
+
+</body>
+</html>
