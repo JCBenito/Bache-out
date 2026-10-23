@@ -17,7 +17,7 @@ app.use(express.static('frontend', { index: 'nosotros.html' }));
 app.post('/api/registro', async (req, res) => {
     let { nombres, apellido_paterno, apellido_materno, telefono, correo, contrasena } = req.body;
 
-    // Convertimos textos a minúsculas y eliminamos espacios extra (la contraseña se queda intacta)
+    // Convertimos textos a minúsculas y eliminamos espacios extra
     nombres = nombres ? nombres.toLowerCase().trim() : '';
     apellido_paterno = apellido_paterno ? apellido_paterno.toLowerCase().trim() : '';
     apellido_materno = apellido_materno ? apellido_materno.toLowerCase().trim() : '';
