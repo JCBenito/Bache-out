@@ -1,7 +1,0 @@
-/* Bache-Out · Página mapa.html */
-#liveMap{height:540px;border-radius:12px;z-index:0}
-.mapbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
-.mapbar .st{color:var(--muted);font-size:13px;flex:1;min-width:200px}
-.dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#aaa;margin-right:6px}
-.dot.on{background:#2bb673;box-shadow:0 0 0 4px rgba(43,182,115,.25)}
-@media(max-width:900px){#liveMap{height:420px}}
