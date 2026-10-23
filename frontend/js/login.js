@@ -1,4 +1,3 @@
-
 /* =================================
    ELEMENTOS DEL FORMULARIO
 ================================= */
@@ -38,10 +37,10 @@ function mostrarMensaje(texto, esExito = false) {
 
 
 /* =================================
-   INICIAR SESIÓN TEMPORAL
+   INICIAR SESIÓN CON LA BASE DE DATOS
 ================================= */
 
-formulario.addEventListener("submit", function (event) {
+formulario.addEventListener("submit", async function (event) {
 
     event.preventDefault();
 
@@ -68,23 +67,40 @@ formulario.addEventListener("submit", function (event) {
     botonLogin.textContent = "Iniciando sesión...";
 
     try {
+        // Petición real al servidor backend en Node.js
+        const respuesta = await fetch('/api/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                usuario: usuarioValor,
+                contrasena: passwordValor
+            })
+        });
 
-        // Guardar una sesión temporal para probar el frontend.
-        sessionStorage.setItem("sesionActiva", "true");
-        sessionStorage.setItem("usuarioBacheOut", usuarioValor);
+        const datos = await respuesta.json();
 
-        mostrarMensaje("Inicio de sesión correcto.", true);
+        if (!respuesta.ok) {
+            throw new Error(datos.error || "Credenciales incorrectas.");
+        }
 
-        // Entrar a la página principal.
-        window.location.href = "index.html";
+        // 👉 Guardamos la sesión con la clave correcta que piden las páginas protegidas
+        sessionStorage.setItem("sesionIniciada", "true");
+        sessionStorage.setItem("nombreUsuario", datos.usuario.nombre);
+
+        mostrarMensaje("¡Inicio de sesión exitoso! Redirigiendo...", true);
+
+        // Pequeña pausa para que se alcance a leer el mensaje y entra a la app
+        setTimeout(() => {
+            window.location.href = "index.html";
+        }, 1000);
 
     } catch (error) {
-
-        mostrarMensaje("No fue posible iniciar sesión.");
+        mostrarMensaje(error.message || "No fue posible iniciar sesión.");
 
         botonLogin.disabled = false;
         botonLogin.textContent = "Iniciar sesión";
-
     }
 
 });
