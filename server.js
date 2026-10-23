@@ -8,7 +8,7 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
-app.use(express.static('.'));
+app.use(express.static('frontend'));
 
 // API: REGISTRO DE USUARIO
 app.post('/api/registro', async (req, res) => {
