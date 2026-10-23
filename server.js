@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
+const path = require('path');
 const pool = require('./db');
 require('dotenv').config();
 
@@ -9,6 +10,11 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.static('frontend'));
+
+// Ruta principal: Mostrar "nosotros.html" por defecto
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'frontend', 'nosotros.html'));
+});
 
 // API: REGISTRO DE USUARIO
 app.post('/api/registro', async (req, res) => {
