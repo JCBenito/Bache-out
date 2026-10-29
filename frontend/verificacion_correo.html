@@ -1,0 +1,156 @@
+
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Bache-Out | Verificación de seguridad</title>
+
+    <link rel="stylesheet" href="css/verificacion_correo.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+    <!-- ENCABEZADO -->
+    <header class="barra-principal">
+
+        <div class="marca">
+
+            <img src="Img/Logo.png" alt="Logo de Bache-Out" class="logo">
+
+            <span>Bache-Out</span>
+
+        </div>
+
+    </header>
+
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="pagina-verificacion">
+
+        <section class="tarjeta-verificacion">
+
+            <!-- ICONO -->
+            <div class="icono-seguridad">
+                <svg viewBox="0 0 24 24" fill="none"
+                    xmlns="http://www.w3.org/2000/svg">
+
+                    <path d="M12 3L20 6V11.5C20 16.5 16.6 20 12 21C7.4 20 4 16.5 4 11.5V6L12 3Z"
+                        stroke="currentColor"
+                        stroke-width="1.7"
+                        stroke-linejoin="round"/>
+
+                    <path d="M12 8V12"
+                        stroke="currentColor"
+                        stroke-width="1.7"
+                        stroke-linecap="round"/>
+
+                    <circle cx="12" cy="15.5" r="0.8"
+                        fill="currentColor"/>
+
+                </svg>
+            </div>
+
+
+            <!-- TÍTULO -->
+            <div class="titulo-verificacion">
+
+                <span class="etiqueta">SEGURIDAD DE LA CUENTA</span>
+
+                <h1>Verificación de seguridad</h1>
+
+                <p>
+                    Has superado el número de intentos permitidos
+                    para iniciar sesión.
+                </p>
+
+            </div>
+
+
+            <!-- AVISO -->
+            <div class="aviso-seguridad">
+
+                <div class="aviso-icono">!</div>
+
+                <div>
+                    <strong>Protegemos tu cuenta</strong>
+
+                    <p>
+                        Para continuar, necesitamos verificar
+                        que eres el propietario de la cuenta.
+                    </p>
+                </div>
+
+            </div>
+
+
+            <!-- FORMULARIO -->
+            <form id="formularioVerificacion">
+
+                <div class="campo">
+
+                    <label for="correo">
+                        Correo electrónico
+                    </label>
+
+                    <input
+                        type="email"
+                        id="correo"
+                        name="correo"
+                        placeholder="ejemplo@correo.com"
+                        autocomplete="email"
+                        required
+                    >
+
+                    <small>
+                        Ingresa el correo electrónico asociado
+                        a tu cuenta de Bache-Out.
+                    </small>
+
+                </div>
+
+
+                <!-- MENSAJE -->
+                <p id="mensaje" class="mensaje"></p>
+
+
+                <!-- BOTÓN -->
+                <button type="submit" class="btn-enviar">
+                    Enviar código de verificación
+                </button>
+
+            </form>
+
+
+            <!-- REGRESAR -->
+            <div class="regresar">
+
+                <a href="login.html">
+                    <span aria-hidden="true">←</span>
+                    Regresar al inicio de sesión
+                </a>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <footer class="pie-pagina">
+        <p>Bache-Out | Sistema de reportes y seguimiento de baches</p>
+    </footer>
+
+
+    <script src="js/verificacion_correo.js"></script>
+
+</body>
+
+</html>
