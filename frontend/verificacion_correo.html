@@ -8,12 +8,12 @@
 
     <title>Bache-Out | Verificación de seguridad</title>
 
-    <link rel="stylesheet" href="css/verificacion_correo.css">
-
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="css/verificacion_correo.css">
 </head>
 
 <body>
@@ -37,34 +37,29 @@
 
         <section class="tarjeta-verificacion">
 
-
             <!-- TÍTULO -->
             <div class="titulo-verificacion">
 
-                <span class="etiqueta">SEGURIDAD DE LA CUENTA</span>
-
                 <h1>Verificación de seguridad</h1>
-
-                <p>
-                    Has superado el número de intentos permitidos
-                    para iniciar sesión.
-                </p>
 
             </div>
 
 
-            <!-- AVISO -->
+            <!-- AVISO DE SEGURIDAD -->
             <div class="aviso-seguridad">
 
                 <div class="aviso-icono">!</div>
 
-                <div>
+                <div class="aviso-contenido">
+
                     <strong>Protegemos tu cuenta</strong>
 
                     <p>
-                        Para continuar, necesitamos verificar
-                        que eres el propietario de la cuenta.
+                    Has superado el número de intentos permitidos
+                    para iniciar sesión. Para continuar, necesitamos verificar
+                    que eres el propietario de la cuenta.
                     </p>
+
                 </div>
 
             </div>
@@ -112,7 +107,6 @@
             <div class="regresar">
 
                 <a href="login.html">
-                    <span aria-hidden="true">←</span>
                     Regresar al inicio de sesión
                 </a>
 
@@ -123,13 +117,15 @@
     </main>
 
 
+    <!-- PIE DE PÁGINA -->
     <footer class="pie-pagina">
+
         <p>Bache-Out | Sistema de reportes y seguimiento de baches</p>
+
     </footer>
 
 
     <script src="js/verificacion_correo.js"></script>
 
 </body>
-
 </html>
