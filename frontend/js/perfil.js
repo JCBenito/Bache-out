@@ -1,3 +1,53 @@
+/* =========================================
+   CARGAR DATOS DEL USUARIO AL INICIAR
+========================================= */
+
+document.addEventListener("DOMContentLoaded", () => {
+    // 1. Validar que la sesión esté activa
+    const sesionIniciada = sessionStorage.getItem("sesionIniciada");
+    if (!sesionIniciada || sesionIniciada !== "true") {
+        window.location.href = "login.html";
+        return;
+    }
+
+    // 2. Recuperar los datos guardados en el sessionStorage durante el login
+    const nombresValor = sessionStorage.getItem("nombres") || "";
+    const apellidoPaternoValor = sessionStorage.getItem("apellidoPaterno") || "";
+    const apellidoMaternoValor = sessionStorage.getItem("apellidoMaterno") || "";
+    const correoValor = sessionStorage.getItem("correo") || "";
+    const telefonoValor = sessionStorage.getItem("telefono") || "";
+
+    // Función para poner la primera letra en mayúscula
+    const capitalizar = (texto) => texto ? texto.charAt(0).toUpperCase() + texto.slice(1) : "";
+
+    const nF = capitalizar(nombresValor);
+    const apP = capitalizar(apellidoPaternoValor);
+    const apM = capitalizar(apellidoMaternoValor);
+
+    // 3. Rellenar los inputs del perfil
+    const nombresInput = document.getElementById("nombres");
+    const apellidoPaternoInput = document.getElementById("apellidoPaterno");
+    const apellidoMaternoInput = document.getElementById("apellidoMaterno");
+    const correoInput = document.getElementById("correo");
+    const telefonoInput = document.getElementById("telefono");
+    const nombreMostrar = document.getElementById("nombreMostrar");
+
+    if (nombresInput) nombresInput.value = nF;
+    if (apellidoPaternoInput) apellidoPaternoInput.value = apP;
+    if (apellidoMaternoInput) apellidoMaternoInput.value = apM;
+    if (correoInput) correoInput.value = correoValor;
+    if (telefonoInput) telefonoInput.value = telefonoValor;
+
+    // Actualizar el título grande del perfil
+    if (nombreMostrar) {
+        nombreMostrar.textContent = `${nF} ${apP} ${apM}`;
+    }
+
+    // Inicializar variables originales para la edición
+    correoOriginal = correoInput ? correoInput.value : "";
+    telefonoOriginal = telefonoInput ? telefonoInput.value : "";
+});
+
 
 /* =========================================
    EDITAR DATOS DEL PERFIL
@@ -14,8 +64,8 @@ const nombres = document.getElementById("nombres");
 const apellidoPaterno = document.getElementById("apellidoPaterno");
 const apellidoMaterno = document.getElementById("apellidoMaterno");
 
-let correoOriginal = correo.value;
-let telefonoOriginal = telefono.value;
+let correoOriginal = "";
+let telefonoOriginal = "";
 
 
 // Activar edición
@@ -85,6 +135,10 @@ btnGuardar.addEventListener("click", function () {
     correoOriginal = correo.value;
     telefonoOriginal = telefono.value;
 
+    // Actualizar también en el sessionStorage por si navega a otra vista
+    sessionStorage.setItem("correo", correoNuevo);
+    sessionStorage.setItem("telefono", telefonoNuevo);
+
     alert("Los datos se actualizaron correctamente.");
 });
 
@@ -136,34 +190,20 @@ btnEliminarFoto.addEventListener("click", function () {
    DE CAMBIO DE CONTRASEÑA
 ========================================= */
 
-const btnMostrarContrasena =
-    document.getElementById("btnMostrarContrasena");
-
-const formularioContrasena =
-    document.getElementById("formularioContrasena");
-
-const btnGuardarContrasena =
-    document.getElementById("btnGuardarContrasena");
-
-const contrasenaActual =
-    document.getElementById("contrasenaActual");
-
-const nuevaContrasena =
-    document.getElementById("nuevaContrasena");
-
-const confirmarContrasena =
-    document.getElementById("confirmarContrasena");
-
-const mensajeContrasena =
-    document.getElementById("mensajeContrasena");
+const btnMostrarContrasena = document.getElementById("btnMostrarContrasena");
+const formularioContrasena = document.getElementById("formularioContrasena");
+const btnGuardarContrasena = document.getElementById("btnGuardarContrasena");
+const contrasenaActual = document.getElementById("contrasenaActual");
+const nuevaContrasena = document.getElementById("nuevaContrasena");
+const confirmarContrasena = document.getElementById("confirmarContrasena");
+const mensajeContrasena = document.getElementById("mensajeContrasena");
 
 
 // Abrir o cerrar el formulario
 btnMostrarContrasena.addEventListener("click", function () {
     formularioContrasena.classList.toggle("mostrar");
 
-    const formularioVisible =
-        formularioContrasena.classList.contains("mostrar");
+    const formularioVisible = formularioContrasena.classList.contains("mostrar");
 
     btnMostrarContrasena.textContent = formularioVisible
         ? "Cancelar"
@@ -231,96 +271,60 @@ btnGuardarContrasena.addEventListener("click", function (evento) {
     mensajeContrasena.textContent = "";
     mensajeContrasena.className = "mensaje-contrasena";
 
-    // Comprobar que todos los campos estén completos
-    if (
-        actual.trim() === "" ||
-        nueva === "" ||
-        confirmar === ""
-    ) {
-        mostrarMensajeContrasena(
-            "Completa todos los campos.",
-            "error"
-        );
+    if (actual.trim() === "" || nueva === "" || confirmar === "") {
+        mostrarMensajeContrasena("Completa todos los campos.", "error");
         return;
     }
 
-    // Comprobar mínimo 8 caracteres
     if (nueva.length < 8) {
-        mostrarMensajeContrasena(
-            "La contraseña debe tener mínimo 8 caracteres.",
-            "error"
-        );
+        mostrarMensajeContrasena("La contraseña debe tener mínimo 8 caracteres.", "error");
         nuevaContrasena.focus();
         return;
     }
 
-    // Comprobar que contenga al menos un número
     if (!/[0-9]/.test(nueva)) {
-        mostrarMensajeContrasena(
-            "La contraseña debe contener al menos un número.",
-            "error"
-        );
+        mostrarMensajeContrasena("La contraseña debe contener al menos un número.", "error");
         nuevaContrasena.focus();
         return;
     }
 
-    // Comprobar que contenga al menos un símbolo
     if (!/[^A-Za-z0-9]/.test(nueva)) {
-        mostrarMensajeContrasena(
-            "La contraseña debe contener al menos un símbolo, como !, @ o #.",
-            "error"
-        );
+        mostrarMensajeContrasena("La contraseña debe contener al menos un símbolo, como !, @ o #.", "error");
         nuevaContrasena.focus();
         return;
     }
 
-    // Comprobar que las contraseñas coincidan
     if (nueva !== confirmar) {
-        mostrarMensajeContrasena(
-            "La nueva contraseña y su confirmación no coinciden.",
-            "error"
-        );
+        mostrarMensajeContrasena("La nueva contraseña y su confirmación no coinciden.", "error");
         confirmarContrasena.focus();
         return;
     }
 
-    // Evitar que la contraseña nueva sea igual a la actual
     if (nueva === actual) {
-        mostrarMensajeContrasena(
-            "La nueva contraseña debe ser diferente de la actual.",
-            "error"
-        );
+        mostrarMensajeContrasena("La nueva contraseña debe ser diferente de la actual.", "error");
         nuevaContrasena.focus();
         return;
     }
-    // Las validaciones se completaron correctamente
-alert("La contraseña se guardó correctamente.");
 
-// Limpiar los campos de contraseña
-contrasenaActual.value = "";
-nuevaContrasena.value = "";
-confirmarContrasena.value = "";
+    alert("La contraseña se guardó correctamente.");
 
-// Limpiar el mensaje de validación
-mensajeContrasena.textContent = "";
-mensajeContrasena.className = "mensaje-contrasena";
+    contrasenaActual.value = "";
+    nuevaContrasena.value = "";
+    confirmarContrasena.value = "";
 
-// Cerrar el formulario de cambio de contraseña
-formularioContrasena.classList.remove("mostrar");
+    mensajeContrasena.textContent = "";
+    mensajeContrasena.className = "mensaje-contrasena";
 
-// Restaurar el texto del botón
-btnMostrarContrasena.textContent = "Cambiar contraseña";
+    formularioContrasena.classList.remove("mostrar");
+    btnMostrarContrasena.textContent = "Cambiar contraseña";
 
-// Ocultar las contraseñas si estaban visibles
-document.querySelectorAll(".campo-contrasena input").forEach(function (input) {
-    input.type = "password";
-});
+    document.querySelectorAll(".campo-contrasena input").forEach(function (input) {
+        input.type = "password";
+    });
 
-document.querySelectorAll(".btn-mostrar").forEach(function (boton) {
-    boton.textContent = "Mostrar";
-});
-
-    
+    document.querySelectorAll(".btn-mostrar").forEach(function (boton) {
+        boton.textContent = "Mostrar";
+    });
 });
 
 
@@ -331,11 +335,11 @@ document.querySelectorAll(".btn-mostrar").forEach(function (boton) {
 const btnCerrarSesion = document.getElementById("btnCerrarSesion");
 
 btnCerrarSesion.addEventListener("click", function () {
-    const confirmarSalida = confirm(
-        "¿Estás seguro de que deseas cerrar sesión?"
-    );
+    const confirmarSalida = confirm("¿Estás seguro de que deseas cerrar sesión?");
 
     if (confirmarSalida) {
+        // Limpiamos los datos temporales del navegador
+        sessionStorage.clear();
         window.location.href = "login.html";
     }
 });
