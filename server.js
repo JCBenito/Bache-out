@@ -74,9 +74,17 @@ app.post('/api/login', async (req, res) => {
             return res.status(400).json({ error: 'Contraseña incorrecta.' });
         }
 
+        // Enviamos todos los datos completos necesarios para el perfil y la app
         res.json({
             mensaje: 'Inicio de sesión exitoso',
-            usuario: { id: usuarioBD.id_usuario, nombre: usuarioBD.nombres }
+            usuario: { 
+                id: usuarioBD.id_usuario, 
+                nombres: usuarioBD.nombres,
+                apellido_paterno: usuarioBD.apellido_paterno,
+                apellido_materno: usuarioBD.apellido_materno,
+                correo: usuarioBD.correo,
+                telefono: usuarioBD.telefono
+            }
         });
     } catch (error) {
         console.error('Error en login:', error);
