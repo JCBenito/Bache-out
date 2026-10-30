@@ -162,19 +162,26 @@
 
 
 
-    <!-- =========================================
+   <!-- =========================================
          PROTECCIÓN DE SESIÓN Y CARGA DE REPORTES
     ========================================= -->
 
     <script>
-        // 1. Proteger la ruta si no hay sesión iniciada
-        if (sessionStorage.getItem("sesionIniciada") !== "true") {
+        // Verificar si el usuario ha iniciado sesión consultando el localStorage
+        let usuarioLogueado = null;
+        try {
+            usuarioLogueado = JSON.parse(localStorage.getItem("usuario"));
+        } catch (e) {
+            console.error("Error al leer la sesión", e);
+        }
+
+        if (!usuarioLogueado || !usuarioLogueado.id) {
+            alert("Debes iniciar sesión para ver tus reportes.");
             window.location.href = "login.html";
         }
     </script>
 
     <script src="js/detalles.js"></script>
-
 </body>
 
 </html>
