@@ -85,15 +85,25 @@ formulario.addEventListener("submit", async function (event) {
             throw new Error(datos.error || "Credenciales incorrectas.");
         }
 
-        // Guardamos la sesión y todos los datos completos del usuario para el perfil y las vistas
+        // =========================================================================
+        // GUARDAR SESIÓN CORRECTAMENTE EN LOCALSTORAGE (COMPATIBLE CON TODO EL PROYECTO)
+        // =========================================================================
+        
+        // 1. Guardar el objeto completo del usuario (Esto es lo que lee Detalles.js)
+        localStorage.setItem("usuario", JSON.stringify(datos.usuario));
+
+        // 2. Mantener también las variables independientes por si otras vistas las usan
+        localStorage.setItem("sesionIniciada", "true");
+        localStorage.setItem("idUsuario", datos.usuario.id);
+        localStorage.setItem("nombreUsuario", datos.usuario.nombres);
+        localStorage.setItem("nombres", datos.usuario.nombres);
+        localStorage.setItem("apellidoPaterno", datos.usuario.apellido_paterno);
+        localStorage.setItem("apellidoMaterno", datos.usuario.apellido_materno);
+        localStorage.setItem("correo", datos.usuario.correo);
+        localStorage.setItem("telefono", datos.usuario.telefono);
+
+        // Opcional: duplicar también en sessionStorage por compatibilidad interna
         sessionStorage.setItem("sesionIniciada", "true");
-        sessionStorage.setItem("idUsuario", datos.usuario.id);
-        sessionStorage.setItem("nombreUsuario", datos.usuario.nombres); // Mantiene compatibilidad con el saludo del index
-        sessionStorage.setItem("nombres", datos.usuario.nombres);
-        sessionStorage.setItem("apellidoPaterno", datos.usuario.apellido_paterno);
-        sessionStorage.setItem("apellidoMaterno", datos.usuario.apellido_materno);
-        sessionStorage.setItem("correo", datos.usuario.correo);
-        sessionStorage.setItem("telefono", datos.usuario.telefono);
 
         mostrarMensaje("¡Inicio de sesión exitoso! Redirigiendo...", true);
 
