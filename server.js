@@ -169,7 +169,7 @@ app.put('/api/actualizar-contrasena', async (req, res) => {
 // ==========================================
 // API: OBTENER REPORTES DE UN USUARIO (NUEVO)
 // ==========================================
-app.get('/api/reportes/usuario/:id_usuario', async (req, res) => {
+app.get('/api/reporte/usuario/:id_usuario', async (req, res) => {
     const { id_usuario } = req.params;
     try {
         const query = `
