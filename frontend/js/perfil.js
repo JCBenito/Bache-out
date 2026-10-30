@@ -98,8 +98,8 @@ btnCancelar.addEventListener("click", function () {
 });
 
 
-// Guardar cambios del perfil
-btnGuardar.addEventListener("click", function () {
+// Guardar cambios del perfil en la Base de Datos
+btnGuardar.addEventListener("click", async function () {
     const correoNuevo = correo.value.trim();
     const telefonoNuevo = telefono.value.replace(/\s/g, "");
 
@@ -110,7 +110,6 @@ btnGuardar.addEventListener("click", function () {
     }
 
     const formatoCorreo = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
     if (!formatoCorreo.test(correoNuevo)) {
         alert("Ingresa un correo electrónico válido.");
         correo.focus();
@@ -123,23 +122,49 @@ btnGuardar.addEventListener("click", function () {
         return;
     }
 
-    correo.value = correoNuevo;
-    telefono.value = telefonoNuevo;
+    const idUsuario = sessionStorage.getItem("idUsuario");
 
-    correo.disabled = true;
-    telefono.disabled = true;
+    try {
+        // Petición al backend para actualizar permanentemente en PostgreSQL
+        const respuesta = await fetch('/api/actualizar-perfil', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                id_usuario: idUsuario,
+                correo: correoNuevo,
+                telefono: telefonoNuevo
+            })
+        });
 
-    accionesEdicion.style.display = "none";
-    btnEditar.style.display = "inline-block";
+        const datos = await respuesta.json();
 
-    correoOriginal = correo.value;
-    telefonoOriginal = telefono.value;
+        if (!respuesta.ok) {
+            throw new Error(datos.error || "No se pudo actualizar el perfil.");
+        }
 
-    // Actualizar también en el sessionStorage por si navega a otra vista
-    sessionStorage.setItem("correo", correoNuevo);
-    sessionStorage.setItem("telefono", telefonoNuevo);
+        // Si el servidor responde con éxito, actualizamos la interfaz y el sessionStorage
+        correo.value = correoNuevo;
+        telefono.value = telefonoNuevo;
 
-    alert("Los datos se actualizaron correctamente.");
+        correo.disabled = true;
+        telefono.disabled = true;
+
+        accionesEdicion.style.display = "none";
+        btnEditar.style.display = "inline-block";
+
+        correoOriginal = correo.value;
+        telefonoOriginal = telefono.value;
+
+        sessionStorage.setItem("correo", correoNuevo);
+        sessionStorage.setItem("telefono", telefonoNuevo);
+
+        alert("¡Los datos se actualizaron correctamente en la base de datos!");
+
+    } catch (error) {
+        alert(error.message || "Error al conectar con el servidor.");
+    }
 });
 
 
