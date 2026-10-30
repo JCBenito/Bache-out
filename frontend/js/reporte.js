@@ -27,6 +27,24 @@ let longitudGlobal = null;
 let fotografiasSeleccionadas = [];
 
 /* =========================================
+   VALIDAR ZONA DE COBERTURA (ACAPULCO)
+   ========================================= */
+function esZonaValida(lat, lon) {
+    /* 
+      Límites geográficos aproximados que cubren el área urbana central de Acapulco 
+      (incluyendo Barrios Históricos, Col. Progreso y Col. La Libertad).
+      Latitudes aprox: 16.8200 a 16.8800
+      Longitudes aprox: -99.9200 a -99.8700
+    */
+    const latMin = 16.8100;
+    const latMax = 16.9000;
+    const lonMin = -99.9500;
+    const lonMax = -99.8300;
+
+    return (lat >= latMin && lat <= latMax && lon >= lonMin && lon <= lonMax);
+}
+
+/* =========================================
    OBTENER UBICACIÓN
    ========================================= */
 
@@ -48,8 +66,20 @@ btnUbicacion.addEventListener("click", function () {
 
     navigator.geolocation.getCurrentPosition(
         function (posicion) {
-            latitudGlobal = posicion.coords.latitude;
-            longitudGlobal = posicion.coords.longitude;
+            const lat = posicion.coords.latitude;
+            const lon = posicion.coords.longitude;
+
+            // Validar si está dentro de las zonas designadas de Acapulco
+            if (!esZonaValida(lat, lon)) {
+                errorUbicacion.textContent = "Estás fuera de la zona de cobertura. El servicio solo está disponible en Barrios Históricos, Progreso y La Libertad (Acapulco).";
+                btnUbicacion.disabled = false;
+                btnUbicacion.textContent = "Obtener ubicación";
+                ubicacionObtenida = false;
+                return;
+            }
+
+            latitudGlobal = lat;
+            longitudGlobal = lon;
 
             ubicacion.value =
                 "Latitud: " +
@@ -220,12 +250,11 @@ formularioReporte.addEventListener("submit", async function (evento) {
     const formData = new FormData();
     formData.append("id_usuario", usuarioLogueado.id);
     formData.append("descripcion", textoDescripcion);
-    formData.append("calle_referencia", "Ubicación GPS por coordenadas"); // Puedes adaptarlo si agregas un input de calle
+    formData.append("calle_referencia", "Ubicación GPS por coordenadas");
     formData.append("latitud", latitudGlobal);
     formData.append("longitud", longitudGlobal);
-    formData.append("id_colonia", 1); // Colonia por defecto o selector si lo tienes
+    formData.append("id_colonia", 1); 
 
-    // Adjuntar la primera fotografía (o puedes ajustar tu backend si deseas recibir el arreglo completo)
     if (fotografiasSeleccionadas.length > 0) {
         formData.append("fotografia", fotografiasSeleccionadas[0]);
     }
