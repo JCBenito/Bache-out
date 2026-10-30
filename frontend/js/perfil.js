@@ -283,10 +283,10 @@ document.querySelectorAll(".campo-contrasena").forEach(function (campo) {
 
 
 /* =========================================
-   VALIDAR CAMBIO DE CONTRASEÑA
+   VALIDAR Y GUARDAR CAMBIO DE CONTRASEÑA
 ========================================= */
 
-btnGuardarContrasena.addEventListener("click", function (evento) {
+btnGuardarContrasena.addEventListener("click", async function (evento) {
     evento.preventDefault();
 
     const actual = contrasenaActual.value;
@@ -331,25 +331,51 @@ btnGuardarContrasena.addEventListener("click", function (evento) {
         return;
     }
 
-    alert("La contraseña se guardó correctamente.");
+    const idUsuario = sessionStorage.getItem("idUsuario");
 
-    contrasenaActual.value = "";
-    nuevaContrasena.value = "";
-    confirmarContrasena.value = "";
+    try {
+        // Petición al backend para actualizar y encriptar la contraseña en PostgreSQL
+        const respuesta = await fetch('/api/actualizar-contrasena', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                id_usuario: idUsuario,
+                contrasenaActual: actual,
+                nuevaContrasena: nueva
+            })
+        });
 
-    mensajeContrasena.textContent = "";
-    mensajeContrasena.className = "mensaje-contrasena";
+        const datos = await respuesta.json();
 
-    formularioContrasena.classList.remove("mostrar");
-    btnMostrarContrasena.textContent = "Cambiar contraseña";
+        if (!respuesta.ok) {
+            throw new Error(datos.error || "No se pudo actualizar la contraseña.");
+        }
 
-    document.querySelectorAll(".campo-contrasena input").forEach(function (input) {
-        input.type = "password";
-    });
+        alert("¡La contraseña se actualizó correctamente en la base de datos!");
 
-    document.querySelectorAll(".btn-mostrar").forEach(function (boton) {
-        boton.textContent = "Mostrar";
-    });
+        contrasenaActual.value = "";
+        nuevaContrasena.value = "";
+        confirmarContrasena.value = "";
+
+        mensajeContrasena.textContent = "";
+        mensajeContrasena.className = "mensaje-contrasena";
+
+        formularioContrasena.classList.remove("mostrar");
+        btnMostrarContrasena.textContent = "Cambiar contraseña";
+
+        document.querySelectorAll(".campo-contrasena input").forEach(function (input) {
+            input.type = "password";
+        });
+
+        document.querySelectorAll(".btn-mostrar").forEach(function (boton) {
+            boton.textContent = "Mostrar";
+        });
+
+    } catch (error) {
+        mostrarMensajeContrasena(error.message || "Error al conectar con el servidor.", "error");
+    }
 });
 
 
