@@ -1,0 +1,117 @@
+
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Bache-Out | Verificación de código</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="css/verificacion_codigo.css">
+</head>
+
+<body>
+
+    <!-- ENCABEZADO -->
+    <header class="barra-principal">
+
+        <div class="marca">
+
+            <img src="Img/Logo.png" alt="Logo de Bache-Out" class="logo">
+
+            <span>Bache-Out</span>
+
+        </div>
+
+    </header>
+
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="pagina-verificacion">
+
+        <section class="tarjeta-verificacion">
+
+            <!-- TÍTULO -->
+            <div class="titulo-verificacion">
+
+                <h1>Verifica tu correo electrónico</h1>
+
+                <p>
+                    Hemos enviado un código de seguridad a tu correo electrónico.
+                    Ingresa los seis dígitos para continuar.
+                </p>
+
+            </div>
+
+
+            <!-- FORMULARIO -->
+            <form id="formularioCodigo">
+
+                <div class="campo">
+
+                    <label for="codigo">
+                        Código de verificación
+                    </label>
+
+                    <input
+                        type="text"
+                        id="codigo"
+                        maxlength="6"
+                        placeholder="000000"
+                        inputmode="numeric"
+                        autocomplete="one-time-code"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- MENSAJE -->
+                <div id="mensaje" class="mensaje"></div>
+
+
+                <!-- BOTÓN -->
+                <button type="submit" class="btn-verificar">
+                    Verificar código
+                </button>
+
+            </form>
+
+
+            <!-- REENVIAR CÓDIGO -->
+            <div class="reenviar">
+
+                <p>
+                    ¿No recibiste el código?
+                    <a href="verificacion_correo.html">
+                        Solicitar uno nuevo
+                    </a>
+                </p>
+
+            </div>
+
+
+            <!-- VOLVER -->
+            <div class="volver-login">
+
+                <a href="login.html">
+                    Volver al inicio de sesión
+                </a>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <script src="js/verificacion_codigo.js"></script>
+
+</body>
+</html>
