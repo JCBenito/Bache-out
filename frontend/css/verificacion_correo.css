@@ -1,7 +1,7 @@
 
-/* =================================
+/* ================================
    CONFIGURACIÓN GENERAL
-================================= */
+================================ */
 
 * {
     margin: 0;
@@ -9,8 +9,9 @@
     box-sizing: border-box;
 }
 
+
 body {
-    font-family: 'Inter', sans-serif;
+    font-family: Arial, sans-serif;
     background-color: #E9FFFB;
     color: #2C3E50;
     min-height: 100vh;
@@ -19,9 +20,9 @@ body {
 }
 
 
-/* =================================
+/* ================================
    ENCABEZADO
-================================= */
+================================ */
 
 .barra-principal {
     width: 100%;
@@ -30,9 +31,15 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    padding: 0 55px;
     border-bottom: 1px solid #DDEBE8;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
+
+
+/* ================================
+   MARCA
+================================ */
 
 .marca {
     display: flex;
@@ -44,6 +51,7 @@ body {
     color: #173F4A;
 }
 
+
 .logo {
     width: 45px;
     height: 45px;
@@ -51,42 +59,42 @@ body {
 }
 
 
-/* =================================
-   CONTENIDO PRINCIPAL
-================================= */
+/* ================================
+   CONTENEDOR PRINCIPAL
+================================ */
 
 .pagina-verificacion {
     flex: 1;
     display: flex;
     justify-content: center;
-    align-items: center;
-    padding: 45px 20px;
+    align-items: flex-start;
+    padding: 45px 20px 60px;
 }
 
 
-/* =================================
+/* ================================
    TARJETA
-================================= */
+================================ */
 
 .tarjeta-verificacion {
     width: 100%;
-    max-width: 490px;
+    max-width: 480px;
     background-color: white;
-    padding: 38px 42px;
-    border-radius: 16px;
+    padding: 35px 40px;
+    border-radius: 15px;
     box-shadow: 0 8px 25px rgba(23, 63, 74, 0.10);
 }
 
 
-
-/* =================================
+/* ================================
    TÍTULO
-================================= */
+================================ */
 
 .titulo-verificacion {
     text-align: center;
     margin-bottom: 25px;
 }
+
 
 .etiqueta {
     display: inline-block;
@@ -97,24 +105,26 @@ body {
     margin-bottom: 12px;
 }
 
+
 .titulo-verificacion h1 {
     font-family: 'Montserrat', sans-serif;
-    font-size: 25px;
+    font-size: 27px;
     font-weight: 800;
     color: #173F4A;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
 }
+
 
 .titulo-verificacion p {
     font-size: 14px;
-    line-height: 1.6;
     color: #6C858B;
+    line-height: 1.6;
 }
 
 
-/* =================================
+/* ================================
    AVISO DE SEGURIDAD
-================================= */
+================================ */
 
 .aviso-seguridad {
     display: flex;
@@ -122,10 +132,11 @@ body {
     gap: 12px;
     padding: 15px;
     margin-bottom: 25px;
-    background-color: #FFF8E8;
-    border: 1px solid #F0DDAF;
+    background-color: #f0eae9;
+    border: 1px solid #bb2605;
     border-radius: 9px;
 }
+
 
 .aviso-icono {
     width: 22px;
@@ -134,66 +145,73 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: #E6B84A;
+    background-color: #c23b05;
     color: white;
     border-radius: 50%;
     font-weight: 700;
     font-size: 13px;
 }
 
-.aviso-seguridad strong {
+
+.aviso-contenido strong {
     display: block;
     color: #765B1C;
     font-size: 13px;
     margin-bottom: 5px;
 }
 
-.aviso-seguridad p {
+
+.aviso-contenido p {
     color: #806D43;
     font-size: 12px;
     line-height: 1.5;
 }
 
 
-/* =================================
-   FORMULARIO
-================================= */
+/* ================================
+   CAMPO DE CORREO
+================================ */
 
 .campo {
     width: 100%;
     margin-bottom: 20px;
 }
 
+
 .campo label {
     display: block;
-    margin-bottom: 8px;
-    color: #173F4A;
+    margin-bottom: 7px;
     font-size: 14px;
     font-weight: 600;
+    color: #173F4A;
 }
+
 
 .campo input {
     width: 100%;
-    height: 49px;
+    height: 48px;
     padding: 0 14px;
     border: 1px solid #C9D9D7;
     border-radius: 8px;
     outline: none;
-    background-color: white;
-    color: #173F4A;
     font-family: 'Inter', sans-serif;
     font-size: 14px;
+    color: #173F4A;
+    background-color: white;
     transition: 0.3s;
 }
+
 
 .campo input:focus {
     border-color: #16818F;
     box-shadow: 0 0 0 3px rgba(22, 129, 143, 0.10);
 }
 
+
 .campo input::placeholder {
     color: #9AAEB2;
 }
+
 
 .campo small {
     display: block;
@@ -204,20 +222,21 @@ body {
 }
 
 
-/* =================================
+/* ================================
    MENSAJES
-================================= */
+================================ */
 
 .mensaje {
     display: none;
     width: 100%;
-    padding: 11px;
-    margin-bottom: 16px;
+    margin-bottom: 18px;
+    padding: 12px;
     border-radius: 8px;
     text-align: center;
     font-size: 13px;
     font-weight: 600;
 }
+
 
 .mensaje.error {
     display: block;
@@ -225,6 +244,7 @@ body {
     border: 1px solid #E5A5A5;
     color: #C0392B;
 }
+
 
 .mensaje.exito {
     display: block;
@@ -234,13 +254,13 @@ body {
 }
 
 
-/* =================================
-   BOTÓN
-================================= */
+/* ================================
+   BOTÓN ENVIAR CÓDIGO
+================================ */
 
 .btn-enviar {
     width: 100%;
-    height: 49px;
+    height: 48px;
     border: none;
     border-radius: 8px;
     background-color: #16818F;
@@ -252,46 +272,47 @@ body {
     transition: 0.3s;
 }
 
+
 .btn-enviar:hover {
     background-color: #0E626D;
     transform: translateY(-1px);
 }
+
 
 .btn-enviar:active {
     transform: translateY(0);
 }
 
 
-/* =================================
-   REGRESAR
-================================= */
+/* ================================
+   REGRESAR AL LOGIN
+================================ */
 
 .regresar {
     text-align: center;
     margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid #E3ECEA;
 }
+
 
 .regresar a {
     color: #16818F;
+    text-decoration: none;
     font-size: 13px;
     font-weight: 600;
-    text-decoration: none;
 }
+
 
 .regresar a:hover {
     color: #0E626D;
     text-decoration: underline;
 }
 
-.regresar span {
-    margin-right: 5px;
-    font-size: 16px;
-}
 
-
-/* =================================
+/* ================================
    PIE DE PÁGINA
-================================= */
+================================ */
 
 .pie-pagina {
     padding: 18px;
@@ -301,48 +322,61 @@ body {
 }
 
 
-/* =================================
+/* ================================
    RESPONSIVE
-================================= */
+================================ */
 
 @media (max-width: 600px) {
 
     .barra-principal {
         height: 68px;
+        padding: 0 18px;
     }
+
 
     .marca {
-        font-size: 20px;
+        font-size: 18px;
     }
+
 
     .logo {
-        width: 39px;
-        height: 39px;
+        width: 38px;
+        height: 38px;
     }
 
+
     .pagina-verificacion {
-        padding: 30px 15px;
+        padding: 35px 15px 40px;
     }
+
 
     .tarjeta-verificacion {
         padding: 30px 22px;
         border-radius: 12px;
     }
 
+
     .titulo-verificacion h1 {
-        font-size: 22px;
+        font-size: 23px;
     }
 
 }
 
+
 @media (max-width: 400px) {
+
+    .marca span {
+        display: none;
+    }
+
 
     .tarjeta-verificacion {
         padding: 25px 18px;
     }
 
+
     .titulo-verificacion h1 {
-        font-size: 20px;
+        font-size: 21px;
     }
 
 }
