@@ -27,21 +27,31 @@ let longitudGlobal = null;
 let fotografiasSeleccionadas = [];
 
 /* =========================================
-   VALIDAR ZONA DE COBERTURA (ACAPULCO)
+   VALIDAR ZONAS DESIGNADAS (ACAPULCO)
+   Delimitación estricta para: Barrios Históricos, Progreso y La Libertad
    ========================================= */
 function esZonaValida(lat, lon) {
-    /* 
-      Límites geográficos aproximados que cubren el área urbana central de Acapulco 
-      (incluyendo Barrios Históricos, Col. Progreso y Col. La Libertad).
-      Latitudes aprox: 16.8200 a 16.8800
-      Longitudes aprox: -99.9200 a -99.8700
-    */
-    const latMin = 16.8100;
-    const latMax = 16.9000;
-    const lonMin = -99.9500;
-    const lonMax = -99.8300;
+    
+    // 1. Zona: Barrios Históricos
+    const enBarriosHistoricos = (
+        lat >= 16.8450 && lat <= 16.8650 && 
+        lon >= -99.9200 && lon <= -99.9000
+    );
 
-    return (lat >= latMin && lat <= latMax && lon >= lonMin && lon <= lonMax);
+    // 2. Zona: Colonia Progreso
+    const enProgreso = (
+        lat >= 16.8550 && lat <= 16.8800 && 
+        lon >= -99.9050 && lon <= -99.8850
+    );
+
+    // 3. Zona: Colonia La Libertad
+    const enLaLibertad = (
+        lat >= 16.8600 && lat <= 16.8850 && 
+        lon >= -99.8900 && lon <= -99.8650
+    );
+
+    // Retorna true solo si está dentro de alguna de estas tres zonas exactas
+    return enBarriosHistoricos || enProgreso || enLaLibertad;
 }
 
 /* =========================================
@@ -69,7 +79,7 @@ btnUbicacion.addEventListener("click", function () {
             const lat = posicion.coords.latitude;
             const lon = posicion.coords.longitude;
 
-            // Validar si está dentro de las zonas designadas de Acapulco
+            // Validar si está dentro de los polígonos permitidos
             if (!esZonaValida(lat, lon)) {
                 errorUbicacion.textContent = "Estás fuera de la zona de cobertura. El servicio solo está disponible en Barrios Históricos, Progreso y La Libertad (Acapulco).";
                 btnUbicacion.disabled = false;
