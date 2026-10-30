@@ -74,7 +74,7 @@ app.post('/api/login', async (req, res) => {
             return res.status(400).json({ error: 'Contraseña incorrecta.' });
         }
 
-        // Enviamos todos los datos completos necesarios para el perfil y la app
+        // Enviamos todos los datos completos necesarios para el perfil y la app (incluyendo el id)
         res.json({
             mensaje: 'Inicio de sesión exitoso',
             usuario: { 
@@ -89,6 +89,38 @@ app.post('/api/login', async (req, res) => {
     } catch (error) {
         console.error('Error en login:', error);
         res.status(500).json({ error: 'Error al iniciar sesión.' });
+    }
+});
+
+// API: ACTUALIZAR PERFIL DE USUARIO
+app.put('/api/actualizar-perfil', async (req, res) => {
+    let { id_usuario, correo, telefono } = req.body;
+
+    // Normalizamos el correo a minúsculas y limpiamos el teléfono
+    const correoLimpio = correo ? correo.toLowerCase().trim() : '';
+    const telefonoLimpio = telefono ? telefono.trim() : '';
+
+    try {
+        // Validamos que el nuevo correo o teléfono no pertenezcan ya a otro usuario diferente
+        const existe = await pool.query(
+            'SELECT id_usuario FROM public.usuarios WHERE (correo = $1 OR telefono = $2) AND id_usuario != $3',
+            [correoLimpio, telefonoLimpio, id_usuario]
+        );
+
+        if (existe.rows.length > 0) {
+            return res.status(400).json({ error: 'El correo o número telefónico ya está en uso por otra cuenta.' });
+        }
+
+        // Ejecutamos la actualización en la base de datos PostgreSQL
+        await pool.query(
+            'UPDATE public.usuarios SET correo = $1, telefono = $2 WHERE id_usuario = $3',
+            [correoLimpio, telefonoLimpio, id_usuario]
+        );
+
+        res.json({ mensaje: 'Perfil actualizado correctamente en la base de datos.' });
+    } catch (error) {
+        console.error('Error al actualizar perfil:', error);
+        res.status(500).json({ error: 'Error al actualizar el perfil en la base de datos.' });
     }
 });
 
