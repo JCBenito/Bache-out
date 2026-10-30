@@ -85,9 +85,14 @@ formulario.addEventListener("submit", async function (event) {
             throw new Error(datos.error || "Credenciales incorrectas.");
         }
 
-        // 👉 Guardamos la sesión con la clave correcta que piden las páginas protegidas
+        // Guardamos la sesión y todos los datos completos del usuario para el perfil y las vistas
         sessionStorage.setItem("sesionIniciada", "true");
-        sessionStorage.setItem("nombreUsuario", datos.usuario.nombre);
+        sessionStorage.setItem("nombreUsuario", datos.usuario.nombres); // Mantiene compatibilidad con el saludo del index
+        sessionStorage.setItem("nombres", datos.usuario.nombres);
+        sessionStorage.setItem("apellidoPaterno", datos.usuario.apellido_paterno);
+        sessionStorage.setItem("apellidoMaterno", datos.usuario.apellido_materno);
+        sessionStorage.setItem("correo", datos.usuario.correo);
+        sessionStorage.setItem("telefono", datos.usuario.telefono);
 
         mostrarMensaje("¡Inicio de sesión exitoso! Redirigiendo...", true);
 
