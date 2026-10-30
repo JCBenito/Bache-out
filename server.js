@@ -96,6 +96,8 @@ app.post('/api/login', async (req, res) => {
 app.put('/api/actualizar-perfil', async (req, res) => {
     let { id_usuario, correo, telefono } = req.body;
 
+    console.log("ID recibido en el servidor:", id_usuario);
+
     // Normalizamos el correo a minúsculas y limpiamos el teléfono
     const correoLimpio = correo ? correo.toLowerCase().trim() : '';
     const telefonoLimpio = telefono ? telefono.trim() : '';
