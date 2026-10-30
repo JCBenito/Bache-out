@@ -87,6 +87,7 @@ formulario.addEventListener("submit", async function (event) {
 
         // Guardamos la sesión y todos los datos completos del usuario para el perfil y las vistas
         sessionStorage.setItem("sesionIniciada", "true");
+        sessionStorage.setItem("idUsuario", datos.usuario.id);
         sessionStorage.setItem("nombreUsuario", datos.usuario.nombres); // Mantiene compatibilidad con el saludo del index
         sessionStorage.setItem("nombres", datos.usuario.nombres);
         sessionStorage.setItem("apellidoPaterno", datos.usuario.apellido_paterno);
