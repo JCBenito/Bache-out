@@ -166,6 +166,26 @@ app.put('/api/actualizar-contrasena', async (req, res) => {
     }
 });
 
+// ==========================================
+// API: OBTENER REPORTES DE UN USUARIO (NUEVO)
+// ==========================================
+app.get('/api/reportes/usuario/:id_usuario', async (req, res) => {
+    const { id_usuario } = req.params;
+    try {
+        const query = `
+            SELECT id_reporte, descripcion, calle_referencia, fecha_reporte, estado, fotografia_url 
+            FROM public.reportes 
+            WHERE id_usuario = $1 
+            ORDER BY fecha_reporte DESC;
+        `;
+        const resultado = await pool.query(query, [id_usuario]);
+        res.json(resultado.rows);
+    } catch (error) {
+        console.error("Error al obtener los reportes:", error);
+        res.status(500).json({ error: "Error interno del servidor al consultar los reportes." });
+    }
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Servidor escuchando en el puerto ${PORT}`);
