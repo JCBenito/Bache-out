@@ -95,26 +95,27 @@
     </main>
 
     <!-- SCRIPT PARA VALIDAR SESIÓN Y MOSTRAR EL NOMBRE -->
-    <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            // 1. Verificamos que el usuario haya iniciado sesión
-            const sesionIniciada = sessionStorage.getItem("sesionIniciada");
-            if (!sesionIniciada || sesionIniciada !== "true") {
-                window.location.href = "login.html"; // Si no hay sesión, lo regresa al login
-                return;
-            }
+   <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        try {
+            // Intentar leer el objeto usuario del localStorage
+            const sesionCruda = localStorage.getItem("usuario");
+            if (sesionCruda) {
+                const usuario = JSON.parse(sesionCruda);
+                const nombreReal = usuario.nombres || localStorage.getItem("nombreUsuario");
 
-            // 2. Obtenemos el nombre guardado al hacer login
-            const nombreUsuario = sessionStorage.getItem("nombreUsuario");
-            const spanNombre = document.getElementById("nombreUsuarioSaludo");
-
-            // 3. Reemplazamos el texto "usuario!" por el nombre real con la primera letra en mayúscula
-            if (nombreUsuario && spanNombre) {
-                const nombreFormateado = nombreUsuario.charAt(0).toUpperCase() + nombreUsuario.slice(1);
-                spanNombre.textContent = `${nombreFormateado}!`;
+                // Buscar el elemento en la página donde va el nombre de bienvenida
+                const spanNombre = document.getElementById("nombreUsuario") || document.getElementById("saludoUsuario");
+                
+                if (spanNombre && nombreReal) {
+                    spanNombre.textContent = nombreReal;
+                }
             }
-        });
-    </script>
+        } catch (e) {
+            console.error("Error al cargar el nombre de usuario:", e);
+        }
+    });
+</script>
 
 </body>
 
