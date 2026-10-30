@@ -78,27 +78,6 @@ body {
 }
 
 
-/* =================================
-   ICONO DE SEGURIDAD
-================================= */
-
-.icono-seguridad {
-    width: 68px;
-    height: 68px;
-    margin: 0 auto 22px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: #E9FFFB;
-    border-radius: 50%;
-    color: #16818F;
-}
-
-.icono-seguridad svg {
-    width: 35px;
-    height: 35px;
-}
-
 
 /* =================================
    TÍTULO
