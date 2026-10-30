@@ -126,6 +126,46 @@ app.put('/api/actualizar-perfil', async (req, res) => {
     }
 });
 
+// API: CAMBIAR CONTRASEÑA
+app.put('/api/actualizar-contrasena', async (req, res) => {
+    let { id_usuario, contrasenaActual, nuevaContrasena } = req.body;
+
+    try {
+        // 1. Buscamos al usuario en la base de datos por su ID
+        const resultado = await pool.query(
+            'SELECT * FROM public.usuarios WHERE id_usuario = $1',
+            [id_usuario]
+        );
+
+        if (resultado.rows.length === 0) {
+            return res.status(400).json({ error: 'Usuario no encontrado.' });
+        }
+
+        const usuarioBD = resultado.rows[0];
+
+        // 2. Comparamos la contraseña actual ingresada con la almacenada (encriptada)
+        const esValida = await bcrypt.compare(contrasenaActual, usuarioBD.contrasena);
+        if (!esValida) {
+            return res.status(400).json({ error: 'La contraseña actual es incorrecta.' });
+        }
+
+        // 3. Encriptamos la nueva contraseña utilizando bcrypt
+        const salt = await bcrypt.genSalt(10);
+        const nuevaContrasenaHash = await bcrypt.hash(nuevaContrasena, salt);
+
+        // 4. Actualizamos el campo de la contraseña en PostgreSQL
+        await pool.query(
+            'UPDATE public.usuarios SET contrasena = $1 WHERE id_usuario = $2',
+            [nuevaContrasenaHash, id_usuario]
+        );
+
+        res.json({ mensaje: 'Contraseña actualizada correctamente en la base de datos.' });
+    } catch (error) {
+        console.error('Error al cambiar contraseña:', error);
+        res.status(500).json({ error: 'Error al actualizar la contraseña en el servidor.' });
+    }
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Servidor escuchando en el puerto ${PORT}`);
