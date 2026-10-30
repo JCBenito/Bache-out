@@ -174,7 +174,7 @@ app.get('/api/reportes/usuario/:id_usuario', async (req, res) => {
     try {
         const query = `
             SELECT id_reporte, descripcion, calle_referencia, fecha_reporte, estado, fotografia_url 
-            FROM public.reportes 
+            FROM public.reporte
             WHERE id_usuario = $1 
             ORDER BY fecha_reporte DESC;
         `;
