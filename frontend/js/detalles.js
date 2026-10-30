@@ -4,14 +4,7 @@
 
 document.addEventListener("DOMContentLoaded", async function () {
 
-    const contenedorReportes = document.getElementById("contenedorReportes");
-    const filtroEstado = document.getElementById("filtroEstado");
-    const totalReportes = document.getElementById("totalReportes");
-    const totalPendientes = document.getElementById("totalPendientes");
-    const totalReparando = document.getElementById("totalReparando");
-    const totalResueltos = document.getElementById("totalResueltos");
-
-    // 1. Verificar sesión activa y obtener el ID del usuario
+    // 1. Verificar sesión activa y obtener el ID del usuario de forma unificada
     let usuarioLogueado = null;
     try {
         usuarioLogueado = JSON.parse(localStorage.getItem("usuario"));
@@ -24,6 +17,13 @@ document.addEventListener("DOMContentLoaded", async function () {
         window.location.href = "login.html";
         return;
     }
+
+    const contenedorReportes = document.getElementById("contenedorReportes");
+    const filtroEstado = document.getElementById("filtroEstado");
+    const totalReportes = document.getElementById("totalReportes");
+    const totalPendientes = document.getElementById("totalPendientes");
+    const totalReparando = document.getElementById("totalReparando");
+    const totalResueltos = document.getElementById("totalResueltos");
 
     let reportesGlobales = [];
 
