@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const path = require('path');
+const multer = require('multer'); // Importante para manejar la subida de imágenes
 const pool = require('./db');
 require('dotenv').config();
 
@@ -9,15 +10,20 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Configuración de multer para guardar las fotos temporalmente (o ajústalo a tu lógica de almacenamiento)
+const upload = multer({ dest: 'frontend/uploads/' });
 
 // Indicamos que el archivo por defecto al entrar a la carpeta frontend sea nosotros.html
 app.use(express.static('frontend', { index: 'nosotros.html' }));
+// Si guardas imágenes en una carpeta pública, asegúrate de servirla:
+app.use('/uploads', express.static(path.join(__dirname, 'frontend/uploads')));
 
 // API: REGISTRO DE USUARIO
 app.post('/api/registro', async (req, res) => {
     let { nombres, apellido_paterno, apellido_materno, telefono, correo, contrasena } = req.body;
 
-    // Convertimos textos a minúsculas y eliminamos espacios extra
     nombres = nombres ? nombres.toLowerCase().trim() : '';
     apellido_paterno = apellido_paterno ? apellido_paterno.toLowerCase().trim() : '';
     apellido_materno = apellido_materno ? apellido_materno.toLowerCase().trim() : '';
@@ -34,7 +40,7 @@ app.post('/api/registro', async (req, res) => {
         }
 
         const salt = await bcrypt.genSalt(10);
-        const contrasenaHash = await bcrypt.hash(contrasena, salt); // Respeta mayúsculas/minúsculas y símbolos de la contraseña
+        const contrasenaHash = await bcrypt.hash(contrasena, salt);
 
         const resultado = await pool.query(
             `INSERT INTO public.usuarios (id_rol, nombres, apellido_paterno, apellido_materno, telefono, correo, contrasena)
@@ -52,8 +58,6 @@ app.post('/api/registro', async (req, res) => {
 // API: INICIO DE SESIÓN
 app.post('/api/login', async (req, res) => {
     let { usuario, contrasena } = req.body;
-
-    // Normalizamos el usuario/correo ingresado a minúsculas para que coincida con la base de datos
     const usuarioLimpio = usuario ? usuario.toLowerCase().trim() : '';
 
     try {
@@ -68,13 +72,11 @@ app.post('/api/login', async (req, res) => {
 
         const usuarioBD = resultado.rows[0];
 
-        // Validamos la contraseña respetando estrictamente mayúsculas, minúsculas y símbolos
         const esValida = await bcrypt.compare(contrasena, usuarioBD.contrasena);
         if (!esValida) {
             return res.status(400).json({ error: 'Contraseña incorrecta.' });
         }
 
-        // Enviamos todos los datos completos necesarios para el perfil y la app (incluyendo el id)
         res.json({
             mensaje: 'Inicio de sesión exitoso',
             usuario: { 
@@ -95,15 +97,10 @@ app.post('/api/login', async (req, res) => {
 // API: ACTUALIZAR PERFIL DE USUARIO
 app.put('/api/actualizar-perfil', async (req, res) => {
     let { id_usuario, correo, telefono } = req.body;
-
-    console.log("ID recibido en el servidor:", id_usuario);
-
-    // Normalizamos el correo a minúsculas y limpiamos el teléfono
     const correoLimpio = correo ? correo.toLowerCase().trim() : '';
     const telefonoLimpio = telefono ? telefono.trim() : '';
 
     try {
-        // Validamos que el nuevo correo o teléfono no pertenezcan ya a otro usuario diferente
         const existe = await pool.query(
             'SELECT id_usuario FROM public.usuarios WHERE (correo = $1 OR telefono = $2) AND id_usuario != $3',
             [correoLimpio, telefonoLimpio, id_usuario]
@@ -113,7 +110,6 @@ app.put('/api/actualizar-perfil', async (req, res) => {
             return res.status(400).json({ error: 'El correo o número telefónico ya está en uso por otra cuenta.' });
         }
 
-        // Ejecutamos la actualización en la base de datos PostgreSQL
         await pool.query(
             'UPDATE public.usuarios SET correo = $1, telefono = $2 WHERE id_usuario = $3',
             [correoLimpio, telefonoLimpio, id_usuario]
@@ -131,7 +127,6 @@ app.put('/api/actualizar-contrasena', async (req, res) => {
     let { id_usuario, contrasenaActual, nuevaContrasena } = req.body;
 
     try {
-        // 1. Buscamos al usuario en la base de datos por su ID
         const resultado = await pool.query(
             'SELECT * FROM public.usuarios WHERE id_usuario = $1',
             [id_usuario]
@@ -143,17 +138,14 @@ app.put('/api/actualizar-contrasena', async (req, res) => {
 
         const usuarioBD = resultado.rows[0];
 
-        // 2. Comparamos la contraseña actual ingresada con la almacenada (encriptada)
         const esValida = await bcrypt.compare(contrasenaActual, usuarioBD.contrasena);
         if (!esValida) {
             return res.status(400).json({ error: 'La contraseña actual es incorrecta.' });
         }
 
-        // 3. Encriptamos la nueva contraseña utilizando bcrypt
         const salt = await bcrypt.genSalt(10);
         const nuevaContrasenaHash = await bcrypt.hash(nuevaContrasena, salt);
 
-        // 4. Actualizamos el campo de la contraseña en PostgreSQL
         await pool.query(
             'UPDATE public.usuarios SET contrasena = $1 WHERE id_usuario = $2',
             [nuevaContrasenaHash, id_usuario]
@@ -167,16 +159,53 @@ app.put('/api/actualizar-contrasena', async (req, res) => {
 });
 
 // ==========================================
-// API: OBTENER REPORTES DE UN USUARIO (NUEVO)
+// API: CREAR UN NUEVO REPORTE (NUEVO / FALTANTE)
 // ==========================================
-app.get('/api/reporte/usuario/:id_usuario', async (req, res) => {
+app.post('/api/reportes', upload.single('fotografia'), async (req, res) => {
+    const { id_usuario, id_estado, descripcion, calle_referencia, latitud, longitud, id_colonia } = req.body;
+    const fotografiaUrl = req.file ? `/uploads/${req.file.filename}` : null;
+
+    try {
+        const query = `
+            INSERT INTO public.reporte 
+            (id_usuario, id_estado, id_colonia, descripcion, calle_referencia, latitud, longitud, fotografia_url)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+            RETURNING id_reporte;
+        `;
+        const values = [
+            id_usuario, 
+            id_estado || 1, 
+            id_colonia || 1, 
+            descripcion, 
+            calle_referencia || 'Ubicación GPS', 
+            latitud, 
+            longitud, 
+            fotografiaUrl
+        ];
+
+        const resultado = await pool.query(query, values);
+        res.status(201).json({ 
+            mensaje: 'Reporte creado con éxito', 
+            id_reporte: resultado.rows[0].id_reporte 
+        });
+    } catch (error) {
+        console.error("Error al crear el reporte:", error);
+        res.status(500).json({ error: "Error interno del servidor al registrar el reporte." });
+    }
+});
+
+// ==========================================
+// API: OBTENER REPORTES DE UN USUARIO (CORREGIDO EN PLURAL)
+// ==========================================
+app.route('/api/reportes/usuario/:id_usuario')
+.get(async (req, res) => {
     const { id_usuario } = req.params;
     try {
         const query = `
-            SELECT id_reporte, descripcion, calle_referencia, fecha_reporte, estado, fotografia_url 
+            SELECT id_reporte, descripcion, calle_referencia, fecha_creacion AS fecha_reporte, id_estado, fotografia_url 
             FROM public.reporte
             WHERE id_usuario = $1 
-            ORDER BY fecha_reporte DESC;
+            ORDER BY fecha_creacion DESC;
         `;
         const resultado = await pool.query(query, [id_usuario]);
         res.json(resultado.rows);
