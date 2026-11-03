@@ -7,7 +7,11 @@ document.addEventListener("DOMContentLoaded", async function () {
     // 1. Verificar sesión activa y obtener el ID del usuario de forma unificada
     let usuarioLogueado = null;
     try {
-        usuarioLogueado = JSON.parse(localStorage.getItem("usuario"));
+        const sesionCruda = localStorage.getItem("usuario");
+        if (sesionCruda) {
+            const parsed = JSON.parse(sesionCruda);
+            usuarioLogueado = parsed.usuario || parsed;
+        }
     } catch (e) {
         console.error("Error al leer la sesión", e);
     }
@@ -58,7 +62,6 @@ document.addEventListener("DOMContentLoaded", async function () {
         }
 
         lista.forEach(reporte => {
-            // Normalizar estado (por defecto 'pendiente' si viene vacío o nulo)
             const estadoRaw = (reporte.estado || 'pendiente').toLowerCase();
             let estadoClase = 'pendiente';
             let estadoTexto = 'Pendiente';
@@ -74,7 +77,6 @@ document.addEventListener("DOMContentLoaded", async function () {
                 estadoTexto = 'Cancelado';
             }
 
-            // Formatear fecha
             const fechaObj = new Date(reporte.fecha_reporte);
             const fechaTexto = isNaN(fechaObj.getTime()) 
                 ? 'Fecha reciente' 
@@ -125,7 +127,6 @@ document.addEventListener("DOMContentLoaded", async function () {
                 </div>
             `;
 
-            // Lógica para el botón "Ver detalles" (Desplegar / Ocultar)
             const btnDetalles = articulo.querySelector(".btn-detalles");
             btnDetalles.addEventListener("click", function () {
                 articulo.classList.toggle("abierto");
@@ -223,6 +224,5 @@ document.addEventListener("DOMContentLoaded", async function () {
         });
     }
 
-    // Inicializar la carga de datos al abrir la página
     cargarReportes();
 });
