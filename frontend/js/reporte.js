@@ -50,7 +50,6 @@ function esZonaValida(lat, lon) {
         lon >= -99.8900 && lon <= -99.8650
     );
 
-    // Retorna true solo si está dentro de alguna de estas tres zonas exactas
     return enBarriosHistoricos || enProgreso || enLaLibertad;
 }
 
@@ -242,10 +241,14 @@ formularioReporte.addEventListener("submit", async function (evento) {
         return;
     }
 
-    /* Recuperar datos del usuario autenticado (guardados en localStorage durante el login) */
+    /* Recuperar datos del usuario autenticado */
     let usuarioLogueado = null;
     try {
-        usuarioLogueado = JSON.parse(localStorage.getItem("usuario"));
+        const sesionCruda = localStorage.getItem("usuario");
+        if (sesionCruda) {
+            const parsed = JSON.parse(sesionCruda);
+            usuarioLogueado = parsed.usuario || parsed;
+        }
     } catch (e) {
         console.error("Error al leer la sesión", e);
     }
@@ -259,6 +262,7 @@ formularioReporte.addEventListener("submit", async function (evento) {
     /* Construir FormData para enviar archivos e información al servidor */
     const formData = new FormData();
     formData.append("id_usuario", usuarioLogueado.id);
+    formData.append("id_estado", 1); // 1 = Pendiente por defecto en la BD
     formData.append("descripcion", textoDescripcion);
     formData.append("calle_referencia", "Ubicación GPS por coordenadas");
     formData.append("latitud", latitudGlobal);
@@ -269,8 +273,9 @@ formularioReporte.addEventListener("submit", async function (evento) {
         formData.append("fotografia", fotografiasSeleccionadas[0]);
     }
 
+    const botonEnviar = formularioReporte.querySelector(".btn-enviar");
+
     try {
-        const botonEnviar = formularioReporte.querySelector(".btn-enviar");
         botonEnviar.disabled = true;
         botonEnviar.textContent = "Enviando reporte...";
 
@@ -292,7 +297,6 @@ formularioReporte.addEventListener("submit", async function (evento) {
     } catch (error) {
         console.error("Error de red:", error);
         alert("Ocurrió un error de conexión al intentar enviar el reporte.");
-        const botonEnviar = formularioReporte.querySelector(".btn-enviar");
         botonEnviar.disabled = false;
         botonEnviar.textContent = "Enviar reporte";
     }
