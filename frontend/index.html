@@ -37,7 +37,6 @@
 
                 <h1>
                     ¡Bienvenido,
-                    <!-- Agregamos el id aquí -->
                     <span id="nombreUsuarioSaludo">usuario!</span>
                 </h1>
 
@@ -95,27 +94,25 @@
     </main>
 
     <!-- SCRIPT PARA VALIDAR SESIÓN Y MOSTRAR EL NOMBRE -->
-   <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        try {
-            // Intentar leer el objeto usuario del localStorage
-            const sesionCruda = localStorage.getItem("usuario");
-            if (sesionCruda) {
-                const usuario = JSON.parse(sesionCruda);
-                const nombreReal = usuario.nombres || localStorage.getItem("nombreUsuario");
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            try {
+                const sesionCruda = localStorage.getItem("usuario");
+                if (sesionCruda) {
+                    const usuario = JSON.parse(sesionCruda);
+                    const nombreReal = usuario.nombres || localStorage.getItem("nombreUsuario");
 
-                // Buscar el elemento en la página donde va el nombre de bienvenida
-                const spanNombre = document.getElementById("nombreUsuario") || document.getElementById("saludoUsuario");
-                
-                if (spanNombre && nombreReal) {
-                    spanNombre.textContent = nombreReal;
+                    const spanNombre = document.getElementById("nombreUsuarioSaludo");
+                    
+                    if (spanNombre && nombreReal) {
+                        spanNombre.textContent = nombreReal + "!";
+                    }
                 }
+            } catch (e) {
+                console.error("Error al cargar el nombre de usuario:", e);
             }
-        } catch (e) {
-            console.error("Error al cargar el nombre de usuario:", e);
-        }
-    });
-</script>
+        });
+    </script>
 
 </body>
 
