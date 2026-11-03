@@ -3,19 +3,29 @@
 ========================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
-    // 1. Validar que la sesión esté activa
-    const sesionIniciada = sessionStorage.getItem("sesionIniciada");
-    if (!sesionIniciada || sesionIniciada !== "true") {
+    // 1. Validar que la sesión esté activa en localStorage
+    let usuarioLogueado = null;
+    try {
+        const sesionCruda = localStorage.getItem("usuario");
+        if (sesionCruda) {
+            const parsed = JSON.parse(sesionCruda);
+            usuarioLogueado = parsed.usuario || parsed;
+        }
+    } catch (e) {
+        console.error("Error al leer la sesión", e);
+    }
+
+    if (!usuarioLogueado || !usuarioLogueado.id) {
         window.location.href = "login.html";
         return;
     }
 
-    // 2. Recuperar los datos guardados en el sessionStorage durante el login
-    const nombresValor = sessionStorage.getItem("nombres") || "";
-    const apellidoPaternoValor = sessionStorage.getItem("apellidoPaterno") || "";
-    const apellidoMaternoValor = sessionStorage.getItem("apellidoMaterno") || "";
-    const correoValor = sessionStorage.getItem("correo") || "";
-    const telefonoValor = sessionStorage.getItem("telefono") || "";
+    // 2. Extraer los datos del objeto unificado
+    const nombresValor = usuarioLogueado.nombres || "";
+    const apellidoPaternoValor = usuarioLogueado.apellido_paterno || "";
+    const apellidoMaternoValor = usuarioLogueado.apellido_materno || "";
+    const correoValor = usuarioLogueado.correo || "";
+    const telefonoValor = usuarioLogueado.telefono || "";
 
     // Función para poner la primera letra en mayúscula
     const capitalizar = (texto) => texto ? texto.charAt(0).toUpperCase() + texto.slice(1) : "";
@@ -122,7 +132,23 @@ btnGuardar.addEventListener("click", async function () {
         return;
     }
 
-    const idUsuario = sessionStorage.getItem("idUsuario");
+    // Obtener ID del usuario desde localStorage de forma segura
+    let usuarioLogueado = null;
+    try {
+        const sesionCruda = localStorage.getItem("usuario");
+        if (sesionCruda) {
+            const parsed = JSON.parse(sesionCruda);
+            usuarioLogueado = parsed.usuario || parsed;
+        }
+    } catch (e) {
+        console.error("Error al leer la sesión", e);
+    }
+
+    if (!usuarioLogueado || !usuarioLogueado.id) {
+        alert("No se encontró una sesión activa.");
+        window.location.href = "login.html";
+        return;
+    }
 
     try {
         // Petición al backend para actualizar permanentemente en PostgreSQL
@@ -132,7 +158,7 @@ btnGuardar.addEventListener("click", async function () {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                id_usuario: idUsuario,
+                id_usuario: usuarioLogueado.id,
                 correo: correoNuevo,
                 telefono: telefonoNuevo
             })
@@ -144,7 +170,7 @@ btnGuardar.addEventListener("click", async function () {
             throw new Error(datos.error || "No se pudo actualizar el perfil.");
         }
 
-        // Si el servidor responde con éxito, actualizamos la interfaz y el sessionStorage
+        // Si el servidor responde con éxito, actualizamos la interfaz y el localStorage
         correo.value = correoNuevo;
         telefono.value = telefonoNuevo;
 
@@ -157,8 +183,10 @@ btnGuardar.addEventListener("click", async function () {
         correoOriginal = correo.value;
         telefonoOriginal = telefono.value;
 
-        sessionStorage.setItem("correo", correoNuevo);
-        sessionStorage.setItem("telefono", telefonoNuevo);
+        // Actualizar el objeto en localStorage
+        usuarioLogueado.correo = correoNuevo;
+        usuarioLogueado.telefono = telefonoNuevo;
+        localStorage.setItem("usuario", JSON.stringify(usuarioLogueado));
 
         alert("¡Los datos se actualizaron correctamente en la base de datos!");
 
@@ -178,36 +206,38 @@ const fotoPerfil = document.getElementById("fotoPerfil");
 
 const fotoPredeterminada = "img/perfil-default.png";
 
-
 // Mostrar la foto seleccionada
-inputFoto.addEventListener("change", function () {
-    const archivo = inputFoto.files[0];
+if (inputFoto) {
+    inputFoto.addEventListener("change", function () {
+        const archivo = inputFoto.files[0];
 
-    if (!archivo) {
-        return;
-    }
+        if (!archivo) {
+            return;
+        }
 
-    if (!archivo.type.startsWith("image/")) {
-        alert("Selecciona un archivo de imagen válido.");
-        inputFoto.value = "";
-        return;
-    }
+        if (!archivo.type.startsWith("image/")) {
+            alert("Selecciona un archivo de imagen válido.");
+            inputFoto.value = "";
+            return;
+        }
 
-    const lector = new FileReader();
+        const lector = new FileReader();
 
-    lector.onload = function (evento) {
-        fotoPerfil.src = evento.target.result;
-    };
+        lector.onload = function (evento) {
+            if (fotoPerfil) fotoPerfil.src = evento.target.result;
+        };
 
-    lector.readAsDataURL(archivo);
-});
-
+        lector.readAsDataURL(archivo);
+    });
+}
 
 // Eliminar la foto y restaurar la predeterminada
-btnEliminarFoto.addEventListener("click", function () {
-    fotoPerfil.src = fotoPredeterminada;
-    inputFoto.value = "";
-});
+if (btnEliminarFoto) {
+    btnEliminarFoto.addEventListener("click", function () {
+        if (fotoPerfil) fotoPerfil.src = fotoPredeterminada;
+        if (inputFoto) inputFoto.value = "";
+    });
+}
 
 
 /* =========================================
@@ -223,34 +253,36 @@ const nuevaContrasena = document.getElementById("nuevaContrasena");
 const confirmarContrasena = document.getElementById("confirmarContrasena");
 const mensajeContrasena = document.getElementById("mensajeContrasena");
 
+if (btnMostrarContrasena && formularioContrasena) {
+    btnMostrarContrasena.addEventListener("click", function () {
+        formularioContrasena.classList.toggle("mostrar");
 
-// Abrir o cerrar el formulario
-btnMostrarContrasena.addEventListener("click", function () {
-    formularioContrasena.classList.toggle("mostrar");
+        const formularioVisible = formularioContrasena.classList.contains("mostrar");
 
-    const formularioVisible = formularioContrasena.classList.contains("mostrar");
+        btnMostrarContrasena.textContent = formularioVisible
+            ? "Cancelar"
+            : "Cambiar contraseña";
 
-    btnMostrarContrasena.textContent = formularioVisible
-        ? "Cancelar"
-        : "Cambiar contraseña";
+        if (!formularioVisible) {
+            if (contrasenaActual) contrasenaActual.value = "";
+            if (nuevaContrasena) nuevaContrasena.value = "";
+            if (confirmarContrasena) confirmarContrasena.value = "";
 
-    if (!formularioVisible) {
-        contrasenaActual.value = "";
-        nuevaContrasena.value = "";
-        confirmarContrasena.value = "";
+            if (mensajeContrasena) {
+                mensajeContrasena.textContent = "";
+                mensajeContrasena.className = "mensaje-contrasena";
+            }
 
-        mensajeContrasena.textContent = "";
-        mensajeContrasena.className = "mensaje-contrasena";
+            document.querySelectorAll(".btn-mostrar").forEach(function (boton) {
+                boton.textContent = "Mostrar";
+            });
 
-        document.querySelectorAll(".btn-mostrar").forEach(function (boton) {
-            boton.textContent = "Mostrar";
-        });
-
-        document.querySelectorAll(".campo-contrasena input").forEach(function (input) {
-            input.type = "password";
-        });
-    }
-});
+            document.querySelectorAll(".campo-contrasena input").forEach(function (input) {
+                input.type = "password";
+            });
+        }
+    });
+}
 
 
 /* =========================================
@@ -258,8 +290,10 @@ btnMostrarContrasena.addEventListener("click", function () {
 ========================================= */
 
 function mostrarMensajeContrasena(texto, tipo) {
-    mensajeContrasena.textContent = texto;
-    mensajeContrasena.className = "mensaje-contrasena " + tipo;
+    if (mensajeContrasena) {
+        mensajeContrasena.textContent = texto;
+        mensajeContrasena.className = "mensaje-contrasena " + tipo;
+    }
 }
 
 
@@ -286,97 +320,118 @@ document.querySelectorAll(".campo-contrasena").forEach(function (campo) {
    VALIDAR Y GUARDAR CAMBIO DE CONTRASEÑA
 ========================================= */
 
-btnGuardarContrasena.addEventListener("click", async function (evento) {
-    evento.preventDefault();
+if (btnGuardarContrasena) {
+    btnGuardarContrasena.addEventListener("click", async function (evento) {
+        evento.preventDefault();
 
-    const actual = contrasenaActual.value;
-    const nueva = nuevaContrasena.value;
-    const confirmar = confirmarContrasena.value;
+        const actual = contrasenaActual.value;
+        const nueva = nuevaContrasena.value;
+        const confirmar = confirmarContrasena.value;
 
-    mensajeContrasena.textContent = "";
-    mensajeContrasena.className = "mensaje-contrasena";
-
-    if (actual.trim() === "" || nueva === "" || confirmar === "") {
-        mostrarMensajeContrasena("Completa todos los campos.", "error");
-        return;
-    }
-
-    if (nueva.length < 8) {
-        mostrarMensajeContrasena("La contraseña debe tener mínimo 8 caracteres.", "error");
-        nuevaContrasena.focus();
-        return;
-    }
-
-    if (!/[0-9]/.test(nueva)) {
-        mostrarMensajeContrasena("La contraseña debe contener al menos un número.", "error");
-        nuevaContrasena.focus();
-        return;
-    }
-
-    if (!/[^A-Za-z0-9]/.test(nueva)) {
-        mostrarMensajeContrasena("La contraseña debe contener al menos un símbolo, como !, @ o #.", "error");
-        nuevaContrasena.focus();
-        return;
-    }
-
-    if (nueva !== confirmar) {
-        mostrarMensajeContrasena("La nueva contraseña y su confirmación no coinciden.", "error");
-        confirmarContrasena.focus();
-        return;
-    }
-
-    if (nueva === actual) {
-        mostrarMensajeContrasena("La nueva contraseña debe ser diferente de la actual.", "error");
-        nuevaContrasena.focus();
-        return;
-    }
-
-    const idUsuario = sessionStorage.getItem("idUsuario");
-
-    try {
-        // Petición al backend para actualizar y encriptar la contraseña en PostgreSQL
-        const respuesta = await fetch('/api/actualizar-contrasena', {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                id_usuario: idUsuario,
-                contrasenaActual: actual,
-                nuevaContrasena: nueva
-            })
-        });
-
-        const datos = await respuesta.json();
-
-        if (!respuesta.ok) {
-            throw new Error(datos.error || "No se pudo actualizar la contraseña.");
+        if (mensajeContrasena) {
+            mensajeContrasena.textContent = "";
+            mensajeContrasena.className = "mensaje-contrasena";
         }
 
-        alert("¡La contraseña se actualizó correctamente en la base de datos!");
+        if (actual.trim() === "" || nueva === "" || confirmar === "") {
+            mostrarMensajeContrasena("Completa todos los campos.", "error");
+            return;
+        }
 
-        contrasenaActual.value = "";
-        nuevaContrasena.value = "";
-        confirmarContrasena.value = "";
+        if (nueva.length < 8) {
+            mostrarMensajeContrasena("La contraseña debe tener mínimo 8 caracteres.", "error");
+            nuevaContrasena.focus();
+            return;
+        }
 
-        mensajeContrasena.textContent = "";
-        mensajeContrasena.className = "mensaje-contrasena";
+        if (!/[0-9]/.test(nueva)) {
+            mostrarMensajeContrasena("La contraseña debe contener al menos un número.", "error");
+            nuevaContrasena.focus();
+            return;
+        }
 
-        formularioContrasena.classList.remove("mostrar");
-        btnMostrarContrasena.textContent = "Cambiar contraseña";
+        if (!/[^A-Za-z0-9]/.test(nueva)) {
+            mostrarMensajeContrasena("La contraseña debe contener al menos un símbolo, como !, @ o #.", "error");
+            nuevaContrasena.focus();
+            return;
+        }
 
-        document.querySelectorAll(".campo-contrasena input").forEach(function (input) {
-            input.type = "password";
-        });
+        if (nueva !== confirmar) {
+            mostrarMensajeContrasena("La nueva contraseña y su confirmación no coinciden.", "error");
+            confirmarContrasena.focus();
+            return;
+        }
 
-        document.querySelectorAll(".btn-mostrar").forEach(function (boton) {
-            boton.textContent = "Mostrar";
-        });
+        if (nueva === actual) {
+            mostrarMensajeContrasena("La nueva contraseña debe ser diferente de la actual.", "error");
+            nuevaContrasena.focus();
+            return;
+        }
 
-    } catch (error) {
-        mostrarMensajeContrasena(error.message || "Error al conectar con el servidor.", "error");
-    }
-});
+        let usuarioLogueado = null;
+        try {
+            const sesionCruda = localStorage.getItem("usuario");
+            if (sesionCruda) {
+                const parsed = JSON.parse(sesionCruda);
+                usuarioLogueado = parsed.usuario || parsed;
+            }
+        } catch (e) {
+            console.error("Error al leer la sesión", e);
+        }
+
+        if (!usuarioLogueado || !usuarioLogueado.id) {
+            alert("No se encontró una sesión activa.");
+            window.location.href = "login.html";
+            return;
+        }
+
+        try {
+            // Petición al backend para actualizar y encriptar la contraseña en PostgreSQL
+            const respuesta = await fetch('/api/actualizar-contrasena', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    id_usuario: usuarioLogueado.id,
+                    contrasenaActual: actual,
+                    nuevaContrasena: nueva
+                })
+            });
+
+            const datos = await respuesta.json();
+
+            if (!respuesta.ok) {
+                throw new Error(datos.error || "No se pudo actualizar la contraseña.");
+            }
+
+            alert("¡La contraseña se actualizó correctamente en la base de datos!");
+
+            contrasenaActual.value = "";
+            nuevaContrasena.value = "";
+            confirmarContrasena.value = "";
+
+            if (mensajeContrasena) {
+                mensajeContrasena.textContent = "";
+                mensajeContrasena.className = "mensaje-contrasena";
+            }
+
+            formularioContrasena.classList.remove("mostrar");
+            btnMostrarContrasena.textContent = "Cambiar contraseña";
+
+            document.querySelectorAll(".campo-contrasena input").forEach(function (input) {
+                input.type = "password";
+            });
+
+            document.querySelectorAll(".btn-mostrar").forEach(function (boton) {
+                boton.textContent = "Mostrar";
+            });
+
+        } catch (error) {
+            mostrarMensajeContrasena(error.message || "Error al conectar con el servidor.", "error");
+        }
+    });
+}
 
 
 /* =========================================
@@ -385,12 +440,15 @@ btnGuardarContrasena.addEventListener("click", async function (evento) {
 
 const btnCerrarSesion = document.getElementById("btnCerrarSesion");
 
-btnCerrarSesion.addEventListener("click", function () {
-    const confirmarSalida = confirm("¿Estás seguro de que deseas cerrar sesión?");
+if (btnCerrarSesion) {
+    btnCerrarSesion.addEventListener("click", function () {
+        const confirmarSalida = confirm("¿Estás seguro de que deseas cerrar sesión?");
 
-    if (confirmarSalida) {
-        // Limpiamos los datos temporales del navegador
-        sessionStorage.clear();
-        window.location.href = "login.html";
-    }
-});
+        if (confirmarSalida) {
+            // Limpiamos los datos del navegador
+            localStorage.clear();
+            sessionStorage.clear();
+            window.location.href = "login.html";
+        }
+    });
+}
