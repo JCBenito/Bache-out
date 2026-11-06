@@ -166,14 +166,25 @@ app.put('/api/actualizar-contrasena', async (req, res) => {
 });
 
 // ==========================================
-// API: CREAR UN NUEVO REPORTE (ADAPTADO A TU BD)
+// API: CREAR UN NUEVO REPORTE
 // ==========================================
 app.post('/api/reportes', upload.single('fotografia'), async (req, res) => {
     const { id_usuario, id_estado, descripcion, calle_referencia, latitud, longitud, id_colonia } = req.body;
     const fotografiaUrl = req.file ? `/uploads/${req.file.filename}` : null;
 
     try {
-        // 1. Insertar en la tabla principal 'reporte'
+        let coloniaIdFinal = id_colonia || 1;
+
+        // Validar si el id_colonia enviado existe en la base de datos
+        const checkCol = await pool.query('SELECT id_colonia FROM public.colonia WHERE id_colonia = $1', [coloniaIdFinal]);
+        if (checkCol.rows.length === 0) {
+            const colRes = await pool.query('SELECT id_colonia FROM public.colonia LIMIT 1');
+            if (colRes.rows.length > 0) {
+                coloniaIdFinal = colRes.rows[0].id_colonia;
+            }
+        }
+
+        // 1. Insertar el reporte principal
         const queryReporte = `
             INSERT INTO public.reporte 
             (id_usuario, id_estado, id_colonia, descripcion, calle_referencia, latitud, longitud)
@@ -183,7 +194,7 @@ app.post('/api/reportes', upload.single('fotografia'), async (req, res) => {
         const valuesReporte = [
             id_usuario, 
             id_estado || 1, 
-            id_colonia || 1, 
+            coloniaIdFinal, 
             descripcion, 
             calle_referencia || 'Ubicación GPS', 
             latitud, 
@@ -193,7 +204,7 @@ app.post('/api/reportes', upload.single('fotografia'), async (req, res) => {
         const resultadoReporte = await pool.query(queryReporte, valuesReporte);
         const id_reporte = resultadoReporte.rows[0].id_reporte;
 
-        // 2. Si hay foto, guardarla en 'evidencia_fotografica' usando tu columna 'fotografia'[cite: 5]
+        // 2. Si hay fotografía, guardarla en la tabla 'evidencia_fotografica' usando la columna 'fotografia'
         if (fotografiaUrl) {
             const queryEvidencia = `
                 INSERT INTO public.evidencia_fotografica (id_reporte, fotografia)
@@ -213,7 +224,7 @@ app.post('/api/reportes', upload.single('fotografia'), async (req, res) => {
 });
 
 // ==========================================
-// API: OBTENER REPORTES DE UN USUARIO (CON JOIN A EVIDENCIA)
+// API: OBTENER REPORTES DE UN USUARIO
 // ==========================================
 app.route('/api/reportes/usuario/:id_usuario')
 .get(async (req, res) => {
