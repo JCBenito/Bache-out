@@ -54,7 +54,7 @@ function esZonaValida(lat, lon) {
 }
 
 /* =========================================
-   OBTENER UBICACIÓN
+   OBTENER UBICACIÓN (CON BLOQUEO ESTRICTO)
    ========================================= */
 
 btnUbicacion.addEventListener("click", function () {
@@ -64,7 +64,7 @@ btnUbicacion.addEventListener("click", function () {
     latitudGlobal = null;
     longitudGlobal = null;
     btnUbicacion.disabled = true;
-    btnUbicacion.textContent = "Obteniendo ubicación...";
+    btnUbicacion.textContent = "Validando zona...";
 
     if (!navigator.geolocation) {
         errorUbicacion.textContent = "La geolocalización no está disponible en este navegador.";
@@ -78,15 +78,21 @@ btnUbicacion.addEventListener("click", function () {
             const lat = posicion.coords.latitude;
             const lon = posicion.coords.longitude;
 
-            // Validar si está dentro de los polígonos permitidos
+            // Validar de forma estricta si está dentro de los polígonos permitidos
             if (!esZonaValida(lat, lon)) {
+                // Bloqueo total: limpiamos variables y vaciamos el campo de texto
                 errorUbicacion.textContent = "Estás fuera de la zona de cobertura. El servicio solo está disponible en Barrios Históricos, Progreso y La Libertad (Acapulco).";
+                ubicacion.value = "";
+                ubicacionObtenida = false;
+                latitudGlobal = null;
+                longitudGlobal = null;
+                
                 btnUbicacion.disabled = false;
                 btnUbicacion.textContent = "Obtener ubicación";
-                ubicacionObtenida = false;
                 return;
             }
 
+            // Si pasa la validación, guardamos las coordenadas globales
             latitudGlobal = lat;
             longitudGlobal = lon;
 
@@ -107,6 +113,11 @@ btnUbicacion.addEventListener("click", function () {
             errorUbicacion.textContent = "No fue posible obtener tu ubicación. Activa el GPS y vuelve a intentarlo.";
             btnUbicacion.disabled = false;
             btnUbicacion.textContent = "Obtener ubicación";
+        },
+        {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0
         }
     );
 });
