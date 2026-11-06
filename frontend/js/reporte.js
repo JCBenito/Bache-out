@@ -28,7 +28,7 @@ let idColoniaGlobal = 1; // Por defecto
 let fotografiasSeleccionadas = [];
 
 /* =========================================
-   VALIDAR Y DETECTAR ZONA (ASIGNANDO ID CORRECTO)
+   VALIDAR Y DETECTAR ZONA (EXPANDIDO PARA TODO ACAPULCO)
    ========================================= */
 
 function calcularDistanciaKm(lat1, lon1, lat2, lon2) {
@@ -44,37 +44,27 @@ function calcularDistanciaKm(lat1, lon1, lat2, lon2) {
 }
 
 function detectarColoniaYValidar(lat, lon) {
-    // 1. Barrios Históricos (ID 1)
+    // Centros de referencia para asignar un ID de colonia aproximado
     const centroBarriosHistoricos = { lat: 16.8530, lon: -99.9100 };
-    
-    // 2. Colonia Progreso (ID 2)
     const centroProgreso = { lat: 16.8670, lon: -99.8950 };
-    
-    // 3. La Libertad / Zona La Sabana (ID 3)
     const centroLaLibertad = { lat: 16.8715, lon: -99.8250 }; 
-
-    const radioMaximoKm = 1.5; // Radio de 1.5 km por zona
 
     const distanciaBarrios = calcularDistanciaKm(lat, lon, centroBarriosHistoricos.lat, centroBarriosHistoricos.lon);
     const distanciaProgreso = calcularDistanciaKm(lat, lon, centroProgreso.lat, centroProgreso.lon);
     const distanciaLibertad = calcularDistanciaKm(lat, lon, centroLaLibertad.lat, centroLaLibertad.lon);
 
-    // Identificar cuál está más cerca dentro del rango permitido
-    if (distanciaLibertad <= radioMaximoKm && distanciaLibertad <= distanciaBarrios && distanciaLibertad <= distanciaProgreso) {
+    // Asignar el ID de colonia más cercano por defecto
+    if (distanciaLibertad <= distanciaBarrios && distanciaLibertad <= distanciaProgreso) {
         idColoniaGlobal = 3; // La Libertad
-        return true;
-    }
-    if (distanciaProgreso <= radioMaximoKm && distanciaProgreso <= distanciaBarrios) {
+    } else if (distanciaProgreso <= distanciaBarrios) {
         idColoniaGlobal = 2; // Progreso
-        return true;
-    }
-    if (distanciaBarrios <= radioMaximoKm) {
+    } else {
         idColoniaGlobal = 1; // Barrios Históricos
-        return true;
     }
 
-    return false; // Fuera de rango
+    return true; // ¡Permite el reporte desde cualquier ubicación de Acapulco!
 }
+
 
 /* =========================================
    OBTENER UBICACIÓN
