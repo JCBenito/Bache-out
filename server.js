@@ -224,7 +224,7 @@ app.post('/api/reportes', upload.single('fotografia'), async (req, res) => {
 });
 
 // ==========================================
-// API: OBTENER TODOS LOS REPORTES (PARA EL MAPA INTERACTIVO)
+// API: OBTENER TODOS LOS REPORTES (PARA EL MAPA)
 // ==========================================
 app.get('/api/reportes', async (req, res) => {
     try {
@@ -237,8 +237,10 @@ app.get('/api/reportes', async (req, res) => {
                 r.longitud, 
                 r.fecha_creacion AS fecha_reporte, 
                 r.id_estado, 
+                c.nombre_colonia AS colonia,
                 e.fotografia AS fotografia_url 
             FROM public.reporte r
+            LEFT JOIN public.colonia c ON r.id_colonia = c.id_colonia
             LEFT JOIN public.evidencia_fotografica e ON r.id_reporte = e.id_reporte
             ORDER BY r.fecha_creacion DESC;
         `;
