@@ -24,10 +24,11 @@ const errorFotografia = document.getElementById("errorFotografia");
 let ubicacionObtenida = false;
 let latitudGlobal = null;
 let longitudGlobal = null;
+let idColoniaGlobal = 1; // Por defecto
 let fotografiasSeleccionadas = [];
 
 /* =========================================
-   VALIDAR ZONAS DESIGNADAS (BARRIOS HISTÓRICOS, PROGRESO Y LA LIBERTAD / LA SABANA)
+   VALIDAR Y DETECTAR ZONA (ASIGNANDO ID CORRECTO)
    ========================================= */
 
 function calcularDistanciaKm(lat1, lon1, lat2, lon2) {
@@ -42,30 +43,41 @@ function calcularDistanciaKm(lat1, lon1, lat2, lon2) {
     return R * c;
 }
 
-function esZonaValida(lat, lon) {
-    // 1. Centro de Barrios Históricos
+function detectarColoniaYValidar(lat, lon) {
+    // 1. Barrios Históricos (ID 1)
     const centroBarriosHistoricos = { lat: 16.8530, lon: -99.9100 };
     
-    // 2. Centro de Colonia Progreso
+    // 2. Colonia Progreso (ID 2)
     const centroProgreso = { lat: 16.8670, lon: -99.8950 };
     
-    // 3. Centro real de La Libertad / Zona La Sabana
+    // 3. La Libertad / Zona La Sabana (ID 3)
     const centroLaLibertad = { lat: 16.8715, lon: -99.8250 }; 
 
-    const radioMaximoKm = 1.5; // Radio controlado de 1.5 km por zona
+    const radioMaximoKm = 1.5; // Radio de 1.5 km por zona
 
     const distanciaBarrios = calcularDistanciaKm(lat, lon, centroBarriosHistoricos.lat, centroBarriosHistoricos.lon);
     const distanciaProgreso = calcularDistanciaKm(lat, lon, centroProgreso.lat, centroProgreso.lon);
     const distanciaLibertad = calcularDistanciaKm(lat, lon, centroLaLibertad.lat, centroLaLibertad.lon);
 
-    return (
-        distanciaBarrios <= radioMaximoKm || 
-        distanciaProgreso <= radioMaximoKm || 
-        distanciaLibertad <= radioMaximoKm
-    );
+    // Identificar cuál está más cerca dentro del rango permitido
+    if (distanciaLibertad <= radioMaximoKm && distanciaLibertad <= distanciaBarrios && distanciaLibertad <= distanciaProgreso) {
+        idColoniaGlobal = 3; // La Libertad
+        return true;
+    }
+    if (distanciaProgreso <= radioMaximoKm && distanciaProgreso <= distanciaBarrios) {
+        idColoniaGlobal = 2; // Progreso
+        return true;
+    }
+    if (distanciaBarrios <= radioMaximoKm) {
+        idColoniaGlobal = 1; // Barrios Históricos
+        return true;
+    }
+
+    return false; // Fuera de rango
 }
+
 /* =========================================
-   OBTENER UBICACIÓN (CON BLOQUEO ESTRICTO)
+   OBTENER UBICACIÓN
    ========================================= */
 
 btnUbicacion.addEventListener("click", function () {
@@ -89,9 +101,8 @@ btnUbicacion.addEventListener("click", function () {
             const lat = posicion.coords.latitude;
             const lon = posicion.coords.longitude;
 
-            // Validar si está dentro del radio permitido
-            if (!esZonaValida(lat, lon)) {
-                // Bloqueo total: limpiamos variables y vaciamos el campo de texto
+            // Validar si está dentro del radio y asignar su ID de colonia correspondiente
+            if (!detectarColoniaYValidar(lat, lon)) {
                 errorUbicacion.textContent = "Estás fuera de la zona de cobertura. El servicio solo está disponible en Barrios Históricos, Progreso y La Libertad (Acapulco).";
                 ubicacion.value = "";
                 ubicacionObtenida = false;
@@ -103,7 +114,6 @@ btnUbicacion.addEventListener("click", function () {
                 return;
             }
 
-            // Si pasa la validación, guardamos las coordenadas globales
             latitudGlobal = lat;
             longitudGlobal = lon;
 
@@ -289,7 +299,7 @@ formularioReporte.addEventListener("submit", async function (evento) {
     formData.append("calle_referencia", "Ubicación GPS por coordenadas");
     formData.append("latitud", latitudGlobal);
     formData.append("longitud", longitudGlobal);
-    formData.append("id_colonia", 1); 
+    formData.append("id_colonia", idColoniaGlobal); // ¡Aquí se envía el ID correcto detectado por el GPS!
 
     if (fotografiasSeleccionadas.length > 0) {
         formData.append("fotografia", fotografiasSeleccionadas[0]);
@@ -303,7 +313,7 @@ formularioReporte.addEventListener("submit", async function (evento) {
 
         const respuesta = await fetch("/api/reportes", {
             method: "POST",
-            body: formData
+            body: encryptedBodyOrOptions = formData
         });
 
         const resultado = await respuesta.json();
