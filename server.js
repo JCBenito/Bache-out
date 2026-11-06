@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const path = require('path');
+const fs = require('fs');
 const multer = require('multer'); // Importante para manejar la subida de imágenes
 const pool = require('./db');
 require('dotenv').config();
@@ -12,13 +13,19 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Configuración de multer para guardar las fotos temporalmente (o ajústalo a tu lógica de almacenamiento)
+// Asegurar que la carpeta de uploads exista para evitar errores al subir archivos
+const uploadDir = path.join(__dirname, 'frontend/uploads');
+if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+// Configuración de multer para guardar las fotos temporalmente
 const upload = multer({ dest: 'frontend/uploads/' });
 
 // Indicamos que el archivo por defecto al entrar a la carpeta frontend sea nosotros.html
 app.use(express.static('frontend', { index: 'nosotros.html' }));
-// Si guardas imágenes en una carpeta pública, asegúrate de servirla:
-app.use('/uploads', express.static(path.join(__dirname, 'frontend/uploads')));
+// Servir la carpeta de imágenes públicas
+app.use('/uploads', express.static(uploadDir));
 
 // API: REGISTRO DE USUARIO
 app.post('/api/registro', async (req, res) => {
@@ -159,34 +166,45 @@ app.put('/api/actualizar-contrasena', async (req, res) => {
 });
 
 // ==========================================
-// API: CREAR UN NUEVO REPORTE (NUEVO / FALTANTE)
+// API: CREAR UN NUEVO REPORTE (ADAPTADO A TU BD)
 // ==========================================
 app.post('/api/reportes', upload.single('fotografia'), async (req, res) => {
     const { id_usuario, id_estado, descripcion, calle_referencia, latitud, longitud, id_colonia } = req.body;
     const fotografiaUrl = req.file ? `/uploads/${req.file.filename}` : null;
 
     try {
-        const query = `
+        // 1. Insertar en la tabla principal 'reporte'
+        const queryReporte = `
             INSERT INTO public.reporte 
-            (id_usuario, id_estado, id_colonia, descripcion, calle_referencia, latitud, longitud, fotografia_url)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+            (id_usuario, id_estado, id_colonia, descripcion, calle_referencia, latitud, longitud)
+            VALUES ($1, $2, $3, $4, $5, $6, $7)
             RETURNING id_reporte;
         `;
-        const values = [
+        const valuesReporte = [
             id_usuario, 
             id_estado || 1, 
             id_colonia || 1, 
             descripcion, 
             calle_referencia || 'Ubicación GPS', 
             latitud, 
-            longitud, 
-            fotografiaUrl
+            longitud
         ];
 
-        const resultado = await pool.query(query, values);
+        const resultadoReporte = await pool.query(queryReporte, valuesReporte);
+        const id_reporte = resultadoReporte.rows[0].id_reporte;
+
+        // 2. Si hay foto, guardarla en 'evidencia_fotografica' usando tu columna 'fotografia'[cite: 5]
+        if (fotografiaUrl) {
+            const queryEvidencia = `
+                INSERT INTO public.evidencia_fotografica (id_reporte, fotografia)
+                VALUES ($1, $2);
+            `;
+            await pool.query(queryEvidencia, [id_reporte, fotografiaUrl]);
+        }
+
         res.status(201).json({ 
             mensaje: 'Reporte creado con éxito', 
-            id_reporte: resultado.rows[0].id_reporte 
+            id_reporte: id_reporte 
         });
     } catch (error) {
         console.error("Error al crear el reporte:", error);
@@ -195,17 +213,24 @@ app.post('/api/reportes', upload.single('fotografia'), async (req, res) => {
 });
 
 // ==========================================
-// API: OBTENER REPORTES DE UN USUARIO (CORREGIDO EN PLURAL)
+// API: OBTENER REPORTES DE UN USUARIO (CON JOIN A EVIDENCIA)
 // ==========================================
 app.route('/api/reportes/usuario/:id_usuario')
 .get(async (req, res) => {
     const { id_usuario } = req.params;
     try {
         const query = `
-            SELECT id_reporte, descripcion, calle_referencia, fecha_creacion AS fecha_reporte, id_estado, fotografia_url 
-            FROM public.reporte
-            WHERE id_usuario = $1 
-            ORDER BY fecha_creacion DESC;
+            SELECT 
+                r.id_reporte, 
+                r.descripcion, 
+                r.calle_referencia, 
+                r.fecha_creacion AS fecha_reporte, 
+                r.id_estado, 
+                e.fotografia AS fotografia_url 
+            FROM public.reporte r
+            LEFT JOIN public.evidencia_fotografica e ON r.id_reporte = e.id_reporte
+            WHERE r.id_usuario = $1 
+            ORDER BY r.fecha_creacion DESC;
         `;
         const resultado = await pool.query(query, [id_usuario]);
         res.json(resultado.rows);
