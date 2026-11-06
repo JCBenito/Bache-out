@@ -3,7 +3,7 @@ const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const path = require('path');
 const fs = require('fs');
-const multer = require('multer'); // Importante para manejar la subida de imágenes
+const multer = require('multer');
 const pool = require('./db');
 require('dotenv').config();
 
@@ -13,13 +13,11 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Asegurar que la carpeta de uploads exista para evitar errores al subir archivos
 const uploadDir = path.join(__dirname, 'frontend/uploads');
 if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
 }
 
-// Configuración avanzada de multer para conservar la extensión original de la foto (.jpg, .png)
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
         cb(null, uploadDir);
@@ -32,15 +30,11 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage: storage });
 
-// Indicamos que el archivo por defecto al entrar a la carpeta frontend sea nosotros.html
 app.use(express.static('frontend', { index: 'nosotros.html' }));
-// Servir la carpeta de imágenes públicas
 app.use('/uploads', express.static(uploadDir));
 
-// API: REGISTRO DE USUARIO
 app.post('/api/registro', async (req, res) => {
     let { nombres, apellido_paterno, apellido_materno, telefono, correo, contrasena } = req.body;
-
     nombres = nombres ? nombres.toLowerCase().trim() : '';
     apellido_paterno = apellido_paterno ? apellido_paterno.toLowerCase().trim() : '';
     apellido_materno = apellido_materno ? apellido_materno.toLowerCase().trim() : '';
@@ -72,7 +66,6 @@ app.post('/api/registro', async (req, res) => {
     }
 });
 
-// API: INICIO DE SESIÓN
 app.post('/api/login', async (req, res) => {
     let { usuario, contrasena } = req.body;
     const usuarioLimpio = usuario ? usuario.toLowerCase().trim() : '';
@@ -88,7 +81,6 @@ app.post('/api/login', async (req, res) => {
         }
 
         const usuarioBD = resultado.rows[0];
-
         const esValida = await bcrypt.compare(contrasena, usuarioBD.contrasena);
         if (!esValida) {
             return res.status(400).json({ error: 'Contraseña incorrecta.' });
@@ -111,7 +103,6 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
-// API: ACTUALIZAR PERFIL DE USUARIO
 app.put('/api/actualizar-perfil', async (req, res) => {
     let { id_usuario, correo, telefono } = req.body;
     const correoLimpio = correo ? correo.toLowerCase().trim() : '';
@@ -139,7 +130,6 @@ app.put('/api/actualizar-perfil', async (req, res) => {
     }
 });
 
-// API: CAMBIAR CONTRASEÑA
 app.put('/api/actualizar-contrasena', async (req, res) => {
     let { id_usuario, contrasenaActual, nuevaContrasena } = req.body;
 
@@ -154,7 +144,6 @@ app.put('/api/actualizar-contrasena', async (req, res) => {
         }
 
         const usuarioBD = resultado.rows[0];
-
         const esValida = await bcrypt.compare(contrasenaActual, usuarioBD.contrasena);
         if (!esValida) {
             return res.status(400).json({ error: 'La contraseña actual es incorrecta.' });
@@ -175,9 +164,6 @@ app.put('/api/actualizar-contrasena', async (req, res) => {
     }
 });
 
-// ==========================================
-// API: CREAR UN NUEVO REPORTE
-// ==========================================
 app.post('/api/reportes', upload.single('fotografia'), async (req, res) => {
     const { id_usuario, id_estado, descripcion, calle_referencia, latitud, longitud, id_colonia } = req.body;
     const fotografiaUrl = req.file ? `/uploads/${req.file.filename}` : null;
@@ -185,7 +171,6 @@ app.post('/api/reportes', upload.single('fotografia'), async (req, res) => {
     try {
         let coloniaIdFinal = id_colonia || 1;
 
-        // Validar si el id_colonia enviado existe en la base de datos
         const checkCol = await pool.query('SELECT id_colonia FROM public.colonia WHERE id_colonia = $1', [coloniaIdFinal]);
         if (checkCol.rows.length === 0) {
             const colRes = await pool.query('SELECT id_colonia FROM public.colonia LIMIT 1');
@@ -194,7 +179,6 @@ app.post('/api/reportes', upload.single('fotografia'), async (req, res) => {
             }
         }
 
-        // 1. Insertar el reporte principal
         const queryReporte = `
             INSERT INTO public.reporte 
             (id_usuario, id_estado, id_colonia, descripcion, calle_referencia, latitud, longitud)
@@ -214,7 +198,6 @@ app.post('/api/reportes', upload.single('fotografia'), async (req, res) => {
         const resultadoReporte = await pool.query(queryReporte, valuesReporte);
         const id_reporte = resultadoReporte.rows[0].id_reporte;
 
-        // 2. Si hay fotografía, guardarla en la tabla 'evidencia_fotografica' usando la columna 'fotografia'
         if (fotografiaUrl) {
             const queryEvidencia = `
                 INSERT INTO public.evidencia_fotografica (id_reporte, fotografia)
@@ -233,9 +216,6 @@ app.post('/api/reportes', upload.single('fotografia'), async (req, res) => {
     }
 });
 
-// ==========================================
-// API: OBTENER TODOS LOS REPORTES (PARA EL MAPA)
-// ==========================================
 app.get('/api/reportes', async (req, res) => {
     try {
         const query = `
@@ -262,9 +242,7 @@ app.get('/api/reportes', async (req, res) => {
     }
 });
 
-// ==========================================
-// API: OBTENER REPORTES DE UN USUARIO ESPECÍFICO
-// ==========================================
+// Incluye id_estado explícitamente para el seguimiento
 app.route('/api/reportes/usuario/:id_usuario')
 .get(async (req, res) => {
     const { id_usuario } = req.params;
