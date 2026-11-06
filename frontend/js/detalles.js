@@ -79,12 +79,20 @@ document.addEventListener("DOMContentLoaded", async function () {
                 ? 'Fecha reciente' 
                 : fechaObj.toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' });
 
-            // Validación limpia de la URL de la imagen
-            let urlFoto = 'img/bache-ejemplo.jpg';
-            if (reporte.fotografia_url) {
-                urlFoto = reporte.fotografia_url.startsWith('/') 
-                    ? reporte.fotografia_url 
-                    : `/${reporte.fotografia_url}`;
+            // Generar HTML dinámico para todas las fotografías del reporte
+            let fotosHtml = '';
+            if (reporte.fotografias && reporte.fotografias.length > 0) {
+                reporte.fotografias.forEach(foto => {
+                    const urlFoto = foto.startsWith('/') ? foto : `/${foto}`;
+                    fotosHtml += `
+                        <img src="${urlFoto}" 
+                             onerror="this.onerror=null; this.src='img/bache-ejemplo.jpg';" 
+                             alt="Fotografía del bache reportado" 
+                             class="foto-reporte" style="margin-bottom: 12px;">
+                    `;
+                });
+            } else {
+                fotosHtml = `<img src="img/bache-ejemplo.jpg" alt="Sin fotografía" class="foto-reporte">`;
             }
 
             const articulo = document.createElement("article");
@@ -108,11 +116,10 @@ document.addEventListener("DOMContentLoaded", async function () {
 
                 <div class="detalles-reporte">
                     <div class="seccion-detalle">
-                        <h3>Fotografía del reporte</h3>
-                        <img src="${urlFoto}" 
-                             onerror="this.onerror=null; this.src='img/bache-ejemplo.jpg';" 
-                             alt="Fotografía del bache reportado" 
-                             class="foto-reporte">
+                        <h3>Fotografía(s) del reporte</h3>
+                        <div class="contenedor-fotos">
+                            ${fotosHtml}
+                        </div>
                     </div>
 
                     <div class="seccion-detalle">
