@@ -27,27 +27,26 @@ let longitudGlobal = null;
 let fotografiasSeleccionadas = [];
 
 /* =========================================
-   VALIDAR ZONAS DESIGNADAS (ACAPULCO)
-   Delimitación estricta para: Barrios Históricos, Progreso y La Libertad
+   VALIDAR ZONAS DESIGNADAS (ACAPULCO - RANGOS ESTRICTOS)
    ========================================= */
 function esZonaValida(lat, lon) {
     
-    // 1. Zona: Barrios Históricos
+    // 1. Zona: Barrios Históricos (Margen estricto y cerrado)
     const enBarriosHistoricos = (
-        lat >= 16.8450 && lat <= 16.8650 && 
-        lon >= -99.9200 && lon <= -99.9000
+        lat >= 16.8500 && lat <= 16.8600 && 
+        lon >= -99.9150 && lon <= -99.9050
     );
 
-    // 2. Zona: Colonia Progreso
+    // 2. Zona: Colonia Progreso (Margen estricto y cerrado)
     const enProgreso = (
-        lat >= 16.8550 && lat <= 16.8800 && 
-        lon >= -99.9050 && lon <= -99.8850
+        lat >= 16.8600 && lat <= 16.8700 && 
+        lon >= -99.9000 && lon <= -99.8900
     );
 
-    // 3. Zona: Colonia La Libertad
+    // 3. Zona: Colonia La Libertad (Margen estricto y cerrado)
     const enLaLibertad = (
-        lat >= 16.8600 && lat <= 16.8850 && 
-        lon >= -99.8900 && lon <= -99.8650
+        lat >= 16.8650 && lat <= 16.8750 && 
+        lon >= -99.8800 && lon <= -99.8700
     );
 
     return enBarriosHistoricos || enProgreso || enLaLibertad;
