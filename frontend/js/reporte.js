@@ -291,29 +291,43 @@ formularioReporte.addEventListener("submit", async function (evento) {
         return;
     }
 
-    /* Construir FormData para enviar archivos e información al servidor */
-    const formData = new FormData();
-    formData.append("id_usuario", usuarioLogueado.id);
-    formData.append("id_estado", 1); // 1 = Pendiente por defecto en la BD
-    formData.append("descripcion", textoDescripcion);
-    formData.append("calle_referencia", "Ubicación GPS por coordenadas");
-    formData.append("latitud", latitudGlobal);
-    formData.append("longitud", longitudGlobal);
-    formData.append("id_colonia", idColoniaGlobal); // ¡Aquí se envía el ID correcto detectado por el GPS!
-
-    if (fotografiasSeleccionadas.length > 0) {
-        formData.append("fotografia", fotografiasSeleccionadas[0]);
-    }
-
     const botonEnviar = formularioReporte.querySelector(".btn-enviar");
 
     try {
         botonEnviar.disabled = true;
-        botonEnviar.textContent = "Enviando reporte...";
+        botonEnviar.textContent = "Obteniendo dirección y enviando...";
+
+        /* Obtener la dirección real de la calle mediante geocodificación inversa */
+        let direccionReal = "Lat: " + latitudGlobal.toFixed(5) + ", Lng: " + longitudGlobal.toFixed(5);
+        try {
+            const respuestaGeo = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitudGlobal}&lon=${longitudGlobal}&zoom=18&addressdetails=1`, {
+                headers: { 'User-Agent': 'BacheOut-App' }
+            });
+            const datosGeo = await respuestaGeo.json();
+            if (datosGeo && datosGeo.display_name) {
+                direccionReal = datosGeo.display_name;
+            }
+        } catch (geoError) {
+            console.error("No se pudo obtener la dirección exacta de la calle:", geoError);
+        }
+
+        /* Construir FormData para enviar archivos e información al servidor */
+        const formData = new FormData();
+        formData.append("id_usuario", usuarioLogueado.id);
+        formData.append("id_estado", 1); // 1 = Pendiente por defecto en la BD
+        formData.append("descripcion", textoDescripcion);
+        formData.append("calle_referencia", direccionReal); // ¡Dirección real de la calle obtenida por GPS!
+        formData.append("latitud", latitudGlobal);
+        formData.append("longitud", longitudGlobal);
+        formData.append("id_colonia", idColoniaGlobal); 
+
+        if (fotografiasSeleccionadas.length > 0) {
+            formData.append("fotografia", fotografiasSeleccionadas[0]);
+        }
 
         const respuesta = await fetch("/api/reportes", {
             method: "POST",
-            body: encryptedBodyOrOptions = formData
+            body: formData
         });
 
         const resultado = await respuesta.json();
