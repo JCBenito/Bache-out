@@ -27,7 +27,7 @@ let longitudGlobal = null;
 let fotografiasSeleccionadas = [];
 
 /* =========================================
-   VALIDAR ZONAS DESIGNADAS (CENTROS CALIBRADOS)
+   VALIDAR ZONAS DESIGNADAS (BARRIOS HISTÓRICOS, PROGRESO Y LA LIBERTAD / LA SABANA)
    ========================================= */
 
 function calcularDistanciaKm(lat1, lon1, lat2, lon2) {
@@ -43,13 +43,16 @@ function calcularDistanciaKm(lat1, lon1, lat2, lon2) {
 }
 
 function esZonaValida(lat, lon) {
-    // Coordenadas centrales ajustadas y reales para cada colonia
+    // 1. Centro de Barrios Históricos
     const centroBarriosHistoricos = { lat: 16.8530, lon: -99.9100 };
+    
+    // 2. Centro de Colonia Progreso
     const centroProgreso = { lat: 16.8670, lon: -99.8950 };
-    // Coordenada actualizada para abarcar correctamente La Libertad donde te encuentras
-    const centroLaLibertad = { lat: 16.8735, lon: -99.8860 }; 
+    
+    // 3. Centro real de La Libertad / Zona La Sabana
+    const centroLaLibertad = { lat: 16.8715, lon: -99.8250 }; 
 
-    const radioMaximoKm = 1.5; // Radio controlado para cubrir la zona exacta
+    const radioMaximoKm = 1.5; // Radio controlado de 1.5 km por zona
 
     const distanciaBarrios = calcularDistanciaKm(lat, lon, centroBarriosHistoricos.lat, centroBarriosHistoricos.lon);
     const distanciaProgreso = calcularDistanciaKm(lat, lon, centroProgreso.lat, centroProgreso.lon);
