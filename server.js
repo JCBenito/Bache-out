@@ -164,9 +164,10 @@ app.put('/api/actualizar-contrasena', async (req, res) => {
     }
 });
 
-app.post('/api/reportes', upload.single('fotografia'), async (req, res) => {
+// API: CREAR UN NUEVO REPORTE (Acepta hasta 3 fotografías con upload.array)
+app.post('/api/reportes', upload.array('fotografia', 3), async (req, res) => {
     const { id_usuario, id_estado, descripcion, calle_referencia, latitud, longitud, id_colonia } = req.body;
-    const fotografiaUrl = req.file ? `/uploads/${req.file.filename}` : null;
+    const archivos = req.files || [];
 
     try {
         let coloniaIdFinal = id_colonia || 1;
@@ -198,7 +199,9 @@ app.post('/api/reportes', upload.single('fotografia'), async (req, res) => {
         const resultadoReporte = await pool.query(queryReporte, valuesReporte);
         const id_reporte = resultadoReporte.rows[0].id_reporte;
 
-        if (fotografiaUrl) {
+        // Guardar cada archivo subido en la tabla de evidencias
+        for (const file of archivos) {
+            const fotografiaUrl = `/uploads/${file.filename}`;
             const queryEvidencia = `
                 INSERT INTO public.evidencia_fotografica (id_reporte, fotografia)
                 VALUES ($1, $2);
@@ -228,10 +231,11 @@ app.get('/api/reportes', async (req, res) => {
                 r.fecha_creacion AS fecha_reporte, 
                 r.id_estado, 
                 c.nombre_colonia AS colonia,
-                e.fotografia AS fotografia_url 
+                COALESCE(json_agg(e.fotografia) FILTER (WHERE e.fotografia IS NOT NULL), '[]') AS fotografias
             FROM public.reporte r
             LEFT JOIN public.colonia c ON r.id_colonia = c.id_colonia
             LEFT JOIN public.evidencia_fotografica e ON r.id_reporte = e.id_reporte
+            GROUP BY r.id_reporte, c.nombre_colonia
             ORDER BY r.fecha_creacion DESC;
         `;
         const resultado = await pool.query(query);
@@ -242,7 +246,7 @@ app.get('/api/reportes', async (req, res) => {
     }
 });
 
-// Incluye id_estado explícitamente para el seguimiento
+// API: OBTENER REPORTES DE UN USUARIO (Agrupa todas las fotos en un arreglo JSON)
 app.route('/api/reportes/usuario/:id_usuario')
 .get(async (req, res) => {
     const { id_usuario } = req.params;
@@ -254,10 +258,11 @@ app.route('/api/reportes/usuario/:id_usuario')
                 r.calle_referencia, 
                 r.fecha_creacion AS fecha_reporte, 
                 r.id_estado, 
-                e.fotografia AS fotografia_url 
+                COALESCE(json_agg(e.fotografia) FILTER (WHERE e.fotografia IS NOT NULL), '[]') AS fotografias
             FROM public.reporte r
             LEFT JOIN public.evidencia_fotografica e ON r.id_reporte = e.id_reporte
             WHERE r.id_usuario = $1 
+            GROUP BY r.id_reporte
             ORDER BY r.fecha_creacion DESC;
         `;
         const resultado = await pool.query(query, [id_usuario]);
