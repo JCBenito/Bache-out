@@ -316,14 +316,15 @@ formularioReporte.addEventListener("submit", async function (evento) {
         formData.append("id_usuario", usuarioLogueado.id);
         formData.append("id_estado", 1); // 1 = Pendiente por defecto en la BD
         formData.append("descripcion", textoDescripcion);
-        formData.append("calle_referencia", direccionReal); // ¡Dirección real de la calle obtenida por GPS!
+        formData.append("calle_referencia", direccionReal); 
         formData.append("latitud", latitudGlobal);
         formData.append("longitud", longitudGlobal);
         formData.append("id_colonia", idColoniaGlobal); 
 
-        if (fotografiasSeleccionadas.length > 0) {
-            formData.append("fotografia", fotografiasSeleccionadas[0]);
-        }
+        // Adjuntar todas las fotografías seleccionadas iterando el arreglo
+        fotografiasSeleccionadas.forEach(archivo => {
+            formData.append("fotografia", archivo);
+        });
 
         const respuesta = await fetch("/api/reportes", {
             method: "POST",
