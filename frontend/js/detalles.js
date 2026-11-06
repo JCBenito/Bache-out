@@ -4,7 +4,6 @@
 
 document.addEventListener("DOMContentLoaded", async function () {
 
-    // 1. Verificar sesión activa y obtener el ID del usuario de forma unificada
     let usuarioLogueado = null;
     try {
         const sesionCruda = localStorage.getItem("usuario");
@@ -31,7 +30,6 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     let reportesGlobales = [];
 
-    // 2. Función para obtener los reportes del servidor
     async function cargarReportes() {
         try {
             const respuesta = await fetch(`/api/reportes/usuario/${usuarioLogueado.id}`);
@@ -52,7 +50,6 @@ document.addEventListener("DOMContentLoaded", async function () {
         }
     }
 
-    // 3. Renderizar las tarjetas dinámicamente en el HTML
     function renderizarReportes(lista) {
         contenedorReportes.innerHTML = "";
 
@@ -62,17 +59,17 @@ document.addEventListener("DOMContentLoaded", async function () {
         }
 
         lista.forEach(reporte => {
-            const estadoRaw = (reporte.estado || 'pendiente').toLowerCase();
+            const idEstado = parseInt(reporte.id_estado, 10) || 1;
             let estadoClase = 'pendiente';
             let estadoTexto = 'Pendiente';
 
-            if (estadoRaw.includes('repar')) {
+            if (idEstado === 2 || reporte.id_estado === '2') {
                 estadoClase = 'reparando';
                 estadoTexto = 'En reparación';
-            } else if (estadoRaw.includes('resuelt')) {
+            } else if (idEstado === 3 || reporte.id_estado === '3') {
                 estadoClase = 'resuelto';
                 estadoTexto = 'Resuelto';
-            } else if (estadoRaw.includes('cancel')) {
+            } else if (idEstado === 4 || reporte.id_estado === '4') {
                 estadoClase = 'cancelado';
                 estadoTexto = 'Cancelado';
             }
@@ -123,7 +120,7 @@ document.addEventListener("DOMContentLoaded", async function () {
                         </div>
                     </div>
 
-                    ${obtenerHTMLSeguimiento(estadoClase)}
+                    ${obtenerHTMLSeguimiento(estadoClase, idEstado)}
                 </div>
             `;
 
@@ -141,7 +138,6 @@ document.addEventListener("DOMContentLoaded", async function () {
         });
     }
 
-    // 4. Actualizar los contadores superiores con datos reales
     function actualizarContadores(lista) {
         let pendientes = 0;
         let reparando = 0;
@@ -149,11 +145,11 @@ document.addEventListener("DOMContentLoaded", async function () {
         let cancelados = 0;
 
         lista.forEach(r => {
-            const estado = (r.estado || 'pendiente').toLowerCase();
-            if (estado.includes('pendiente')) pendientes++;
-            else if (estado.includes('repar')) reparando++;
-            else if (estado.includes('resuelt')) resueltos++;
-            else if (estado.includes('cancel')) cancelados++;
+            const idEst = parseInt(r.id_estado, 10) || 1;
+            if (idEst === 1) pendientes++;
+            else if (idEst === 2) reparando++;
+            else if (idEst === 3) resueltos++;
+            else if (idEst === 4) cancelados++;
         });
 
         if (totalReportes) totalReportes.textContent = lista.length;
@@ -162,9 +158,8 @@ document.addEventListener("DOMContentLoaded", async function () {
         if (totalResueltos) totalResueltos.textContent = resueltos;
     }
 
-    // 5. Generar la barra de seguimiento o mensaje de cancelación dinámico
-    function obtenerHTMLSeguimiento(estado) {
-        if (estado === 'cancelado') {
+    function obtenerHTMLSeguimiento(estadoClase, idEstadoReal) {
+        if (estadoClase === 'cancelado') {
             return `
                 <div class="mensaje-cancelado">
                     <div class="circulo-cancelado">X</div>
@@ -176,28 +171,31 @@ document.addEventListener("DOMContentLoaded", async function () {
             `;
         }
 
-        const esP2Completado = estado === 'reparando' || estado === 'resuelto';
-        const esP3Completado = estado === 'resuelto';
+        const esP2Completado = idEstadoReal >= 2;
+        const esP3Completado = idEstadoReal >= 3;
+        const esP1Actual = idEstadoReal === 1;
+        const esP2Actual = idEstadoReal === 2;
+        const esP3Actual = idEstadoReal === 3;
 
         return `
             <div class="seguimiento">
                 <h3>Seguimiento del reporte</h3>
                 <div class="barra-seguimiento">
-                    <div class="paso completado">
+                    <div class="paso ${esP1Actual ? 'actual' : (esP2Completado ? 'completado' : '')}">
                         <div class="circulo">1</div>
                         <span>Pendiente</span>
                     </div>
 
                     <div class="linea ${esP2Completado ? 'completada' : ''}"></div>
 
-                    <div class="paso ${estado === 'reparando' ? 'actual' : (esP2Completado ? 'completado' : '')}">
+                    <div class="paso ${esP2Actual ? 'actual' : (esP3Completado ? 'completado' : '')}">
                         <div class="circulo">2</div>
                         <span>En reparación</span>
                     </div>
 
                     <div class="linea ${esP3Completado ? 'completada' : ''}"></div>
 
-                    <div class="paso ${estado === 'resuelto' ? 'actual' : ''}">
+                    <div class="paso ${esP3Actual ? 'actual' : ''}">
                         <div class="circulo">3</div>
                         <span>Resuelto</span>
                     </div>
@@ -206,7 +204,6 @@ document.addEventListener("DOMContentLoaded", async function () {
         `;
     }
 
-    // 6. Filtrar reportes al cambiar la opción del selector
     if (filtroEstado) {
         filtroEstado.addEventListener("change", function () {
             const estadoSeleccionado = filtroEstado.value;
@@ -214,7 +211,6 @@ document.addEventListener("DOMContentLoaded", async function () {
 
             tarjetas.forEach(tarjeta => {
                 const estado = tarjeta.dataset.estado;
-
                 if (estadoSeleccionado === "todos" || estado === estadoSeleccionado) {
                     tarjeta.classList.remove("oculto");
                 } else {
