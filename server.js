@@ -224,7 +224,34 @@ app.post('/api/reportes', upload.single('fotografia'), async (req, res) => {
 });
 
 // ==========================================
-// API: OBTENER REPORTES DE UN USUARIO
+// API: OBTENER TODOS LOS REPORTES (PARA EL MAPA INTERACTIVO)
+// ==========================================
+app.get('/api/reportes', async (req, res) => {
+    try {
+        const query = `
+            SELECT 
+                r.id_reporte, 
+                r.descripcion, 
+                r.calle_referencia, 
+                r.latitud, 
+                r.longitud, 
+                r.fecha_creacion AS fecha_reporte, 
+                r.id_estado, 
+                e.fotografia AS fotografia_url 
+            FROM public.reporte r
+            LEFT JOIN public.evidencia_fotografica e ON r.id_reporte = e.id_reporte
+            ORDER BY r.fecha_creacion DESC;
+        `;
+        const resultado = await pool.query(query);
+        res.json(resultado.rows);
+    } catch (error) {
+        console.error("Error al obtener los reportes para el mapa:", error);
+        res.status(500).json({ error: "Error interno del servidor al consultar los reportes." });
+    }
+});
+
+// ==========================================
+// API: OBTENER REPORTES DE UN USUARIO ESPECÍFICO
 // ==========================================
 app.route('/api/reportes/usuario/:id_usuario')
 .get(async (req, res) => {
