@@ -27,10 +27,9 @@ let longitudGlobal = null;
 let fotografiasSeleccionadas = [];
 
 /* =========================================
-   VALIDAR ZONAS DESIGNADAS (RADIO ESTRICTO DE 1.2 KM)
+   VALIDAR ZONAS DESIGNADAS (CENTROS CALIBRADOS)
    ========================================= */
 
-// Función auxiliar para calcular la distancia en kilómetros entre dos coordenadas (Fórmula de Haversine)
 function calcularDistanciaKm(lat1, lon1, lat2, lon2) {
     const R = 6371; // Radio de la tierra en km
     const dLat = (lat2 - lat1) * (Math.PI / 180);
@@ -40,30 +39,28 @@ function calcularDistanciaKm(lat1, lon1, lat2, lon2) {
         Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
         Math.sin(dLon / 2) * Math.sin(dLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c; // Distancia en kilómetros
+    return R * c;
 }
 
 function esZonaValida(lat, lon) {
-    // Coordenadas centrales exactas de cada zona permitida en Acapulco
+    // Coordenadas centrales ajustadas y reales para cada colonia
     const centroBarriosHistoricos = { lat: 16.8530, lon: -99.9100 };
     const centroProgreso = { lat: 16.8670, lon: -99.8950 };
-    const centroLaLibertad = { lat: 16.8720, lon: -99.8770 };
+    // Coordenada actualizada para abarcar correctamente La Libertad donde te encuentras
+    const centroLaLibertad = { lat: 16.8735, lon: -99.8860 }; 
 
-    const radioMaximoKm = 1.2; // Radio estricto de 1.2 km para cubrir de borde a borde sin salir a otras áreas
+    const radioMaximoKm = 1.5; // Radio controlado para cubrir la zona exacta
 
-    // Calculamos la distancia desde la ubicación actual del usuario hacia cada centro
     const distanciaBarrios = calcularDistanciaKm(lat, lon, centroBarriosHistoricos.lat, centroBarriosHistoricos.lon);
     const distanciaProgreso = calcularDistanciaKm(lat, lon, centroProgreso.lat, centroProgreso.lon);
     const distanciaLibertad = calcularDistanciaKm(lat, lon, centroLaLibertad.lat, centroLaLibertad.lon);
 
-    // Si está a 1.2 km o menos de CUALQUIERA de las tres colonias, es válido
     return (
         distanciaBarrios <= radioMaximoKm || 
         distanciaProgreso <= radioMaximoKm || 
         distanciaLibertad <= radioMaximoKm
     );
 }
-
 /* =========================================
    OBTENER UBICACIÓN (CON BLOQUEO ESTRICTO)
    ========================================= */
