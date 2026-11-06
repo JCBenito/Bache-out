@@ -27,29 +27,41 @@ let longitudGlobal = null;
 let fotografiasSeleccionadas = [];
 
 /* =========================================
-   VALIDAR ZONAS DESIGNADAS (ACAPULCO - RANGOS ESTRICTOS)
+   VALIDAR ZONAS DESIGNADAS (RADIO DE 2.5 KM)
    ========================================= */
+
+// Función auxiliar para calcular la distancia en kilómetros entre dos coordenadas (Fórmula de Haversine)
+function calcularDistanciaKm(lat1, lon1, lat2, lon2) {
+    const R = 6371; // Radio de la tierra en km
+    const dLat = (lat2 - lat1) * (Math.PI / 180);
+    const dLon = (lon2 - lon1) * (Math.PI / 180);
+    const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c; // Distancia en kilómetros
+}
+
 function esZonaValida(lat, lon) {
-    
-    // 1. Zona: Barrios Históricos (Margen estricto y cerrado)
-    const enBarriosHistoricos = (
-        lat >= 16.8500 && lat <= 16.8600 && 
-        lon >= -99.9150 && lon <= -99.9050
-    );
+    // Coordenadas aproximadas de los centros de cada zona en Acapulco
+    const centroBarriosHistoricos = { lat: 16.8530, lon: -99.9100 };
+    const centroProgreso = { lat: 16.8670, lon: -99.8950 };
+    const centroLaLibertad = { lat: 16.8720, lon: -99.8770 };
 
-    // 2. Zona: Colonia Progreso (Margen estricto y cerrado)
-    const enProgreso = (
-        lat >= 16.8600 && lat <= 16.8700 && 
-        lon >= -99.9000 && lon <= -99.8900
-    );
+    const radioMaximoKm = 2.5; // 2.5 kilómetros a la redonda
 
-    // 3. Zona: Colonia La Libertad (Margen estricto y cerrado)
-    const enLaLibertad = (
-        lat >= 16.8650 && lat <= 16.8750 && 
-        lon >= -99.8800 && lon <= -99.8700
-    );
+    // Calculamos la distancia desde la ubicación actual del usuario hacia cada centro
+    const distanciaBarrios = calcularDistanciaKm(lat, lon, centroBarriosHistoricos.lat, centroBarriosHistoricos.lon);
+    const distanciaProgreso = calcularDistanciaKm(lat, lon, centroProgreso.lat, centroProgreso.lon);
+    const distanciaLibertad = calcularDistanciaKm(lat, lon, centroLaLibertad.lat, centroLaLibertad.lon);
 
-    return enBarriosHistoricos || enProgreso || enLaLibertad;
+    // Si está a 2.5 km o menos de CUALQUIERA de las tres zonas, es válido
+    return (
+        distanciaBarrios <= radioMaximoKm || 
+        distanciaProgreso <= radioMaximoKm || 
+        distanciaLibertad <= radioMaximoKm
+    );
 }
 
 /* =========================================
@@ -77,7 +89,7 @@ btnUbicacion.addEventListener("click", function () {
             const lat = posicion.coords.latitude;
             const lon = posicion.coords.longitude;
 
-            // Validar de forma estricta si está dentro de los polígonos permitidos
+            // Validar si está dentro del radio permitido de 2.5 km
             if (!esZonaValida(lat, lon)) {
                 // Bloqueo total: limpiamos variables y vaciamos el campo de texto
                 errorUbicacion.textContent = "Estás fuera de la zona de cobertura. El servicio solo está disponible en Barrios Históricos, Progreso y La Libertad (Acapulco).";
