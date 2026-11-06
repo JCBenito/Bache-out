@@ -27,7 +27,7 @@ let longitudGlobal = null;
 let fotografiasSeleccionadas = [];
 
 /* =========================================
-   VALIDAR ZONAS DESIGNADAS (RADIO DE 2.5 KM)
+   VALIDAR ZONAS DESIGNADAS (RADIO ESTRICTO DE 1.2 KM)
    ========================================= */
 
 // Función auxiliar para calcular la distancia en kilómetros entre dos coordenadas (Fórmula de Haversine)
@@ -44,19 +44,19 @@ function calcularDistanciaKm(lat1, lon1, lat2, lon2) {
 }
 
 function esZonaValida(lat, lon) {
-    // Coordenadas aproximadas de los centros de cada zona en Acapulco
+    // Coordenadas centrales exactas de cada zona permitida en Acapulco
     const centroBarriosHistoricos = { lat: 16.8530, lon: -99.9100 };
     const centroProgreso = { lat: 16.8670, lon: -99.8950 };
     const centroLaLibertad = { lat: 16.8720, lon: -99.8770 };
 
-    const radioMaximoKm = 2.5; // 2.5 kilómetros a la redonda
+    const radioMaximoKm = 1.2; // Radio estricto de 1.2 km para cubrir de borde a borde sin salir a otras áreas
 
     // Calculamos la distancia desde la ubicación actual del usuario hacia cada centro
     const distanciaBarrios = calcularDistanciaKm(lat, lon, centroBarriosHistoricos.lat, centroBarriosHistoricos.lon);
     const distanciaProgreso = calcularDistanciaKm(lat, lon, centroProgreso.lat, centroProgreso.lon);
     const distanciaLibertad = calcularDistanciaKm(lat, lon, centroLaLibertad.lat, centroLaLibertad.lon);
 
-    // Si está a 2.5 km o menos de CUALQUIERA de las tres zonas, es válido
+    // Si está a 1.2 km o menos de CUALQUIERA de las tres colonias, es válido
     return (
         distanciaBarrios <= radioMaximoKm || 
         distanciaProgreso <= radioMaximoKm || 
@@ -89,7 +89,7 @@ btnUbicacion.addEventListener("click", function () {
             const lat = posicion.coords.latitude;
             const lon = posicion.coords.longitude;
 
-            // Validar si está dentro del radio permitido de 2.5 km
+            // Validar si está dentro del radio permitido
             if (!esZonaValida(lat, lon)) {
                 // Bloqueo total: limpiamos variables y vaciamos el campo de texto
                 errorUbicacion.textContent = "Estás fuera de la zona de cobertura. El servicio solo está disponible en Barrios Históricos, Progreso y La Libertad (Acapulco).";
