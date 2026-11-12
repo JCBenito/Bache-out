@@ -1,5 +1,0 @@
-/* Bache-Out · Página estadisticas.html */
-.stats .bar{grid-template-columns:140px 1fr 32px;font-size:14px}
-.stats .bar div{height:24px}
-.stats .donut{width:210px;height:210px}
-.stats .donut div{width:124px;height:124px;font-size:28px}
