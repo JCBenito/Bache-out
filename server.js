@@ -39,6 +39,24 @@ app.post('/api/registro', async (req, res) => {
     apellido_paterno = apellido_paterno ? apellido_paterno.toLowerCase().trim() : '';
     apellido_materno = apellido_materno ? apellido_materno.toLowerCase().trim() : '';
     correo = correo ? correo.toLowerCase().trim() : '';
+    telefono = telefono ? telefono.replace(/[\s\-()]/g, '').trim() : '';
+
+    // 1. Validación de formato estricto de correo electrónico
+    const regexCorreoEstricto = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9-]+(\.[a-zA-Z]{2,6}){1,2}$/;
+    if (!regexCorreoEstricto.test(correo) || /(\.[a-zA-Z]{2,6})\1+$/.test(correo)) {
+        return res.status(400).json({ error: 'El formato del correo electrónico no es válido.' });
+    }
+
+    // 2. Validación de teléfono mexicano (debe iniciar con +52 o 52 + 10 dígitos)
+    const regexTelefonoMexico = /^(\+?52)\d{10}$/;
+    if (!regexTelefonoMexico.test(telefono)) {
+        return res.status(400).json({ error: 'El teléfono debe iniciar con la lada de México (+52 o 52) seguido de 10 dígitos.' });
+    }
+
+    // Estandarizar el formato del teléfono asegurando que comience con '+'
+    if (!telefono.startsWith('+')) {
+        telefono = '+' + telefono;
+    }
 
     try {
         const existe = await pool.query(
