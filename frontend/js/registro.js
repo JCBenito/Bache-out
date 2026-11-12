@@ -77,11 +77,22 @@ formulario.addEventListener("submit", async function (event) {
     mensaje.classList.remove("exito");
 
     // ====================================
-    // VALIDACIONES LOCALES
+    // VALIDACIONES LOCALES ESTRICTAS
     // ====================================
 
-    if (!/^[0-9]{10}$/.test(telefono)) {
-        mostrarError("Error: el número telefónico debe tener 10 dígitos.");
+    // 1. Validación de correo estricto (evita dominios mal formados o repetidos como .com.com)
+    const regexCorreoEstricto = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9-]+(\.[a-zA-Z]{2,6}){1,2}$/;
+    if (!regexCorreoEstricto.test(correo) || /(\.[a-zA-Z]{2,6})\1+$/.test(correo)) {
+        mostrarError("Error: ingresa un correo electrónico válido (ej. usuario@dominio.com).");
+        correoInput.focus();
+        return;
+    }
+
+    // 2. Validación de teléfono de México (+52 o 52 seguido de 10 dígitos)
+    const telefonoLimpio = telefono.replace(/[\s\-()]/g, '');
+    const regexTelefonoMexico = /^(\+?52)\d{10}$/;
+    if (!regexTelefonoMexico.test(telefonoLimpio)) {
+        mostrarError("Error: el teléfono debe iniciar con la lada de México (+52 o 52) seguido de 10 dígitos (ej. +527441234567).");
         telefonoInput.focus();
         return;
     }
@@ -130,7 +141,7 @@ formulario.addEventListener("submit", async function (event) {
                 nombres,
                 apellido_paterno,
                 apellido_materno,
-                telefono,
+                telefono: telefonoLimpio, // Enviamos el teléfono limpio con su lada
                 correo,
                 contrasena: passwordValor
             })
