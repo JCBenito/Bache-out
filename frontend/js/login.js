@@ -1,74 +1,163 @@
-/* Bache-Out · Login del administrador */
 
-/* IMPORTANTE: esto es una demostración en el navegador. En producción valida
-   el correo y la contraseña en tu servidor (fetch a tu API) y usa cookies de sesión seguras. */
-const ADMINS = [{ correo: "admin@bache-out.mx", pass: "admin123" }];
-const ACCESO_ABIERTO = true; /* true = entra cualquier correo y contraseña (solo para pruebas). Ponlo en false para exigir los correos de ADMINS. */
-/* Página a la que se entra después de iniciar sesión (cámbiala si renombraste resumen.html) */
-const PAGINA_INICIO = "resumen.html";
+/* =================================
+   ELEMENTOS DEL FORMULARIO
+================================= */
 
-/* Sesión: usa sessionStorage y, si el navegador lo bloquea (pasa al abrir archivos con doble clic), window.name */
-function leerSesion() {
-  try { const s = sessionStorage.getItem("bo_sesion"); if (s) return s; } catch (e) {}
-  const m = /(?:^|;)bo_sesion=([^;]*)/.exec(window.name || ""); return m ? decodeURIComponent(m[1]) : null;
-}
-function guardarSesion(c) { try { sessionStorage.setItem("bo_sesion", c); } catch (e) {} window.name = "bo_sesion=" + encodeURIComponent(c); }
-function borrarSesion() { try { sessionStorage.removeItem("bo_sesion"); } catch (e) {} window.name = ""; }
+const formulario = document.getElementById("formularioLogin");
+const usuario = document.getElementById("usuario");
+const password = document.getElementById("password");
+const mostrarPassword = document.getElementById("mostrarPassword");
+const mensaje = document.getElementById("mensaje");
+const botonLogin = formulario.querySelector('button[type="submit"]');
 
-const $ = (s, r = document) => r.querySelector(s);
-const $$ = (s, r = document) => [...r.querySelectorAll(s)];
-const emailOk = v => /^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(v);
-const passGuardada = c => { try { return localStorage.getItem("bo_pass_" + c); } catch (e) { return null; } };
-const autenticar = (c, p) => {
-  if (ACCESO_ABIERTO) return true;
-  const a = ADMINS.find(x => x.correo === c);
-  return !!a && p === (passGuardada(c) || a.pass);
-};
-const msg = (id, t, ok) => { const e = $(id); e.textContent = t; e.classList.toggle("ok", !!ok); };
+// Contador de intentos incorrectos
+let intentosFallidos = Number(sessionStorage.getItem("intentosFallidos")) || 0;
 
-function panel(id) {
-  ["fLogin", "fRec1"].forEach(f => $("#" + f).hidden = f !== id);
-  ["lMsg", "r1Msg"].forEach(m => msg("#" + m, ""));
-  $({ fLogin: "#lCorreo", fRec1: "#rCorreo" }[id]).focus();
-}
+const MAX_INTENTOS = 3;
 
-/* Si ya hay sesión, pasa directo al panel */
-const sesion = leerSesion();
-if (sesion) location.replace(PAGINA_INICIO);
 
-$$("[data-ver]").forEach(b => b.onclick = () => {
-  const i = $("#" + b.dataset.ver), ver = i.type === "password";
-  i.type = ver ? "text" : "password"; b.textContent = ver ? "Ocultar" : "Mostrar";
+/* =================================
+   MOSTRAR / OCULTAR CONTRASEÑA
+================================= */
+
+mostrarPassword.addEventListener("click", function () {
+    if (password.type === "password") {
+        password.type = "text";
+        mostrarPassword.textContent = "Ocultar";
+    } else {
+        password.type = "password";
+        mostrarPassword.textContent = "Mostrar";
+    }
 });
-$("#goRec").onclick = () => { $("#rCorreo").value = $("#lCorreo").value.trim(); panel("fRec1"); };
-$$("[data-back]").forEach(b => b.onclick = () => panel("fLogin"));
 
-$("#fLogin").onsubmit = e => {
-  e.preventDefault();
-  const c = $("#lCorreo").value.trim().toLowerCase(), p = $("#lPass").value;
-  $("#lCorreo").removeAttribute("aria-invalid");
-  if (!emailOk(c)) { $("#lCorreo").setAttribute("aria-invalid", "true"); msg("#lMsg", "Escribe tu correo, por ejemplo nombre@dominio.mx."); return; }
-  if (!p) { msg("#lMsg", "Escribe tu contraseña."); return; }
-  if (autenticar(c, p)) {
-    guardarSesion(c);
-    location.href = PAGINA_INICIO;
-  } else {
-    msg("#lMsg", "Correo o contraseña incorrectos. Revisa que estén bien escritos."); $("#lPass").select();
-  }
-};
 
-/* Cambiar contraseña (sin código) */
-$("#fRec1").onsubmit = e => {
-  e.preventDefault();
-  const c = $("#rCorreo").value.trim().toLowerCase(), n = $("#rNueva").value, c2 = $("#rConf").value;
-  if (!emailOk(c)) { msg("#r1Msg", "Escribe tu correo, por ejemplo nombre@dominio.mx."); return; }
-  if (!ACCESO_ABIERTO && !ADMINS.some(a => a.correo === c)) { msg("#r1Msg", "Ese correo no tiene acceso de administrador."); return; }
-  if (n.length < 4) { msg("#r1Msg", "La contraseña debe tener al menos 4 caracteres."); return; }
-  if (n !== c2) { msg("#r1Msg", "Las contraseñas no coinciden."); return; }
-  try { localStorage.setItem("bo_pass_" + c, n); } catch (e) {} /* aquí tu servidor guarda la nueva contraseña */
-  $("#lCorreo").value = c; $("#lPass").value = ""; ["rNueva", "rConf"].forEach(i => $("#" + i).value = "");
-  panel("fLogin"); msg("#lMsg", "Contraseña cambiada. Ya puedes iniciar sesión.", true); $("#lPass").focus();
-};
+/* =================================
+   MOSTRAR MENSAJES
+================================= */
 
-if (new URLSearchParams(location.search).get("salio")) msg("#lMsg", "Cerraste sesión correctamente.", true);
-$("#lCorreo").focus();
+function mostrarMensaje(texto, esExito = false) {
+    mensaje.textContent = texto;
+    mensaje.style.display = "block";
+    mensaje.classList.toggle("exito", esExito);
+}
+
+
+/* =================================
+   INICIAR SESIÓN CON LA BASE DE DATOS
+================================= */
+
+formulario.addEventListener("submit", async function (event) {
+
+    event.preventDefault();
+
+    const usuarioValor = usuario.value.trim();
+    const passwordValor = password.value;
+
+    mensaje.textContent = "";
+    mensaje.style.display = "none";
+    mensaje.classList.remove("exito");
+
+    if (usuarioValor === "") {
+        mostrarMensaje("Ingresa tu correo electrónico o número telefónico.");
+        usuario.focus();
+        return;
+    }
+
+    if (passwordValor === "") {
+        mostrarMensaje("Ingresa tu contraseña.");
+        password.focus();
+        return;
+    }
+
+    botonLogin.disabled = true;
+    botonLogin.textContent = "Iniciando sesión...";
+
+    try {
+
+        const respuesta = await fetch('/api/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                usuario: usuarioValor,
+                contrasena: passwordValor
+            })
+        });
+
+       let datos = {};
+
+        try {
+            const textoRespuesta = await respuesta.text();
+            datos = textoRespuesta ? JSON.parse(textoRespuesta) : {};
+        } catch (error) {
+            throw new Error("El servidor devolvió una respuesta no válida.");
+        }
+
+        // =================================
+        // CREDENCIALES INCORRECTAS
+        // =================================
+
+        if (respuesta.status === 401) {
+
+            intentosFallidos++;
+
+            sessionStorage.setItem("intentosFallidos", intentosFallidos);
+
+            if (intentosFallidos >= MAX_INTENTOS) {
+
+                // Guardar el correo para la pantalla de verificación
+                sessionStorage.setItem("correoVerificacion", usuarioValor);
+
+                alert(
+                    "Has superado el límite de intentos de inicio de sesión.\n\n" +
+                    "Por seguridad, necesitas verificar tu identidad mediante tu correo electrónico.\n\n" +
+                    "Presiona Aceptar para continuar."
+                );
+
+                window.location.href = "verificacion_correo.html";
+                return;
+            }
+
+            const intentosRestantes = MAX_INTENTOS - intentosFallidos;
+
+            mostrarMensaje(
+                `Correo o contraseña incorrectos`
+            );
+
+            botonLogin.disabled = false;
+            botonLogin.textContent = "Iniciar sesión";
+
+            return;
+        }
+
+        // Otros errores del servidor
+        if (!respuesta.ok) {
+            throw new Error(datos.error || "No fue posible iniciar sesión.");
+        }
+
+        // =================================
+        // INICIO DE SESIÓN EXITOSO
+        // =================================
+
+        // Reiniciar contador de intentos
+        sessionStorage.removeItem("intentosFallidos");
+
+        sessionStorage.setItem("sesionIniciada", "true");
+        sessionStorage.setItem("nombreUsuario", datos.usuario.nombre);
+
+        mostrarMensaje("¡Inicio de sesión exitoso! Redirigiendo...", true);
+
+        setTimeout(() => {
+            window.location.href = "index.html";
+        }, 1000);
+
+    } catch (error) {
+
+        mostrarMensaje(error.message || "No fue posible iniciar sesión.");
+
+        botonLogin.disabled = false;
+        botonLogin.textContent = "Iniciar sesión";
+    }
+
+});
