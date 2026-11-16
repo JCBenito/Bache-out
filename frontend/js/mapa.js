@@ -25,7 +25,7 @@ const coloresEstado = {
 ========================================= */
 
 async function initMap() {
-    const acapulco = {
+    const acapulcoCentro = {
         lat: 16.8531,
         lng: -99.8237
     };
@@ -33,7 +33,7 @@ async function initMap() {
     mapa = new google.maps.Map(
         document.getElementById("mapa"),
         {
-            center: acapulco,
+            center: acapulcoCentro,
             zoom: 13,
             mapTypeControl: true,
             streetViewControl: true,
@@ -56,6 +56,7 @@ async function initMap() {
 
 async function cargarReportesReales() {
     try {
+        // Rompedor de caché para obtener siempre los datos frescos
         const respuesta = await fetch('/api/reportes?_t=' + new Date().getTime());
         
         if (!respuesta.ok) {
@@ -63,9 +64,6 @@ async function cargarReportesReales() {
         }
 
         const datos = await respuesta.json();
-        
-        // 🔍 DIAGNÓSTICO: Ver qué trae la API exactamente
-        console.log("📥 Datos crudos recibidos del servidor:", datos);
 
         reportesGlobal = datos.map(r => {
             let estadoTexto = "Pendiente";
@@ -96,13 +94,20 @@ async function cargarReportesReales() {
             };
         });
 
-        // 🔍 DIAGNÓSTICO: Ver los reportes ya mapeados listos para el mapa
-        console.log("🗺️ Reportes mapeados para el mapa:", reportesGlobal);
-
+        // Mostrar los reportes con sus iconos personalizados
         mostrarReportes(reportesGlobal);
 
+        // Centrar automáticamente el mapa en el reporte más reciente
+        if (reportesGlobal.length > 0) {
+            const ultimoReporte = reportesGlobal[0];
+            if (ultimoReporte.lat && ultimoReporte.lng) {
+                mapa.setCenter({ lat: ultimoReporte.lat, lng: ultimoReporte.lng });
+                mapa.setZoom(16);
+            }
+        }
+
     } catch (error) {
-        console.error("❌ Error al cargar los reportes en el mapa:", error);
+        console.error("Error al cargar los reportes en el mapa:", error);
     }
 }
 
@@ -115,13 +120,7 @@ function mostrarReportes(listaReportes) {
     eliminarMarcadores();
 
     listaReportes.forEach(function (reporte) {
-        if (!reporte.lat || !reporte.lng) {
-            console.warn("⚠️ Reporte sin coordenadas válidas omitido:", reporte);
-            return;
-        }
-
-        // 🔍 DIAGNÓSTICO: Imprimir cada pin que se va a crear
-        console.log(`📍 Creando pin para ${reporte.folio} en lat: ${reporte.lat}, lng: ${reporte.lng}`);
+        if (!reporte.lat || !reporte.lng) return;
 
         const marcador = new google.maps.Marker({
             position: {
@@ -130,9 +129,7 @@ function mostrarReportes(listaReportes) {
             },
             map: mapa,
             title: reporte.folio,
-            icon: crearIcono(
-                coloresEstado[reporte.estado] || "#95a5a6"
-            )
+            icon: crearIcono(coloresEstado[reporte.estado] || "#95a5a6")
         });
 
         marcador.reporte = reporte;
@@ -150,13 +147,13 @@ function mostrarReportes(listaReportes) {
 
 
 /* =========================================
-   CREAR ICONO DEL PIN
+   CREAR ICONO PERSONALIZADO DEL PIN
 ========================================= */
 
 function crearIcono(color) {
     return {
         path: google.maps.SymbolPath.CIRCLE,
-        scale: 9,
+        scale: 12, // Tamaño optimizado para destacar perfectamente en el mapa
         fillColor: color,
         fillOpacity: 1,
         strokeColor: "#ffffff",
