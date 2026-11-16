@@ -6,7 +6,7 @@ let mapa;
 let marcadores = [];
 let marcadorUsuario = null;
 let ventanaInformacion;
-let reportesGlobal = []; // Almacenará los reportes reales de la BD para los filtros
+let reportesGlobal = [];
 
 /* =========================================
    COLORES DE LOS ESTADOS
@@ -44,10 +44,7 @@ async function initMap() {
 
     ventanaInformacion = new google.maps.InfoWindow();
 
-    // 1. Cargar los reportes reales desde el servidor
     await cargarReportesReales();
-
-    // 2. Configurar herramientas de interacción
     configurarFiltros();
     configurarMiUbicacion();
 }
@@ -59,7 +56,6 @@ async function initMap() {
 
 async function cargarReportesReales() {
     try {
-        // Se añade un parámetro único de tiempo (?_t=...) para evitar que el navegador guarde en caché datos viejos
         const respuesta = await fetch('/api/reportes?_t=' + new Date().getTime());
         
         if (!respuesta.ok) {
@@ -67,19 +63,19 @@ async function cargarReportesReales() {
         }
 
         const datos = await respuesta.json();
+        
+        // 🔍 DIAGNÓSTICO: Ver qué trae la API exactamente
+        console.log("📥 Datos crudos recibidos del servidor:", datos);
 
-        // Mapear los campos de la base de datos al formato que usa tu mapa
         reportesGlobal = datos.map(r => {
-            // Mapear el ID de estado numérico o de texto si viene de la BD
             let estadoTexto = "Pendiente";
-            if (r.id_estado === 2 || r.id_estado === "En reparación") estadoTexto = "En reparación";
-            if (r.id_estado === 3 || r.id_estado === "Resuelto") estadoTexto = "Resuelto";
-            if (r.id_estado === 4 || r.id_estado === "Cancelado") estadoTexto = "Cancelado";
+            if (r.id_estado === 2 || r.id_estado === "En reparación" || r.id_estado === "2") estadoTexto = "En reparación";
+            if (r.id_estado === 3 || r.id_estado === "Resuelto" || r.id_estado === "3") estadoTexto = "Resuelto";
+            if (r.id_estado === 4 || r.id_estado === "Cancelado" || r.id_estado === "4") estadoTexto = "Cancelado";
             if (typeof r.id_estado === "string" && coloresEstado[r.id_estado]) {
                 estadoTexto = r.id_estado;
             }
 
-            // Formatear fecha legible si viene en formato ISO
             let fechaFormateada = "Reciente";
             if (r.fecha_reporte) {
                 const fechaObj = new Date(r.fecha_reporte);
@@ -100,11 +96,13 @@ async function cargarReportesReales() {
             };
         });
 
-        // Mostrar los reportes reales en el mapa
+        // 🔍 DIAGNÓSTICO: Ver los reportes ya mapeados listos para el mapa
+        console.log("🗺️ Reportes mapeados para el mapa:", reportesGlobal);
+
         mostrarReportes(reportesGlobal);
 
     } catch (error) {
-        console.error("No se pudieron cargar los reportes en el mapa:", error);
+        console.error("❌ Error al cargar los reportes en el mapa:", error);
     }
 }
 
@@ -117,8 +115,13 @@ function mostrarReportes(listaReportes) {
     eliminarMarcadores();
 
     listaReportes.forEach(function (reporte) {
-        // Validar que tenga coordenadas válidas antes de poner el pin
-        if (!reporte.lat || !reporte.lng) return;
+        if (!reporte.lat || !reporte.lng) {
+            console.warn("⚠️ Reporte sin coordenadas válidas omitido:", reporte);
+            return;
+        }
+
+        // 🔍 DIAGNÓSTICO: Imprimir cada pin que se va a crear
+        console.log(`📍 Creando pin para ${reporte.folio} en lat: ${reporte.lat}, lng: ${reporte.lng}`);
 
         const marcador = new google.maps.Marker({
             position: {
