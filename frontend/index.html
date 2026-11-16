@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bache-Out | Inicio</title>
-    <link rel="stylesheet" href="css/estilos.css">
+    <link rel="stylesheet" href="/css/estilos.css">
 </head>
 
 <body>
@@ -13,7 +13,7 @@
     <!-- ENCABEZADO -->
     <header class="barra-principal">
         <div class="marca">
-            <img src="Img/Logo.png" alt="Logo de Bache-Out" class="logo">
+            <img src="/Img/Logo.png" alt="Logo de Bache-Out" class="logo">
             <span>Bache-Out</span>
         </div>
     </header>
@@ -36,8 +36,7 @@
             <div class="inicio-texto">
 
                 <h1>
-                    ¡Bienvenid@,
-                    <span id="nombreUsuarioSaludo">usuario!</span>
+                    ¡Bienvenid@, <span id="nombreUsuarioSaludo">Ciudadano</span>!
                 </h1>
 
                 <p>
@@ -59,7 +58,7 @@
 
             <!-- LOGO -->
             <div class="inicio-logo">
-                <img src="Img/Logo.png" alt="Logo de Bache-Out">
+                <img src="/Img/Logo.png" alt="Logo de Bache-Out">
             </div>
         </section>
 
@@ -98,15 +97,25 @@
         document.addEventListener("DOMContentLoaded", function () {
             try {
                 const sesionCruda = localStorage.getItem("usuario");
-                if (sesionCruda) {
-                    const usuario = JSON.parse(sesionCruda);
-                    const nombreReal = usuario.nombres || localStorage.getItem("nombreUsuario");
+                let nombreReal = "";
 
-                    const spanNombre = document.getElementById("nombreUsuarioSaludo");
-                    
-                    if (spanNombre && nombreReal) {
-                        spanNombre.textContent = nombreReal + "!";
-                    }
+                if (sesionCruda) {
+                    const usuarioObj = JSON.parse(sesionCruda);
+                    // Busca tanto en 'nombres' (como lo manda tu backend) como en variantes alternativas
+                    nombreReal = usuarioObj.nombres || usuarioObj.nombre || usuarioObj.usuario;
+                }
+
+                // Respaldo por si está guardado de forma independiente
+                if (!nombreReal) {
+                    nombreReal = localStorage.getItem("nombreUsuario");
+                }
+
+                const spanNombre = document.getElementById("nombreUsuarioSaludo");
+                
+                if (spanNombre && nombreReal) {
+                    // Pone la primera letra en mayúscula para mejor estética
+                    const nombreFormateado = nombreReal.charAt(0).toUpperCase() + nombreReal.slice(1);
+                    spanNombre.textContent = nombreFormateado;
                 }
             } catch (e) {
                 console.error("Error al cargar el nombre de usuario:", e);
