@@ -62,7 +62,7 @@ function detectarColoniaYValidar(lat, lon) {
         idColoniaGlobal = 1; // Barrios Históricos
     }
 
-    return true; // ¡Permite el reporte desde cualquier ubicación de Acapulco!
+    return true; 
 }
 
 
@@ -91,18 +91,7 @@ btnUbicacion.addEventListener("click", function () {
             const lat = posicion.coords.latitude;
             const lon = posicion.coords.longitude;
 
-            // Validar si está dentro del radio y asignar su ID de colonia correspondiente
-            if (!detectarColoniaYValidar(lat, lon)) {
-                errorUbicacion.textContent = "Estás fuera de la zona de cobertura. El servicio solo está disponible en Barrios Históricos, Progreso y La Libertad (Acapulco).";
-                ubicacion.value = "";
-                ubicacionObtenida = false;
-                latitudGlobal = null;
-                longitudGlobal = null;
-                
-                btnUbicacion.disabled = false;
-                btnUbicacion.textContent = "Obtener ubicación";
-                return;
-            }
+            detectarColoniaYValidar(lat, lon);
 
             latitudGlobal = lat;
             longitudGlobal = lon;
@@ -133,6 +122,7 @@ btnUbicacion.addEventListener("click", function () {
     );
 });
 
+
 /* =========================================
    CONTADOR DE DESCRIPCIÓN
    ========================================= */
@@ -147,6 +137,7 @@ descripcion.addEventListener("input", function () {
         contadorDescripcion.style.color = "#7b898e";
     }
 });
+
 
 /* =========================================
    SELECCIONAR FOTOGRAFÍAS
@@ -182,6 +173,7 @@ fotografiaInput.addEventListener("change", function () {
     fotografiaInput.value = "";
 });
 
+
 /* =========================================
    MOSTRAR NOMBRES
    ========================================= */
@@ -213,6 +205,7 @@ function mostrarNombresFotografias() {
     });
 }
 
+
 /* =========================================
    ELIMINAR FOTOGRAFÍA
    ========================================= */
@@ -222,6 +215,7 @@ function eliminarFotografia(indice) {
     errorFotografia.textContent = "";
     mostrarNombresFotografias();
 }
+
 
 /* =========================================
    ENVIAR FORMULARIO (CONEXIÓN AL BACKEND)
@@ -304,14 +298,14 @@ formularioReporte.addEventListener("submit", async function (evento) {
         /* Construir FormData para enviar archivos e información al servidor */
         const formData = new FormData();
         formData.append("id_usuario", usuarioLogueado.id);
-        formData.append("id_estado", 1); // 1 = Pendiente por defecto en la BD
+        formData.append("id_estado", 1); // 1 = Pendiente
         formData.append("descripcion", textoDescripcion);
         formData.append("calle_referencia", direccionReal); 
         formData.append("latitud", latitudGlobal);
         formData.append("longitud", longitudGlobal);
         formData.append("id_colonia", idColoniaGlobal); 
 
-        // Adjuntar todas las fotografías seleccionadas iterando el arreglo
+        // Adjuntar cada archivo fotográfico al FormData
         fotografiasSeleccionadas.forEach(archivo => {
             formData.append("fotografia", archivo);
         });
@@ -325,7 +319,8 @@ formularioReporte.addEventListener("submit", async function (evento) {
 
         if (respuesta.ok) {
             alert("¡Reporte enviado correctamente con éxito!");
-            window.location.href = "Detalles.html";
+            // Redirigir directamente al mapa interactivo para visualizar el pin recién creado
+            window.location.href = "mapa.html";
         } else {
             alert("Error del servidor: " + (resultado.error || "No se pudo registrar el reporte."));
             botonEnviar.disabled = false;
