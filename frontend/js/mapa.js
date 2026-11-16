@@ -59,7 +59,8 @@ async function initMap() {
 
 async function cargarReportesReales() {
     try {
-        const respuesta = await fetch('/api/reportes');
+        // Se añade un parámetro único de tiempo (?_t=...) para evitar que el navegador guarde en caché datos viejos
+        const respuesta = await fetch('/api/reportes?_t=' + new Date().getTime());
         
         if (!respuesta.ok) {
             throw new Error("Error al obtener los reportes del servidor.");
