@@ -1,19 +1,27 @@
 /* =========================================
-   CARGAR DATOS DEL USUARIO AL INICIAR
+   HELPER PARA OBTENER SESIÓN ACTUAL
 ========================================= */
 
-document.addEventListener("DOMContentLoaded", () => {
-    // 1. Validar que la sesión esté activa en localStorage
-    let usuarioLogueado = null;
+function obtenerUsuarioSesion() {
     try {
         const sesionCruda = localStorage.getItem("usuario");
         if (sesionCruda) {
             const parsed = JSON.parse(sesionCruda);
-            usuarioLogueado = parsed.usuario || parsed;
+            return parsed.usuario || parsed;
         }
     } catch (e) {
         console.error("Error al leer la sesión", e);
     }
+    return null;
+}
+
+/* =========================================
+   CARGAR DATOS DEL USUARIO AL INICIAR
+========================================= */
+
+document.addEventListener("DOMContentLoaded", async () => {
+    // 1. Validar que la sesión esté activa en localStorage
+    const usuarioLogueado = obtenerUsuarioSesion();
 
     if (!usuarioLogueado || !usuarioLogueado.id) {
         window.location.href = "login.html";
@@ -48,7 +56,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (correoInput) correoInput.value = correoValor;
     if (telefonoInput) telefonoInput.value = telefonoValor;
 
-    // Actualizar el título grande del perfil
     if (nombreMostrar) {
         nombreMostrar.textContent = `${nF} ${apP} ${apM}`;
     }
@@ -56,6 +63,28 @@ document.addEventListener("DOMContentLoaded", () => {
     // Inicializar variables originales para la edición
     correoOriginal = correoInput ? correoInput.value : "";
     telefonoOriginal = telefonoInput ? telefonoInput.value : "";
+
+    // 4. Cargar foto de perfil persistente
+    const imgPerfil = document.getElementById("fotoPerfil");
+    if (imgPerfil) {
+        const fotoGuardadaLocal = localStorage.getItem(`foto_perfil_${usuarioLogueado.id}`);
+        if (fotoGuardadaLocal) {
+            imgPerfil.src = fotoGuardadaLocal;
+        }
+
+        try {
+            const respFoto = await fetch(`/api/foto-perfil/${usuarioLogueado.id}`);
+            if (respFoto.ok) {
+                const dataFoto = await respFoto.json();
+                if (dataFoto.foto_perfil) {
+                    imgPerfil.src = dataFoto.foto_perfil;
+                    localStorage.setItem(`foto_perfil_${usuarioLogueado.id}`, dataFoto.foto_perfil);
+                }
+            }
+        } catch (err) {
+            console.error("No se pudo verificar la foto en el servidor:", err);
+        }
+    }
 });
 
 
@@ -79,121 +108,114 @@ let telefonoOriginal = "";
 
 
 // Activar edición
-btnEditar.addEventListener("click", function () {
-    correo.disabled = false;
-    telefono.disabled = false;
+if (btnEditar) {
+    btnEditar.addEventListener("click", function () {
+        correo.disabled = false;
+        telefono.disabled = false;
 
-    nombres.disabled = true;
-    apellidoPaterno.disabled = true;
-    apellidoMaterno.disabled = true;
+        nombres.disabled = true;
+        apellidoPaterno.disabled = true;
+        apellidoMaterno.disabled = true;
 
-    correoOriginal = correo.value;
-    telefonoOriginal = telefono.value;
+        correoOriginal = correo.value;
+        telefonoOriginal = telefono.value;
 
-    accionesEdicion.style.display = "flex";
-    btnEditar.style.display = "none";
-});
+        accionesEdicion.style.display = "flex";
+        btnEditar.style.display = "none";
+    });
+}
 
 
 // Cancelar edición
-btnCancelar.addEventListener("click", function () {
-    correo.value = correoOriginal;
-    telefono.value = telefonoOriginal;
-
-    correo.disabled = true;
-    telefono.disabled = true;
-
-    accionesEdicion.style.display = "none";
-    btnEditar.style.display = "inline-block";
-});
-
-
-// Guardar cambios del perfil en la Base de Datos
-btnGuardar.addEventListener("click", async function () {
-    const correoNuevo = correo.value.trim();
-    const telefonoNuevo = telefono.value.replace(/\s/g, "");
-
-    if (correoNuevo === "") {
-        alert("Ingresa tu correo electrónico.");
-        correo.focus();
-        return;
-    }
-
-    const formatoCorreo = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!formatoCorreo.test(correoNuevo)) {
-        alert("Ingresa un correo electrónico válido.");
-        correo.focus();
-        return;
-    }
-
-    if (!/^\d{10}$/.test(telefonoNuevo)) {
-        alert("El número de teléfono debe contener 10 dígitos.");
-        telefono.focus();
-        return;
-    }
-
-    // Obtener ID del usuario desde localStorage de forma segura
-    let usuarioLogueado = null;
-    try {
-        const sesionCruda = localStorage.getItem("usuario");
-        if (sesionCruda) {
-            const parsed = JSON.parse(sesionCruda);
-            usuarioLogueado = parsed.usuario || parsed;
-        }
-    } catch (e) {
-        console.error("Error al leer la sesión", e);
-    }
-
-    if (!usuarioLogueado || !usuarioLogueado.id) {
-        alert("No se encontró una sesión activa.");
-        window.location.href = "login.html";
-        return;
-    }
-
-    try {
-        // Petición al backend para actualizar permanentemente en PostgreSQL
-        const respuesta = await fetch('/api/actualizar-perfil', {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                id_usuario: usuarioLogueado.id,
-                correo: correoNuevo,
-                telefono: telefonoNuevo
-            })
-        });
-
-        const datos = await respuesta.json();
-
-        if (!respuesta.ok) {
-            throw new Error(datos.error || "No se pudo actualizar el perfil.");
-        }
-
-        // Si el servidor responde con éxito, actualizamos la interfaz y el localStorage
-        correo.value = correoNuevo;
-        telefono.value = telefonoNuevo;
+if (btnCancelar) {
+    btnCancelar.addEventListener("click", function () {
+        correo.value = correoOriginal;
+        telefono.value = telefonoOriginal;
 
         correo.disabled = true;
         telefono.disabled = true;
 
         accionesEdicion.style.display = "none";
         btnEditar.style.display = "inline-block";
+    });
+}
 
-        correoOriginal = correo.value;
-        telefonoOriginal = telefono.value;
 
-        // Actualizar el objeto en localStorage
-        usuarioLogueado.correo = correoNuevo;
-        usuarioLogueado.telefono = telefonoNuevo;
-        localStorage.setItem("usuario", JSON.stringify(usuarioLogueado));
+// Guardar cambios del perfil en la Base de Datos
+if (btnGuardar) {
+    btnGuardar.addEventListener("click", async function () {
+        const correoNuevo = correo.value.trim();
+        const telefonoNuevo = telefono.value.replace(/\s/g, "");
 
-        alert("¡Los datos se actualizaron correctamente en la base de datos!");
+        if (correoNuevo === "") {
+            alert("Ingresa tu correo electrónico.");
+            correo.focus();
+            return;
+        }
 
-    } catch (error) {
-        alert(error.message || "Error al conectar con el servidor.");
-    }
-});
+        const formatoCorreo = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!formatoCorreo.test(correoNuevo)) {
+            alert("Ingresa un correo electrónico válido.");
+            correo.focus();
+            return;
+        }
+
+        if (!/^\d{10}$/.test(telefonoNuevo)) {
+            alert("El número de teléfono debe contener 10 dígitos.");
+            telefono.focus();
+            return;
+        }
+
+        const usuarioLogueado = obtenerUsuarioSesion();
+
+        if (!usuarioLogueado || !usuarioLogueado.id) {
+            alert("No se encontró una sesión activa.");
+            window.location.href = "login.html";
+            return;
+        }
+
+        try {
+            const respuesta = await fetch('/api/actualizar-perfil', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    id_usuario: usuarioLogueado.id,
+                    correo: correoNuevo,
+                    telefono: telefonoNuevo
+                })
+            });
+
+            const datos = await respuesta.json();
+
+            if (!respuesta.ok) {
+                throw new Error(datos.error || "No se pudo actualizar el perfil.");
+            }
+
+            correo.value = correoNuevo;
+            telefono.value = telefonoNuevo;
+
+            correo.disabled = true;
+            telefono.disabled = true;
+
+            accionesEdicion.style.display = "none";
+            btnEditar.style.display = "inline-block";
+
+            correoOriginal = correo.value;
+            telefonoOriginal = telefono.value;
+
+            usuarioLogueado.correo = correoNuevo;
+            usuarioLogueado.telefono = telefonoNuevo;
+            localStorage.setItem("usuario", JSON.stringify(usuarioLogueado));
+
+            alert("¡Los datos se actualizaron correctamente en la base de datos!");
+
+        } catch (error) {
+            alert(error.message || "Error al conectar con el servidor.");
+        }
+    });
+}
 
 
 /* =========================================
@@ -206,9 +228,9 @@ const fotoPerfil = document.getElementById("fotoPerfil");
 
 const fotoPredeterminada = "img/perfil-default.png";
 
-// Mostrar la foto seleccionada
+// Subir y guardar la foto seleccionada
 if (inputFoto) {
-    inputFoto.addEventListener("change", function () {
+    inputFoto.addEventListener("change", async function () {
         const archivo = inputFoto.files[0];
 
         if (!archivo) {
@@ -221,21 +243,63 @@ if (inputFoto) {
             return;
         }
 
-        const lector = new FileReader();
+        const usuarioLogueado = obtenerUsuarioSesion();
+        if (!usuarioLogueado || !usuarioLogueado.id) {
+            alert("No se encontró una sesión activa.");
+            return;
+        }
 
+        // Vista previa inmediata
+        const lector = new FileReader();
         lector.onload = function (evento) {
             if (fotoPerfil) fotoPerfil.src = evento.target.result;
         };
-
         lector.readAsDataURL(archivo);
+
+        // Enviar al servidor para guardarla permanentemente
+        const formData = new FormData();
+        formData.append("id_usuario", usuarioLogueado.id);
+        formData.append("foto_perfil", archivo);
+
+        try {
+            const respuesta = await fetch("/api/foto-perfil", {
+                method: "POST",
+                body: formData
+            });
+
+            const resultado = await respuesta.json();
+
+            if (respuesta.ok && resultado.foto_perfil) {
+                if (fotoPerfil) fotoPerfil.src = resultado.foto_perfil;
+                localStorage.setItem(`foto_perfil_${usuarioLogueado.id}`, resultado.foto_perfil);
+            } else {
+                alert(resultado.error || "No se pudo guardar la foto en el servidor.");
+            }
+        } catch (error) {
+            console.error("Error al subir la foto:", error);
+            alert("Error de conexión al guardar la foto de perfil.");
+        }
     });
 }
 
 // Eliminar la foto y restaurar la predeterminada
 if (btnEliminarFoto) {
-    btnEliminarFoto.addEventListener("click", function () {
+    btnEliminarFoto.addEventListener("click", async function () {
+        const usuarioLogueado = obtenerUsuarioSesion();
+
         if (fotoPerfil) fotoPerfil.src = fotoPredeterminada;
         if (inputFoto) inputFoto.value = "";
+
+        if (usuarioLogueado && usuarioLogueado.id) {
+            localStorage.removeItem(`foto_perfil_${usuarioLogueado.id}`);
+            try {
+                await fetch(`/api/foto-perfil/${usuarioLogueado.id}`, {
+                    method: "DELETE"
+                });
+            } catch (error) {
+                console.error("Error al eliminar la foto del servidor:", error);
+            }
+        }
     });
 }
 
@@ -368,16 +432,7 @@ if (btnGuardarContrasena) {
             return;
         }
 
-        let usuarioLogueado = null;
-        try {
-            const sesionCruda = localStorage.getItem("usuario");
-            if (sesionCruda) {
-                const parsed = JSON.parse(sesionCruda);
-                usuarioLogueado = parsed.usuario || parsed;
-            }
-        } catch (e) {
-            console.error("Error al leer la sesión", e);
-        }
+        const usuarioLogueado = obtenerUsuarioSesion();
 
         if (!usuarioLogueado || !usuarioLogueado.id) {
             alert("No se encontró una sesión activa.");
@@ -386,7 +441,6 @@ if (btnGuardarContrasena) {
         }
 
         try {
-            // Petición al backend para actualizar y encriptar la contraseña en PostgreSQL
             const respuesta = await fetch('/api/actualizar-contrasena', {
                 method: 'PUT',
                 headers: {
@@ -445,8 +499,8 @@ if (btnCerrarSesion) {
         const confirmarSalida = confirm("¿Estás seguro de que deseas cerrar sesión?");
 
         if (confirmarSalida) {
-            // Limpiamos los datos del navegador
-            localStorage.clear();
+            // Solo eliminamos la sesión activa, conservando el caché de foto_perfil_[ID]
+            localStorage.removeItem("usuario");
             sessionStorage.clear();
             window.location.href = "login.html";
         }
