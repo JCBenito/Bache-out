@@ -191,7 +191,78 @@ app.put('/api/actualizar-contrasena', async (req, res) => {
     }
 });
 
+// ==========================================
+// GESTIÓN DE FOTO DE PERFIL EN DISCO (Sin modificar PostgreSQL)
+// ==========================================
+
+app.post('/api/foto-perfil', upload.single('foto_perfil'), (req, res) => {
+    const { id_usuario } = req.body;
+    const archivo = req.file;
+
+    if (!archivo || !id_usuario) {
+        return res.status(400).json({ error: 'Falta la imagen o el ID de usuario.' });
+    }
+
+    try {
+        const extensiones = ['.jpg', '.jpeg', '.png', '.webp'];
+        for (const ext of extensiones) {
+            const anterior = path.join(uploadDir, `perfil_${id_usuario}${ext}`);
+            if (fs.existsSync(anterior)) {
+                fs.unlinkSync(anterior);
+            }
+        }
+
+        const extension = path.extname(archivo.originalname).toLowerCase() || '.jpg';
+        const nombreFijo = `perfil_${id_usuario}${extension}`;
+        const rutaDestino = path.join(uploadDir, nombreFijo);
+
+        fs.renameSync(archivo.path, rutaDestino);
+
+        res.json({ 
+            mensaje: 'Foto de perfil guardada.', 
+            foto_perfil: `/uploads/${nombreFijo}?t=${Date.now()}` 
+        });
+    } catch (error) {
+        console.error('Error al guardar foto de perfil:', error);
+        res.status(500).json({ error: 'No se pudo guardar la foto en el servidor.' });
+    }
+});
+
+app.get('/api/foto-perfil/:id_usuario', (req, res) => {
+    const { id_usuario } = req.params;
+    const extensiones = ['.jpg', '.jpeg', '.png', '.webp'];
+
+    for (const ext of extensiones) {
+        const nombreArchivo = `perfil_${id_usuario}${ext}`;
+        if (fs.existsSync(path.join(uploadDir, nombreArchivo))) {
+            return res.json({ foto_perfil: `/uploads/${nombreArchivo}?t=${Date.now()}` });
+        }
+    }
+
+    res.json({ foto_perfil: null });
+});
+
+app.delete('/api/foto-perfil/:id_usuario', (req, res) => {
+    const { id_usuario } = req.params;
+    const extensiones = ['.jpg', '.jpeg', '.png', '.webp'];
+
+    try {
+        for (const ext of extensiones) {
+            const rutaArchivo = path.join(uploadDir, `perfil_${id_usuario}${ext}`);
+            if (fs.existsSync(rutaArchivo)) {
+                fs.unlinkSync(rutaArchivo);
+            }
+        }
+        res.json({ mensaje: 'Foto de perfil eliminada.' });
+    } catch (error) {
+        console.error('Error al eliminar foto de perfil:', error);
+        res.status(500).json({ error: 'No se pudo eliminar la foto.' });
+    }
+});
+
+// ==========================================
 // API: CREAR UN NUEVO REPORTE (Acepta hasta 3 fotografías con upload.array)
+// ==========================================
 app.post('/api/reportes', upload.array('fotografia', 3), async (req, res) => {
     const { id_usuario, id_estado, descripcion, calle_referencia, latitud, longitud, id_colonia } = req.body;
     const archivos = req.files || [];
