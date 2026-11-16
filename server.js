@@ -258,11 +258,14 @@ app.get('/api/reportes', async (req, res) => {
                 r.fecha_creacion AS fecha_reporte, 
                 r.id_estado, 
                 c.nombre_colonia AS colonia,
-                COALESCE(json_agg(e.fotografia) FILTER (WHERE e.fotografia IS NOT NULL), '[]') AS fotografias
+                COALESCE(fotos.fotografias, '[]') AS fotografias
             FROM public.reporte r
             LEFT JOIN public.colonia c ON r.id_colonia = c.id_colonia
-            LEFT JOIN public.evidencia_fotografica e ON r.id_reporte = e.id_reporte
-            GROUP BY r.id_reporte, c.nombre_colonia
+            LEFT JOIN LATERAL (
+                SELECT json_agg(e.fotografia) AS fotografias
+                FROM public.evidencia_fotografica e
+                WHERE e.id_reporte = r.id_reporte
+            ) fotos ON true
             ORDER BY r.fecha_creacion DESC;
         `;
         const resultado = await pool.query(query);
@@ -273,7 +276,7 @@ app.get('/api/reportes', async (req, res) => {
     }
 });
 
-// API: OBTENER REPORTES DE UN USUARIO (Agrupa todas las fotos en un arreglo JSON)
+// API: OBTENER REPORTES DE UN USUARIO (Agrupa todas las fotos en un arreglo JSON de forma segura)
 app.route('/api/reportes/usuario/:id_usuario')
 .get(async (req, res) => {
     const { id_usuario } = req.params;
@@ -285,11 +288,14 @@ app.route('/api/reportes/usuario/:id_usuario')
                 r.calle_referencia, 
                 r.fecha_creacion AS fecha_reporte, 
                 r.id_estado, 
-                COALESCE(json_agg(e.fotografia) FILTER (WHERE e.fotografia IS NOT NULL), '[]') AS fotografias
+                COALESCE(fotos.fotografias, '[]') AS fotografias
             FROM public.reporte r
-            LEFT JOIN public.evidencia_fotografica e ON r.id_reporte = e.id_reporte
+            LEFT JOIN LATERAL (
+                SELECT json_agg(e.fotografia) AS fotografias
+                FROM public.evidencia_fotografica e
+                WHERE e.id_reporte = r.id_reporte
+            ) fotos ON true
             WHERE r.id_usuario = $1 
-            GROUP BY r.id_reporte
             ORDER BY r.fecha_creacion DESC;
         `;
         const resultado = await pool.query(query, [id_usuario]);
