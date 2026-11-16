@@ -1,7 +1,6 @@
-
-/* =================================
-   ELEMENTOS DEL FORMULARIO
-================================= */
+// ========================================
+// ELEMENTOS DEL FORMULARIO
+// ========================================
 
 const formulario = document.getElementById("formularioLogin");
 const usuario = document.getElementById("usuario");
@@ -12,13 +11,12 @@ const botonLogin = formulario.querySelector('button[type="submit"]');
 
 // Contador de intentos incorrectos
 let intentosFallidos = Number(sessionStorage.getItem("intentosFallidos")) || 0;
-
 const MAX_INTENTOS = 3;
 
 
-/* =================================
-   MOSTRAR / OCULTAR CONTRASEÑA
-================================= */
+// ========================================
+// MOSTRAR / OCULTAR CONTRASEÑA
+// ========================================
 
 mostrarPassword.addEventListener("click", function () {
     if (password.type === "password") {
@@ -31,9 +29,9 @@ mostrarPassword.addEventListener("click", function () {
 });
 
 
-/* =================================
-   MOSTRAR MENSAJES
-================================= */
+// ========================================
+// MOSTRAR MENSAJES
+// ========================================
 
 function mostrarMensaje(texto, esExito = false) {
     mensaje.textContent = texto;
@@ -42,9 +40,9 @@ function mostrarMensaje(texto, esExito = false) {
 }
 
 
-/* =================================
-   INICIAR SESIÓN CON LA BASE DE DATOS
-================================= */
+// ========================================
+// INICIAR SESIÓN CON LA BASE DE DATOS
+// ========================================
 
 formulario.addEventListener("submit", async function (event) {
 
@@ -85,7 +83,7 @@ formulario.addEventListener("submit", async function (event) {
             })
         });
 
-       let datos = {};
+        let datos = {};
 
         try {
             const textoRespuesta = await respuesta.text();
@@ -95,18 +93,15 @@ formulario.addEventListener("submit", async function (event) {
         }
 
         // =================================
-        // CREDENCIALES INCORRECTAS
+        // CREDENCIALES INCORRECTAS (Status 401 o 400 por error de credenciales)
         // =================================
 
-        if (respuesta.status === 401) {
+        if (respuesta.status === 401 || (respuesta.status === 400 && datos.error && !datos.usuario)) {
 
             intentosFallidos++;
-
             sessionStorage.setItem("intentosFallidos", intentosFallidos);
 
             if (intentosFallidos >= MAX_INTENTOS) {
-
-                // Guardar el correo para la pantalla de verificación
                 sessionStorage.setItem("correoVerificacion", usuarioValor);
 
                 alert(
@@ -122,7 +117,7 @@ formulario.addEventListener("submit", async function (event) {
             const intentosRestantes = MAX_INTENTOS - intentosFallidos;
 
             mostrarMensaje(
-                `Correo o contraseña incorrectos`
+                datos.error || "Correo o contraseña incorrectos."
             );
 
             botonLogin.disabled = false;
@@ -143,13 +138,14 @@ formulario.addEventListener("submit", async function (event) {
         // Reiniciar contador de intentos
         sessionStorage.removeItem("intentosFallidos");
 
+        // Guardar sesión y datos del usuario para mostrar el saludo personalizado
         sessionStorage.setItem("sesionIniciada", "true");
-        sessionStorage.setItem("nombreUsuario", datos.usuario.nombre);
+        localStorage.setItem("usuarioActivo", JSON.stringify(datos.usuario));
 
         mostrarMensaje("¡Inicio de sesión exitoso! Redirigiendo...", true);
 
         setTimeout(() => {
-            window.location.href = "index.html";
+            window.location.href = "index.html"; // Tu página de inicio / panel
         }, 1000);
 
     } catch (error) {
