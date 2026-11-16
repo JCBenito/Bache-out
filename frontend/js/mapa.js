@@ -30,8 +30,10 @@ async function initMap() {
         lng: -99.8237
     };
 
+    const elementoMapa = document.getElementById("mapa");
+
     mapa = new google.maps.Map(
-        document.getElementById("mapa"),
+        elementoMapa,
         {
             center: acapulcoCentro,
             zoom: 13,
@@ -47,6 +49,19 @@ async function initMap() {
     await cargarReportesReales();
     configurarFiltros();
     configurarMiUbicacion();
+
+    // 🛠️ SOLUCIÓN CLAVE: Forzar un evento de redimensionamiento (resize)
+    // Esto obliga a Google Maps a redibujar todos los pines ocultos o no renderizados por tiempos de carga del CSS
+    setTimeout(() => {
+        google.maps.event.trigger(mapa, 'resize');
+        if (reportesGlobal.length > 0) {
+            const ultimoReporte = reportesGlobal[0];
+            if (ultimoReporte.lat && ultimoReporte.lng) {
+                mapa.setCenter({ lat: ultimoReporte.lat, lng: ultimoReporte.lng });
+                mapa.setZoom(16);
+            }
+        }
+    }, 300);
 }
 
 
@@ -56,7 +71,6 @@ async function initMap() {
 
 async function cargarReportesReales() {
     try {
-        // Rompedor de caché para obtener siempre los datos frescos
         const respuesta = await fetch('/api/reportes?_t=' + new Date().getTime());
         
         if (!respuesta.ok) {
@@ -94,17 +108,7 @@ async function cargarReportesReales() {
             };
         });
 
-        // Mostrar los reportes con sus iconos personalizados
         mostrarReportes(reportesGlobal);
-
-        // Centrar automáticamente el mapa en el reporte más reciente
-        if (reportesGlobal.length > 0) {
-            const ultimoReporte = reportesGlobal[0];
-            if (ultimoReporte.lat && ultimoReporte.lng) {
-                mapa.setCenter({ lat: ultimoReporte.lat, lng: ultimoReporte.lng });
-                mapa.setZoom(16);
-            }
-        }
 
     } catch (error) {
         console.error("Error al cargar los reportes en el mapa:", error);
@@ -153,7 +157,7 @@ function mostrarReportes(listaReportes) {
 function crearIcono(color) {
     return {
         path: google.maps.SymbolPath.CIRCLE,
-        scale: 12, // Tamaño optimizado para destacar perfectamente en el mapa
+        scale: 12,
         fillColor: color,
         fillOpacity: 1,
         strokeColor: "#ffffff",
