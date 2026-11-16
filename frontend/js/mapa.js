@@ -1,196 +1,147 @@
 /* =========================================
-   DATOS DE PRUEBA
-========================================= */
-
-const reportes = [
-
-    {
-        ID: "1",
-        estado: "Pendiente",
-        colonia: "La Libertad",
-        fecha: "01/10/2026",
-        descripcion: "Bache de tamaño mediano ubicado sobre la calle principal.",
-        lat: 16.8605,
-        lng: -99.8235
-    },
-
-    {
-        ID: "2",
-        estado: "En reparación",
-        colonia: "La Progreso",
-        fecha: "30/09/2026",
-        descripcion: "Bache que afecta uno de los carriles de circulación.",
-        lat: 16.8682,
-        lng: -99.8310
-    },
-
-    {
-        ID: "3",
-        estado: "Resuelto",
-        colonia: "Barrios Históricos",
-        fecha: "27/09/2026",
-        descripcion: "Bache reparado por la brigada correspondiente.",
-        lat: 16.8508,
-        lng: -99.9050
-    },
-
-    {
-        ID: "4",
-        estado: "Cancelado",
-        colonia: "La Libertad",
-        fecha: "25/09/2026",
-        descripcion: "Reporte cancelado por información insuficiente.",
-        lat: 16.8550,
-        lng: -99.8180
-    },
-
-    {
-        ID: "5",
-        estado: "Pendiente",
-        colonia: "La Progreso",
-        fecha: "29/09/2026",
-        descripcion: "Bache profundo ubicado cerca de una zona transitada.",
-        lat: 16.8750,
-        lng: -99.8250
-    },
-
-    {
-        ID: "6",
-        estado: "En reparación",
-        colonia: "Barrios Históricos",
-        fecha: "28/09/2026",
-        descripcion: "Bache en proceso de reparación.",
-        lat: 16.8460,
-        lng: -99.9140
-    }
-
-];
-
-
-/* =========================================
-   VARIABLES
+   VARIABLES GLOBALES
 ========================================= */
 
 let mapa;
-
 let marcadores = [];
-
 let marcadorUsuario = null;
-
 let ventanaInformacion;
-
+let reportesGlobal = []; // Almacenará los reportes reales de la BD para los filtros
 
 /* =========================================
    COLORES DE LOS ESTADOS
 ========================================= */
 
 const coloresEstado = {
-
     "Pendiente": "#f39c12",
-
     "En reparación": "#3498db",
-
     "Resuelto": "#27ae60",
-
     "Cancelado": "#e74c3c"
-
 };
 
 
 /* =========================================
-   INICIALIZAR GOOGLE MAPS
+   INICIALIZAR GOOGLE MAPS Y CARGAR REPORTES
 ========================================= */
 
-function initMap() {
-
+async function initMap() {
     const acapulco = {
         lat: 16.8531,
         lng: -99.8237
     };
-
 
     mapa = new google.maps.Map(
         document.getElementById("mapa"),
         {
             center: acapulco,
             zoom: 13,
-
             mapTypeControl: true,
-
             streetViewControl: true,
-
             fullscreenControl: true,
-
             zoomControl: true
         }
     );
 
+    ventanaInformacion = new google.maps.InfoWindow();
 
-    ventanaInformacion =
-        new google.maps.InfoWindow();
+    // 1. Cargar los reportes reales desde el servidor
+    await cargarReportesReales();
 
-
-    mostrarReportes(reportes);
-
-
+    // 2. Configurar herramientas de interacción
     configurarFiltros();
-
-
     configurarMiUbicacion();
-
 }
 
 
 /* =========================================
-   MOSTRAR REPORTES
+   OBTENER REPORTES DESDE LA BASE DE DATOS
+========================================= */
+
+async function cargarReportesReales() {
+    try {
+        const respuesta = await fetch('/api/reportes');
+        
+        if (!respuesta.ok) {
+            throw new Error("Error al obtener los reportes del servidor.");
+        }
+
+        const datos = await respuesta.json();
+
+        // Mapear los campos de la base de datos al formato que usa tu mapa
+        reportesGlobal = datos.map(r => {
+            // Mapear el ID de estado numérico o de texto si viene de la BD
+            let estadoTexto = "Pendiente";
+            if (r.id_estado === 2 || r.id_estado === "En reparación") estadoTexto = "En reparación";
+            if (r.id_estado === 3 || r.id_estado === "Resuelto") estadoTexto = "Resuelto";
+            if (r.id_estado === 4 || r.id_estado === "Cancelado") estadoTexto = "Cancelado";
+            if (typeof r.id_estado === "string" && coloresEstado[r.id_estado]) {
+                estadoTexto = r.id_estado;
+            }
+
+            // Formatear fecha legible si viene en formato ISO
+            let fechaFormateada = "Reciente";
+            if (r.fecha_reporte) {
+                const fechaObj = new Date(r.fecha_reporte);
+                if (!isNaN(fechaObj)) {
+                    fechaFormateada = fechaObj.toLocaleDateString();
+                }
+            }
+
+            return {
+                ID: r.id_reporte,
+                folio: `REPORTE #${r.id_reporte}`,
+                estado: estadoTexto,
+                colonia: r.colonia || "Zona general",
+                fecha: fechaFormateada,
+                descripcion: r.descripcion || "Sin descripción proporcionada.",
+                lat: parseFloat(r.latitud),
+                lng: parseFloat(r.longitud)
+            };
+        });
+
+        // Mostrar los reportes reales en el mapa
+        mostrarReportes(reportesGlobal);
+
+    } catch (error) {
+        console.error("No se pudieron cargar los reportes en el mapa:", error);
+    }
+}
+
+
+/* =========================================
+   MOSTRAR REPORTES EN EL MAPA
 ========================================= */
 
 function mostrarReportes(listaReportes) {
-
     eliminarMarcadores();
 
-
     listaReportes.forEach(function (reporte) {
+        // Validar que tenga coordenadas válidas antes de poner el pin
+        if (!reporte.lat || !reporte.lng) return;
 
-        const marcador =
-            new google.maps.Marker({
-
-                position: {
-                    lat: reporte.lat,
-                    lng: reporte.lng
-                },
-
-                map: mapa,
-
-                title: reporte.folio,
-
-                icon: crearIcono(
-                    coloresEstado[reporte.estado]
-                )
-
-            });
-
+        const marcador = new google.maps.Marker({
+            position: {
+                lat: reporte.lat,
+                lng: reporte.lng
+            },
+            map: mapa,
+            title: reporte.folio,
+            icon: crearIcono(
+                coloresEstado[reporte.estado] || "#95a5a6"
+            )
+        });
 
         marcador.reporte = reporte;
-
 
         marcador.addListener(
             "click",
             function () {
-
-                mostrarInformacion(
-                    marcador,
-                    reporte
-                );
-
+                mostrarInformacion(marcador, reporte);
             }
         );
 
-
         marcadores.push(marcador);
-
     });
-
 }
 
 
@@ -199,23 +150,14 @@ function mostrarReportes(listaReportes) {
 ========================================= */
 
 function crearIcono(color) {
-
     return {
-
         path: google.maps.SymbolPath.CIRCLE,
-
         scale: 9,
-
         fillColor: color,
-
         fillOpacity: 1,
-
         strokeColor: "#ffffff",
-
         strokeWeight: 3
-
     };
-
 }
 
 
@@ -223,55 +165,43 @@ function crearIcono(color) {
    INFORMACIÓN DEL BACHE
 ========================================= */
 
-function mostrarInformacion(
-    marcador,
-    reporte
-) {
-
-    const color =
-        coloresEstado[reporte.estado];
-
+function mostrarInformacion(marcador, reporte) {
+    const color = coloresEstado[reporte.estado] || "#95a5a6";
 
     const contenido = `
-
         <div class="info-bache">
-
-            <h3>
-                ${reporte.folio}
-            </h3>
-
+            <h3>${reporte.folio}</h3>
 
             <span
                 class="info-estado"
                 style="
                     background-color: ${color};
                     color: white;
+                    padding: 3px 8px;
+                    border-radius: 4px;
+                    font-size: 11px;
                 "
             >
                 ${reporte.estado}
             </span>
 
-
-            <p>
+            <p style="margin-top: 8px;">
                 <strong>Colonia:</strong>
                 ${reporte.colonia}
             </p>
-
 
             <p>
                 <strong>Fecha:</strong>
                 ${reporte.fecha}
             </p>
 
-
             <p>
                 <strong>Descripción:</strong>
                 ${reporte.descripcion}
             </p>
 
-
             <a
-                href="Detalles.html?folio=${reporte.folio}"
+                href="Detalles.html?id=${reporte.ID}"
                 style="
                     display: inline-block;
                     margin-top: 8px;
@@ -286,22 +216,11 @@ function mostrarInformacion(
             >
                 Ver detalles
             </a>
-
         </div>
-
     `;
 
-
-    ventanaInformacion.setContent(
-        contenido
-    );
-
-
-    ventanaInformacion.open(
-        mapa,
-        marcador
-    );
-
+    ventanaInformacion.setContent(contenido);
+    ventanaInformacion.open(mapa, marcador);
 }
 
 
@@ -310,18 +229,10 @@ function mostrarInformacion(
 ========================================= */
 
 function eliminarMarcadores() {
-
-    marcadores.forEach(
-        function (marcador) {
-
-            marcador.setMap(null);
-
-        }
-    );
-
-
+    marcadores.forEach(function (marcador) {
+        marcador.setMap(null);
+    });
     marcadores = [];
-
 }
 
 
@@ -330,30 +241,15 @@ function eliminarMarcadores() {
 ========================================= */
 
 function configurarFiltros() {
+    const filtroEstado = document.getElementById("filtroEstado");
+    const filtroColonia = document.getElementById("filtroColonia");
 
-    const filtroEstado =
-        document.getElementById(
-            "filtroEstado"
-        );
-
-
-    const filtroColonia =
-        document.getElementById(
-            "filtroColonia"
-        );
-
-
-    filtroEstado.addEventListener(
-        "change",
-        aplicarFiltros
-    );
-
-
-    filtroColonia.addEventListener(
-        "change",
-        aplicarFiltros
-    );
-
+    if (filtroEstado) {
+        filtroEstado.addEventListener("change", aplicarFiltros);
+    }
+    if (filtroColonia) {
+        filtroColonia.addEventListener("change", aplicarFiltros);
+    }
 }
 
 
@@ -362,46 +258,22 @@ function configurarFiltros() {
 ========================================= */
 
 function aplicarFiltros() {
+    const estadoSeleccionado = document.getElementById("filtroEstado")?.value || "todos";
+    const coloniaSeleccionada = document.getElementById("filtroColonia")?.value || "todas";
 
-    const estadoSeleccionado =
-        document.getElementById(
-            "filtroEstado"
-        ).value;
+    const reportesFiltrados = reportesGlobal.filter(function (reporte) {
+        const coincideEstado =
+            estadoSeleccionado === "todos" ||
+            reporte.estado.toLowerCase() === estadoSeleccionado.toLowerCase();
 
+        const coincideColonia =
+            coloniaSeleccionada === "todas" ||
+            reporte.colonia.toLowerCase() === coloniaSeleccionada.toLowerCase();
 
-    const coloniaSeleccionada =
-        document.getElementById(
-            "filtroColonia"
-        ).value;
+        return coincideEstado && coincideColonia;
+    });
 
-
-    const reportesFiltrados =
-        reportes.filter(
-            function (reporte) {
-
-                const coincideEstado =
-                    estadoSeleccionado === "todos" ||
-                    reporte.estado === estadoSeleccionado;
-
-
-                const coincideColonia =
-                    coloniaSeleccionada === "todas" ||
-                    reporte.colonia === coloniaSeleccionada;
-
-
-                return (
-                    coincideEstado &&
-                    coincideColonia
-                );
-
-            }
-        );
-
-
-    mostrarReportes(
-        reportesFiltrados
-    );
-
+    mostrarReportes(reportesFiltrados);
 }
 
 
@@ -410,133 +282,62 @@ function aplicarFiltros() {
 ========================================= */
 
 function configurarMiUbicacion() {
+    const boton = document.getElementById("btnMiUbicacion");
 
-    const boton =
-        document.getElementById(
-            "btnMiUbicacion"
-        );
+    if (!boton) return;
 
+    boton.addEventListener("click", function () {
+        if (!navigator.geolocation) {
+            alert("Tu navegador no permite obtener la ubicación.");
+            return;
+        }
 
-    boton.addEventListener(
-        "click",
-        function () {
+        boton.textContent = "Obteniendo ubicación...";
+        boton.disabled = true;
 
-            if (!navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            function (posicion) {
+                const ubicacion = {
+                    lat: posicion.coords.latitude,
+                    lng: posicion.coords.longitude
+                };
 
-                alert(
-                    "Tu navegador no permite obtener la ubicación."
-                );
-
-                return;
-            }
-
-
-            boton.textContent =
-                "Obteniendo ubicación...";
-
-            boton.disabled = true;
-
-
-            navigator.geolocation.getCurrentPosition(
-
-                function (posicion) {
-
-                    const latitud =
-                        posicion.coords.latitude;
-
-
-                    const longitud =
-                        posicion.coords.longitude;
-
-
-                    const ubicacion = {
-
-                        lat: latitud,
-
-                        lng: longitud
-
-                    };
-
-
-                    if (marcadorUsuario) {
-
-                        marcadorUsuario.setMap(
-                            null
-                        );
-
-                    }
-
-
-                    marcadorUsuario =
-                        new google.maps.Marker({
-
-                            position: ubicacion,
-
-                            map: mapa,
-
-                            title: "Mi ubicación",
-
-                            icon: {
-
-                                path:
-                                    google.maps.SymbolPath.CIRCLE,
-
-                                scale: 8,
-
-                                fillColor: "#173F4A",
-
-                                fillOpacity: 1,
-
-                                strokeColor: "#ffffff",
-
-                                strokeWeight: 3
-
-                            }
-
-                        });
-
-
-                    mapa.setCenter(
-                        ubicacion
-                    );
-
-
-                    mapa.setZoom(16);
-
-
-                    boton.textContent =
-                        "Mi ubicación";
-
-                    boton.disabled = false;
-
-                },
-
-
-                function () {
-
-                    alert(
-                        "No fue posible obtener tu ubicación. " +
-                        "Verifica que hayas permitido el acceso a tu ubicación."
-                    );
-
-
-                    boton.textContent =
-                        "Mi ubicación";
-
-                    boton.disabled = false;
-
+                if (marcadorUsuario) {
+                    marcadorUsuario.setMap(null);
                 }
 
-            );
+                marcadorUsuario = new google.maps.Marker({
+                    position: ubicacion,
+                    map: mapa,
+                    title: "Mi ubicación",
+                    icon: {
+                        path: google.maps.SymbolPath.CIRCLE,
+                        scale: 8,
+                        fillColor: "#173F4A",
+                        fillOpacity: 1,
+                        strokeColor: "#ffffff",
+                        strokeWeight: 3
+                    }
+                });
 
-        }
-    );
+                mapa.setCenter(ubicacion);
+                mapa.setZoom(16);
 
+                boton.textContent = "Mi ubicación";
+                boton.disabled = false;
+            },
+            function () {
+                alert("No fue posible obtener tu ubicación. Verifica los permisos del navegador.");
+                boton.textContent = "Mi ubicación";
+                boton.disabled = false;
+            }
+        );
+    });
 }
 
 
 /* =========================================
-   GOOGLE MAPS
+   GOOGLE MAPS CALLBACK
 ========================================= */
 
 window.initMap = initMap;
