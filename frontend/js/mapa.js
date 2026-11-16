@@ -50,17 +50,10 @@ async function initMap() {
     configurarFiltros();
     configurarMiUbicacion();
 
-    // 🛠️ SOLUCIÓN CLAVE: Forzar un evento de redimensionamiento (resize)
-    // Esto obliga a Google Maps a redibujar todos los pines ocultos o no renderizados por tiempos de carga del CSS
+    // Asegurar el renderizado correcto del contenedor sin alterar el centro ni el zoom inicial
     setTimeout(() => {
         google.maps.event.trigger(mapa, 'resize');
-        if (reportesGlobal.length > 0) {
-            const ultimoReporte = reportesGlobal[0];
-            if (ultimoReporte.lat && ultimoReporte.lng) {
-                mapa.setCenter({ lat: ultimoReporte.lat, lng: ultimoReporte.lng });
-                mapa.setZoom(16);
-            }
-        }
+        mapa.setCenter(acapulcoCentro);
     }, 300);
 }
 
@@ -335,6 +328,11 @@ function configurarMiUbicacion() {
                 alert("No fue posible obtener tu ubicación. Verifica los permisos del navegador.");
                 boton.textContent = "Mi ubicación";
                 boton.disabled = false;
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0
             }
         );
     });
