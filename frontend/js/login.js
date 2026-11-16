@@ -93,7 +93,7 @@ formulario.addEventListener("submit", async function (event) {
         }
 
         // =================================
-        // CREDENCIALES INCORRECTAS (Status 401 o 400 por error de credenciales)
+        // CREDENCIALES INCORRECTAS
         // =================================
 
         if (respuesta.status === 401 || (respuesta.status === 400 && datos.error && !datos.usuario)) {
@@ -114,11 +114,7 @@ formulario.addEventListener("submit", async function (event) {
                 return;
             }
 
-            const intentosRestantes = MAX_INTENTOS - intentosFallidos;
-
-            mostrarMensaje(
-                datos.error || "Correo o contraseña incorrectos."
-            );
+            mostrarMensaje(datos.error || "Correo o contraseña incorrectos.");
 
             botonLogin.disabled = false;
             botonLogin.textContent = "Iniciar sesión";
@@ -137,15 +133,16 @@ formulario.addEventListener("submit", async function (event) {
 
         // Reiniciar contador de intentos
         sessionStorage.removeItem("intentosFallidos");
-
-        // Guardar sesión y datos del usuario para mostrar el saludo personalizado
         sessionStorage.setItem("sesionIniciada", "true");
-        localStorage.setItem("usuarioActivo", JSON.stringify(datos.usuario));
+
+        // GUARDAR DATOS EXACTOS PARA EL INDEX.HTML (Clave "usuario")
+        localStorage.setItem("usuario", JSON.stringify(datos.usuario));
+        localStorage.setItem("nombreUsuario", datos.usuario.nombres); // Respaldo adicional
 
         mostrarMensaje("¡Inicio de sesión exitoso! Redirigiendo...", true);
 
         setTimeout(() => {
-            window.location.href = "index.html"; // Tu página de inicio / panel
+            window.location.href = "index.html";
         }, 1000);
 
     } catch (error) {
