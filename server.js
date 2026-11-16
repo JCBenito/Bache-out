@@ -30,14 +30,17 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage: storage });
 
-// Servir archivos estáticos de la carpeta frontend
-app.use(express.static('frontend'));
-app.use('/uploads', express.static(uploadDir));
-
-// FORZAR QUE LA PÁGINA PRINCIPAL SEA "nosotros.html"
+// ==========================================
+// 1. FORZAR QUE LA PÁGINA PRINCIPAL SEA "nosotros.html"
+// (Debe ir antes de express.static para que intercepte la ruta raíz "/")
+// ==========================================
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'frontend', 'nosotros.html'));
 });
+
+// 2. Archivos estáticos de la carpeta frontend y carpeta de subidas
+app.use(express.static('frontend'));
+app.use('/uploads', express.static(uploadDir));
 
 app.post('/api/registro', async (req, res) => {
     let { nombres, apellido_paterno, apellido_materno, telefono, correo, contrasena } = req.body;
