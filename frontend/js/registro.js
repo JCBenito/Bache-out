@@ -21,6 +21,20 @@ const botonRegistro = formulario.querySelector('button[type="submit"]');
 
 
 // ========================================
+// BLOQUEAR NÚMEROS Y CARACTERES EN TIEMPO REAL
+// ========================================
+
+[nombreInput, apellidoPInput, apellidoMInput].forEach(campo => {
+    if (!campo) return;
+
+    campo.addEventListener("input", function () {
+        // Elimina automáticamente números y caracteres especiales, dejando solo letras, acentos, ñ y espacios
+        this.value = this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚüÜñÑ\s]/g, "");
+    });
+});
+
+
+// ========================================
 // MOSTRAR / OCULTAR CONTRASEÑA
 // ========================================
 
@@ -60,12 +74,12 @@ formulario.addEventListener("submit", async function (event) {
     event.preventDefault();
 
     // ====================================
-    // OBTENER DATOS (Usando los IDs exactos del HTML)
+    // OBTENER DATOS
     // ====================================
-    const nombres = nombreInput ? nombreInput.value.trim() : "";
-    const apellido_paterno = apellidoPInput ? apellidoPInput.value.trim() : "";
-    const apellido_materno = apellidoMInput ? apellidoMInput.value.trim() : "";
-    const correo = correoInput ? correoInput.value.trim() : "";
+    const nombres = nombreInput ? nombreInput.value.trim().replace(/\s+/g, " ") : "";
+    const apellido_paterno = apellidoPInput ? apellidoPInput.value.trim().replace(/\s+/g, " ") : "";
+    const apellido_materno = apellidoMInput ? apellidoMInput.value.trim().replace(/\s+/g, " ") : "";
+    const correo = correoInput ? correoInput.value.trim().toLowerCase() : "";
     const telefono = telefonoInput.value.trim();
     
     const passwordValor = password.value;
@@ -80,15 +94,51 @@ formulario.addEventListener("submit", async function (event) {
     // VALIDACIONES LOCALES ESTRICTAS
     // ====================================
 
-    // 1. Validación de correo estricto (evita dominios mal formados o repetidos como .com.com)
-    const regexCorreoEstricto = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9-]+(\.[a-zA-Z]{2,6}){1,2}$/;
-    if (!regexCorreoEstricto.test(correo) || /(\.[a-zA-Z]{2,6})\1+$/.test(correo)) {
-        mostrarError("Error: ingresa un correo electrónico válido (ej. usuario@dominio.com).");
+    // 1. Validación de nombres y apellidos reales (solo letras, acentos, ñ y espacios; mínimo 2 letras)
+    const regexSoloLetras = /^[a-záéíóúüñA-ZÁÉÍÓÚÜÑ\s]{2,50}$/;
+
+    if (!regexSoloLetras.test(nombres)) {
+        mostrarError("Error: el nombre solo debe contener letras reales (mínimo 2 caracteres, sin números ni símbolos).");
+        nombreInput.focus();
+        return;
+    }
+
+    if (!regexSoloLetras.test(apellido_paterno)) {
+        mostrarError("Error: el apellido paterno solo debe contener letras reales.");
+        apellidoPInput.focus();
+        return;
+    }
+
+    if (apellido_materno !== "" && !regexSoloLetras.test(apellido_materno)) {
+        mostrarError("Error: el apellido materno solo debe contener letras reales.");
+        apellidoMInput.focus();
+        return;
+    }
+
+    // 2. Validación de correo con extensiones/dominios reales permitidos
+    const dominiosPermitidos = [
+        "gmail.com", "hotmail.com", "hotmail.es",
+        "outlook.com", "outlook.es", "live.com", "live.com.mx",
+        "yahoo.com", "yahoo.com.mx", "yahoo.es",
+        "icloud.com", "me.com", "msn.com",
+        "proton.me", "protonmail.com",
+        "acapulco.tecnm.mx", "tecnm.mx"
+    ];
+
+    const partesCorreo = correo.split("@");
+    const regexUsuarioCorreo = /^[a-z0-9._-]{3,}$/;
+
+    if (
+        partesCorreo.length !== 2 ||
+        !regexUsuarioCorreo.test(partesCorreo[0]) ||
+        !dominiosPermitidos.includes(partesCorreo[1])
+    ) {
+        mostrarError("Error: ingresa un correo con una extensión real válida (ej. @gmail.com, @hotmail.com, @outlook.com, @yahoo.com, @icloud.com).");
         correoInput.focus();
         return;
     }
 
-    // 2. Validación de teléfono de México (+52 o 52 seguido de 10 dígitos)
+    // 3. Validación de teléfono de México (+52 o 52 seguido de 10 dígitos)
     const telefonoLimpio = telefono.replace(/[\s\-()]/g, '');
     const regexTelefonoMexico = /^(\+?52)\d{10}$/;
     if (!regexTelefonoMexico.test(telefonoLimpio)) {
@@ -128,7 +178,7 @@ formulario.addEventListener("submit", async function (event) {
     }
 
     // ====================================
-    // PETICIÓN REAL AL BACKEND (RENDER)
+    // PETICIÓN REAL AL BACKEND
     // ====================================
 
     try {
@@ -141,7 +191,7 @@ formulario.addEventListener("submit", async function (event) {
                 nombres,
                 apellido_paterno,
                 apellido_materno,
-                telefono: telefonoLimpio, // Enviamos el teléfono limpio con su lada
+                telefono: telefonoLimpio,
                 correo,
                 contrasena: passwordValor
             })
