@@ -64,7 +64,7 @@ app.post('/api/registro', async (req, res) => {
         return res.status(400).json({ error: 'El apellido materno solo debe contener letras reales.' });
     }
 
-    // 2. Validación de correo electrónico con dominios reales verificados
+    // 2. Validación de correo electrónico: sin puntos ni caracteres al inicio o antes/después del @, y con dominios reales
     const dominiosPermitidos = [
         'gmail.com',
         'hotmail.com',
@@ -86,16 +86,18 @@ app.post('/api/registro', async (req, res) => {
     ];
 
     const partesCorreo = correo.split('@');
-    const regexUsuarioCorreo = /^[a-zA-Z0-9._-]+$/;
+    // Inicia y termina obligatoriamente con letra o número antes del @, mínimo 3 caracteres, sin puntos consecutivos
+    const regexUsuarioCorreo = /^[a-z0-9](?:[a-z0-9._-]*[a-z0-9])?$/;
 
     if (
         partesCorreo.length !== 2 ||
         partesCorreo[0].length < 3 ||
+        partesCorreo[0].includes('..') ||
         !regexUsuarioCorreo.test(partesCorreo[0]) ||
         !dominiosPermitidos.includes(partesCorreo[1])
     ) {
         return res.status(400).json({ 
-            error: 'Ingresa un correo electrónico con una extensión real válida (ej. @gmail.com, @hotmail.com, @outlook.com, @yahoo.com, @icloud.com).' 
+            error: 'El correo no debe llevar puntos ni símbolos al inicio o antes/después del @, y debe usar un dominio válido (ej. @gmail.com, @hotmail.com, @outlook.com, @yahoo.com).' 
         });
     }
 
