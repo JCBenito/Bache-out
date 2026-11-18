@@ -33,6 +33,15 @@ const botonRegistro = formulario.querySelector('button[type="submit"]');
     });
 });
 
+// Bloquear puntos, símbolos o espacios al inicio del correo mientras el usuario escribe
+if (correoInput) {
+    correoInput.addEventListener("input", function () {
+        this.value = this.value
+            .replace(/^[^a-zA-Z0-9]+/, "") // Elimina puntos o símbolos al inicio
+            .replace(/\s/g, "");            // Elimina espacios
+    });
+}
+
 
 // ========================================
 // MOSTRAR / OCULTAR CONTRASEÑA
@@ -115,7 +124,7 @@ formulario.addEventListener("submit", async function (event) {
         return;
     }
 
-    // 2. Validación de correo con extensiones/dominios reales permitidos
+    // 2. Validación de correo: sin puntos/caracteres al inicio ni justo antes/después del @, y con dominios reales
     const dominiosPermitidos = [
         "gmail.com", "hotmail.com", "hotmail.es",
         "outlook.com", "outlook.es", "live.com", "live.com.mx",
@@ -126,14 +135,17 @@ formulario.addEventListener("submit", async function (event) {
     ];
 
     const partesCorreo = correo.split("@");
-    const regexUsuarioCorreo = /^[a-z0-9._-]{3,}$/;
+    // Inicia y termina con letra o número antes del @, mínimo 3 caracteres, sin puntos consecutivos
+    const regexUsuarioCorreo = /^[a-z0-9](?:[a-z0-9._-]*[a-z0-9])?$/;
 
     if (
         partesCorreo.length !== 2 ||
+        partesCorreo[0].length < 3 ||
+        partesCorreo[0].includes("..") ||
         !regexUsuarioCorreo.test(partesCorreo[0]) ||
         !dominiosPermitidos.includes(partesCorreo[1])
     ) {
-        mostrarError("Error: ingresa un correo con una extensión real válida (ej. @gmail.com, @hotmail.com, @outlook.com, @yahoo.com, @icloud.com).");
+        mostrarError("Error: el correo no debe llevar puntos ni símbolos al inicio o antes/después del @, y debe usar un dominio válido (ej. @gmail.com, @hotmail.com, @outlook.com, @yahoo.com).");
         correoInput.focus();
         return;
     }
