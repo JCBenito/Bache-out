@@ -44,19 +44,62 @@ app.use('/uploads', express.static(uploadDir));
 
 app.post('/api/registro', async (req, res) => {
     let { nombres, apellido_paterno, apellido_materno, telefono, correo, contrasena } = req.body;
-    nombres = nombres ? nombres.toLowerCase().trim() : '';
-    apellido_paterno = apellido_paterno ? apellido_paterno.toLowerCase().trim() : '';
-    apellido_materno = apellido_materno ? apellido_materno.toLowerCase().trim() : '';
+    
+    nombres = nombres ? nombres.toLowerCase().trim().replace(/\s+/g, ' ') : '';
+    apellido_paterno = apellido_paterno ? apellido_paterno.toLowerCase().trim().replace(/\s+/g, ' ') : '';
+    apellido_materno = apellido_materno ? apellido_materno.toLowerCase().trim().replace(/\s+/g, ' ') : '';
     correo = correo ? correo.toLowerCase().trim() : '';
     telefono = telefono ? telefono.replace(/[\s\-()]/g, '').trim() : '';
 
-    // 1. Validación de formato estricto de correo electrónico
-    const regexCorreoEstricto = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9-]+(\.[a-zA-Z]{2,6}){1,2}$/;
-    if (!regexCorreoEstricto.test(correo) || /(\.[a-zA-Z]{2,6})\1+$/.test(correo)) {
-        return res.status(400).json({ error: 'El formato del correo electrónico no es válido.' });
+    // 1. Validación estricta de nombres y apellidos reales (solo letras, acentos, ñ, diéresis y espacios)
+    const regexSoloLetras = /^[a-záéíóúüñA-ZÁÉÍÓÚÜÑ\s]{2,50}$/;
+    
+    if (!regexSoloLetras.test(nombres)) {
+        return res.status(400).json({ error: 'El nombre solo debe contener letras reales (sin números ni caracteres especiales).' });
+    }
+    if (!regexSoloLetras.test(apellido_paterno)) {
+        return res.status(400).json({ error: 'El apellido paterno solo debe contener letras reales.' });
+    }
+    if (apellido_materno && !regexSoloLetras.test(apellido_materno)) {
+        return res.status(400).json({ error: 'El apellido materno solo debe contener letras reales.' });
     }
 
-    // 2. Validación de teléfono mexicano (debe iniciar con +52 o 52 + 10 dígitos)
+    // 2. Validación de correo electrónico con dominios reales verificados
+    const dominiosPermitidos = [
+        'gmail.com',
+        'hotmail.com',
+        'hotmail.es',
+        'outlook.com',
+        'outlook.es',
+        'live.com',
+        'live.com.mx',
+        'yahoo.com',
+        'yahoo.com.mx',
+        'yahoo.es',
+        'icloud.com',
+        'me.com',
+        'msn.com',
+        'proton.me',
+        'protonmail.com',
+        'acapulco.tecnm.mx',
+        'tecnm.mx'
+    ];
+
+    const partesCorreo = correo.split('@');
+    const regexUsuarioCorreo = /^[a-zA-Z0-9._-]+$/;
+
+    if (
+        partesCorreo.length !== 2 ||
+        partesCorreo[0].length < 3 ||
+        !regexUsuarioCorreo.test(partesCorreo[0]) ||
+        !dominiosPermitidos.includes(partesCorreo[1])
+    ) {
+        return res.status(400).json({ 
+            error: 'Ingresa un correo electrónico con una extensión real válida (ej. @gmail.com, @hotmail.com, @outlook.com, @yahoo.com, @icloud.com).' 
+        });
+    }
+
+    // 3. Validación de teléfono mexicano (debe iniciar con +52 o 52 + 10 dígitos)
     const regexTelefonoMexico = /^(\+?52)\d{10}$/;
     if (!regexTelefonoMexico.test(telefono)) {
         return res.status(400).json({ error: 'El teléfono debe iniciar con la lada de México (+52 o 52) seguido de 10 dígitos.' });
