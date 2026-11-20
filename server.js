@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs');
 const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
+const nodemailer = require('nodemailer');
 const pool = require('./db');
 require('dotenv').config();
 
@@ -101,16 +102,19 @@ app.post('/api/registro', async (req, res) => {
         });
     }
 
-    // 3. Validación de teléfono mexicano (debe iniciar con +52 o 52 + 10 dígitos)
-    const regexTelefonoMexico = /^(\+?52)\d{10}$/;
-    if (!regexTelefonoMexico.test(telefono)) {
-        return res.status(400).json({ error: 'El teléfono debe iniciar con la lada de México (+52 o 52) seguido de 10 dígitos.' });
+    // 3. Validación de teléfono mexicano (exactamente 10 dígitos numéricos, agregando +52 automáticamente)
+    const soloDigitosTelefono = telefono.replace(/\D/g, '');
+    let diezDigitos = soloDigitosTelefono;
+
+    if (soloDigitosTelefono.length === 12 && soloDigitosTelefono.startsWith('52')) {
+        diezDigitos = soloDigitosTelefono.slice(2);
     }
 
-    // Estandarizar el formato del teléfono asegurando que comience con '+'
-    if (!telefono.startsWith('+')) {
-        telefono = '+' + telefono;
+    if (!/^\d{10}$/.test(diezDigitos)) {
+        return res.status(400).json({ error: 'El número de teléfono debe contener exactamente 10 dígitos numéricos.' });
     }
+
+    telefono = `+52${diezDigitos}`;
 
     try {
         const existe = await pool.query(
@@ -144,8 +148,8 @@ app.post('/api/login', async (req, res) => {
 
     try {
         const resultado = await pool.query(
-            'SELECT * FROM public.usuarios WHERE LOWER(correo) = $1 OR telefono = $1',
-            [usuarioLimpio]
+            'SELECT * FROM public.usuarios WHERE LOWER(correo) = $1 OR telefono = $1 OR telefono = $2',
+            [usuarioLimpio, `+52${usuarioLimpio.replace(/\D/g, '')}`]
         );
 
         if (resultado.rows.length === 0) {
@@ -233,6 +237,110 @@ app.put('/api/actualizar-contrasena', async (req, res) => {
     } catch (error) {
         console.error('Error al cambiar contraseña:', error);
         res.status(500).json({ error: 'Error al actualizar la contraseña en el servidor.' });
+    }
+});
+
+// ==========================================
+// RECUPERACIÓN DE CONTRASEÑA POR CORREO (NODEMAILER)
+// ==========================================
+
+const codigosRecuperacion = new Map();
+
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+    }
+});
+
+// PASO 1: SOLICITAR CÓDIGO DE RECUPERACIÓN
+app.post('/api/recuperar-solicitar', async (req, res) => {
+    const correo = req.body.correo ? req.body.correo.toLowerCase().trim() : '';
+
+    if (!correo) {
+        return res.status(400).json({ error: 'Ingresa tu correo electrónico.' });
+    }
+
+    try {
+        const resultado = await pool.query(
+            'SELECT id_usuario, nombres FROM public.usuarios WHERE LOWER(correo) = $1',
+            [correo]
+        );
+
+        if (resultado.rows.length === 0) {
+            return res.status(404).json({ error: 'No existe ninguna cuenta registrada con ese correo.' });
+        }
+
+        const usuario = resultado.rows[0];
+        const codigo = Math.floor(100000 + Math.random() * 900000).toString();
+        const expiracion = Date.now() + 15 * 60 * 1000; // Válido por 15 minutos
+
+        codigosRecuperacion.set(correo, { codigo, expiracion, id_usuario: usuario.id_usuario });
+
+        await transporter.sendMail({
+            from: `"Soporte Bache-Out" <${process.env.EMAIL_USER}>`,
+            to: correo,
+            subject: 'Código de recuperación de contraseña - Bache-Out',
+            html: `
+                <div style="font-family: Arial, sans-serif; max-width: 500px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
+                    <h2 style="color: #1e3a8a;">Recuperación de contraseña</h2>
+                    <p>Hola <strong>${usuario.nombres}</strong>,</p>
+                    <p>Recibimos una solicitud para restablecer tu contraseña en el portal ciudadano <strong>Bache-Out</strong>.</p>
+                    <p>Tu código de verificación es:</p>
+                    <div style="font-size: 28px; font-weight: bold; letter-spacing: 6px; text-align: center; background: #f1f5f9; padding: 15px; border-radius: 6px; color: #0f172a;">
+                        ${codigo}
+                    </div>
+                    <p style="font-size: 13px; color: #64748b; margin-top: 15px;">Este código expira en 15 minutos. Si no solicitaste este cambio, ignora este mensaje.</p>
+                </div>
+            `
+        });
+
+        res.json({ mensaje: 'Código enviado. Revisa tu bandeja de entrada o carpeta de spam.' });
+    } catch (error) {
+        console.error('Error al enviar correo de recuperación:', error);
+        res.status(500).json({ error: 'No se pudo enviar el correo de verificación.' });
+    }
+});
+
+// PASO 2: VERIFICAR CÓDIGO Y RESTABLECER CONTRASEÑA
+app.post('/api/recuperar-restablecer', async (req, res) => {
+    const correo = req.body.correo ? req.body.correo.toLowerCase().trim() : '';
+    const { codigo, nuevaContrasena } = req.body;
+
+    const registro = codigosRecuperacion.get(correo);
+
+    if (!registro) {
+        return res.status(400).json({ error: 'No hay una solicitud activa para este correo o el código ya fue usado.' });
+    }
+
+    if (Date.now() > registro.expiracion) {
+        codigosRecuperacion.delete(correo);
+        return res.status(400).json({ error: 'El código ha expirado. Solicita uno nuevo.' });
+    }
+
+    if (registro.codigo !== String(codigo).trim()) {
+        return res.status(400).json({ error: 'El código de verificación es incorrecto.' });
+    }
+
+    if (!nuevaContrasena || nuevaContrasena.length < 8 || !/[0-9]/.test(nuevaContrasena) || !/[^A-Za-z0-9]/.test(nuevaContrasena)) {
+        return res.status(400).json({ error: 'La contraseña debe tener al menos 8 caracteres, un número y un símbolo.' });
+    }
+
+    try {
+        const salt = await bcrypt.genSalt(10);
+        const hash = await bcrypt.hash(nuevaContrasena, salt);
+
+        await pool.query(
+            'UPDATE public.usuarios SET contrasena = $1 WHERE id_usuario = $2',
+            [hash, registro.id_usuario]
+        );
+
+        codigosRecuperacion.delete(correo);
+        res.json({ mensaje: 'Contraseña restablecida correctamente.' });
+    } catch (error) {
+        console.error('Error al restablecer contraseña:', error);
+        res.status(500).json({ error: 'Error al actualizar la contraseña en la base de datos.' });
     }
 });
 
