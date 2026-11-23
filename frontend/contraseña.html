@@ -62,7 +62,7 @@
                         Nueva contraseña
                     </label>
 
-                    <div class="contenedor-input-pass">
+                    <div class="recuadro-password">
                         <input
                             type="password"
                             id="nuevaContrasena"
@@ -71,9 +71,9 @@
                         >
                         <button
                             type="button"
-                            class="btn-ver-pass"
-                            data-target="nuevaContrasena"
-                            aria-label="Mostrar nueva contraseña"
+                            class="boton-ojo"
+                            data-input="nuevaContrasena"
+                            aria-label="Mostrar o ocultar nueva contraseña"
                         >
                             Mostrar
                         </button>
@@ -89,7 +89,7 @@
                         Confirmar nueva contraseña
                     </label>
 
-                    <div class="contenedor-input-pass">
+                    <div class="recuadro-password">
                         <input
                             type="password"
                             id="confirmarContrasena"
@@ -98,9 +98,9 @@
                         >
                         <button
                             type="button"
-                            class="btn-ver-pass"
-                            data-target="confirmarContrasena"
-                            aria-label="Mostrar confirmación de contraseña"
+                            class="boton-ojo"
+                            data-input="confirmarContrasena"
+                            aria-label="Mostrar o ocultar confirmación de contraseña"
                         >
                             Mostrar
                         </button>
@@ -156,14 +156,14 @@
     <script src="js/contraseña.js"></script>
 
     <script>
-        document.querySelectorAll('.btn-ver-pass').forEach((btn) => {
-            btn.addEventListener('click', () => {
-                const input = document.getElementById(btn.dataset.target);
+        document.querySelectorAll('.boton-ojo').forEach((boton) => {
+            boton.addEventListener('click', () => {
+                const input = document.getElementById(boton.dataset.input);
                 if (!input) return;
 
-                const esPassword = input.type === 'password';
-                input.type = esPassword ? 'text' : 'password';
-                btn.textContent = esPassword ? 'Ocultar' : 'Mostrar';
+                const estaOculta = input.type === 'password';
+                input.type = estaOculta ? 'text' : 'password';
+                boton.textContent = estaOculta ? 'Ocultar' : 'Mostrar';
             });
         });
     </script>
