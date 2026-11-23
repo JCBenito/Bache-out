@@ -278,7 +278,7 @@ html {
 .mensaje-error {
     display: block;
     margin-top: 7px;
-    color: #d9534f;
+    color: #d9534f !important;
     font-size: 12px;
     line-height: 1.4;
 }
@@ -662,5 +662,6 @@ label.btn-seleccionar-fotos:hover {
     .contenedor-formulario {
         padding: 18px 12px;
     }
+
 
 }
