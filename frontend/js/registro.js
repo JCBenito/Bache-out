@@ -37,8 +37,15 @@ const botonRegistro = formulario.querySelector('button[type="submit"]');
 if (correoInput) {
     correoInput.addEventListener("input", function () {
         this.value = this.value
-            .replace(/^[^a-zA-Z0-9]+/, "") // Elimina puntos o símbolos al inicio
-            .replace(/\s/g, "");            // Elimina espacios
+            .replace(/^[^a-zA-Z0-9]+/, "")
+            .replace(/\s/g, "");
+    });
+}
+
+// Solo permitir números en el teléfono y limitar a 10 dígitos sin lada
+if (telefonoInput) {
+    telefonoInput.addEventListener("input", function () {
+        this.value = this.value.replace(/\D/g, "").slice(0, 10);
     });
 }
 
@@ -79,7 +86,6 @@ mostrarConfirmar.addEventListener("click", function () {
 
 formulario.addEventListener("submit", async function (event) {
 
-    // Evita que la página se recargue
     event.preventDefault();
 
     // ====================================
@@ -89,7 +95,7 @@ formulario.addEventListener("submit", async function (event) {
     const apellido_paterno = apellidoPInput ? apellidoPInput.value.trim().replace(/\s+/g, " ") : "";
     const apellido_materno = apellidoMInput ? apellidoMInput.value.trim().replace(/\s+/g, " ") : "";
     const correo = correoInput ? correoInput.value.trim().toLowerCase() : "";
-    const telefono = telefonoInput.value.trim();
+    const telefonoSinLada = telefonoInput ? telefonoInput.value.replace(/\D/g, "") : "";
     
     const passwordValor = password.value;
     const confirmarValor = confirmarPassword.value;
@@ -103,7 +109,7 @@ formulario.addEventListener("submit", async function (event) {
     // VALIDACIONES LOCALES ESTRICTAS
     // ====================================
 
-    // 1. Validación de nombres y apellidos reales (solo letras, acentos, ñ y espacios; mínimo 2 letras)
+    // 1. Validación de nombres y apellidos reales
     const regexSoloLetras = /^[a-záéíóúüñA-ZÁÉÍÓÚÜÑ\s]{2,50}$/;
 
     if (!regexSoloLetras.test(nombres)) {
@@ -124,7 +130,7 @@ formulario.addEventListener("submit", async function (event) {
         return;
     }
 
-    // 2. Validación de correo: sin puntos/caracteres al inicio ni justo antes/después del @, y con dominios reales
+    // 2. Validación de correo electrónico
     const dominiosPermitidos = [
         "gmail.com", "hotmail.com", "hotmail.es",
         "outlook.com", "outlook.es", "live.com", "live.com.mx",
@@ -135,7 +141,6 @@ formulario.addEventListener("submit", async function (event) {
     ];
 
     const partesCorreo = correo.split("@");
-    // Inicia y termina con letra o número antes del @, mínimo 3 caracteres, sin puntos consecutivos
     const regexUsuarioCorreo = /^[a-z0-9](?:[a-z0-9._-]*[a-z0-9])?$/;
 
     if (
@@ -150,14 +155,14 @@ formulario.addEventListener("submit", async function (event) {
         return;
     }
 
-    // 3. Validación de teléfono de México (+52 o 52 seguido de 10 dígitos)
-    const telefonoLimpio = telefono.replace(/[\s\-()]/g, '');
-    const regexTelefonoMexico = /^(\+?52)\d{16}$/;
-    if (!regexTelefonoMexico.test(telefonoLimpio)) {
-        mostrarError("Error: el teléfono debe iniciar con la lada de México (+52 o 52) seguido de 10 dígitos (ej. +527441234567).");
+    // 3. Validación de teléfono de 10 dígitos sin lada (se agrega +52 automáticamente)
+    if (!/^\d{10}$/.test(telefonoSinLada)) {
+        mostrarError("Error: ingresa los 10 dígitos de tu número telefónico sin lada (ej. 7441234567).");
         telefonoInput.focus();
         return;
     }
+
+    const telefonoCompleto = `+52${telefonoSinLada}`;
 
     if (passwordValor.length < 8) {
         mostrarError("Error: la contraseña debe tener mínimo 8 caracteres.");
@@ -203,7 +208,7 @@ formulario.addEventListener("submit", async function (event) {
                 nombres,
                 apellido_paterno,
                 apellido_materno,
-                telefono: telefonoLimpio,
+                telefono: telefonoCompleto,
                 correo,
                 contrasena: passwordValor
             })
