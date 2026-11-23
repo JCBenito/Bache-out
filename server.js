@@ -303,6 +303,34 @@ app.post('/api/recuperar-solicitar', async (req, res) => {
     }
 });
 
+
+// PASO INTERMEDIO: VERIFICAR QUE EL CÓDIGO DE 6 DÍGITOS SEA CORRECTO ANTES DE CAMBIAR CONTRASEÑA
+app.post('/api/recuperar-verificar-codigo', (req, res) => {
+    const correo = req.body.correo ? req.body.correo.toLowerCase().trim() : '';
+    const { codigo } = req.body;
+
+    if (!correo) {
+        return res.status(400).json({ error: 'Sesión de recuperación expirada. Vuelve a ingresar tu correo.' });
+    }
+
+    const registro = codigosRecuperacion.get(correo);
+
+    if (!registro) {
+        return res.status(400).json({ error: 'No hay una solicitud activa para este correo o el código ya expiró.' });
+    }
+
+    if (Date.now() > registro.expiracion) {
+        codigosRecuperacion.delete(correo);
+        return res.status(400).json({ error: 'El código ha expirado. Solicita uno nuevo.' });
+    }
+
+    if (registro.codigo !== String(codigo).trim()) {
+        return res.status(400).json({ error: 'El código de verificación es incorrecto.' });
+    }
+
+    res.json({ mensaje: 'Código verificado correctamente.' });
+});
+
 // PASO 2: VERIFICAR CÓDIGO Y RESTABLECER CONTRASEÑA
 app.post('/api/recuperar-restablecer', async (req, res) => {
     const correo = req.body.correo ? req.body.correo.toLowerCase().trim() : '';
