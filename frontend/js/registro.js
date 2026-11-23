@@ -155,14 +155,12 @@ formulario.addEventListener("submit", async function (event) {
         return;
     }
 
-    // 3. Validación de teléfono de 10 dígitos sin lada (se agrega +52 automáticamente)
+    // 3. Validación de teléfono de 10 dígitos sin lada
     if (!/^\d{10}$/.test(telefonoSinLada)) {
         mostrarError("Error: ingresa los 10 dígitos de tu número telefónico sin lada (ej. 7441234567).");
         telefonoInput.focus();
         return;
     }
-
-    const telefonoCompleto = `+52${telefonoSinLada}`;
 
     if (passwordValor.length < 8) {
         mostrarError("Error: la contraseña debe tener mínimo 8 caracteres.");
@@ -208,7 +206,7 @@ formulario.addEventListener("submit", async function (event) {
                 nombres,
                 apellido_paterno,
                 apellido_materno,
-                telefono: telefonoCompleto,
+                telefono: telefonoSinLada,
                 correo,
                 contrasena: passwordValor
             })
