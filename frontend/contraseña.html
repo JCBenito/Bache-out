@@ -62,12 +62,22 @@
                         Nueva contraseña
                     </label>
 
-                    <input
-                        type="password"
-                        id="nuevaContrasena"
-                        placeholder="Ingresa tu nueva contraseña"
-                        required
-                    >
+                    <div class="contenedor-input-pass">
+                        <input
+                            type="password"
+                            id="nuevaContrasena"
+                            placeholder="Ingresa tu nueva contraseña"
+                            required
+                        >
+                        <button
+                            type="button"
+                            class="btn-ver-pass"
+                            data-target="nuevaContrasena"
+                            aria-label="Mostrar nueva contraseña"
+                        >
+                            Mostrar
+                        </button>
+                    </div>
 
                 </div>
 
@@ -79,12 +89,22 @@
                         Confirmar nueva contraseña
                     </label>
 
-                    <input
-                        type="password"
-                        id="confirmarContrasena"
-                        placeholder="Confirma tu nueva contraseña"
-                        required
-                    >
+                    <div class="contenedor-input-pass">
+                        <input
+                            type="password"
+                            id="confirmarContrasena"
+                            placeholder="Confirma tu nueva contraseña"
+                            required
+                        >
+                        <button
+                            type="button"
+                            class="btn-ver-pass"
+                            data-target="confirmarContrasena"
+                            aria-label="Mostrar confirmación de contraseña"
+                        >
+                            Mostrar
+                        </button>
+                    </div>
 
                     <small id="mensajeError"></small>
 
@@ -134,6 +154,19 @@
 
     <!-- JAVASCRIPT -->
     <script src="js/contraseña.js"></script>
+
+    <script>
+        document.querySelectorAll('.btn-ver-pass').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                const input = document.getElementById(btn.dataset.target);
+                if (!input) return;
+
+                const esPassword = input.type === 'password';
+                input.type = esPassword ? 'text' : 'password';
+                btn.textContent = esPassword ? 'Ocultar' : 'Mostrar';
+            });
+        });
+    </script>
 
 </body>
 
