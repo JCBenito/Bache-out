@@ -102,7 +102,7 @@ app.post('/api/registro', async (req, res) => {
         });
     }
 
-    // 3. Validación de teléfono mexicano (exactamente 10 dígitos numéricos, agregando +52 automáticamente)
+    // 3. Validación de teléfono mexicano (exactamente 10 dígitos numéricos sin +52 para ajustarse a VARCHAR(10))
     const soloDigitosTelefono = telefono.replace(/\D/g, '');
     let diezDigitos = soloDigitosTelefono;
 
@@ -114,7 +114,7 @@ app.post('/api/registro', async (req, res) => {
         return res.status(400).json({ error: 'El número de teléfono debe contener exactamente 10 dígitos numéricos.' });
     }
 
-    telefono = `+52${diezDigitos}`;
+    telefono = diezDigitos;
 
     try {
         const existe = await pool.query(
@@ -145,11 +145,15 @@ app.post('/api/registro', async (req, res) => {
 app.post('/api/login', async (req, res) => {
     let { usuario, contrasena } = req.body;
     const usuarioLimpio = usuario ? usuario.toLowerCase().trim() : '';
+    const soloDigitos = usuarioLimpio.replace(/\D/g, '');
+    const diezDigitos = (soloDigitos.length === 12 && soloDigitos.startsWith('52'))
+        ? soloDigitos.slice(2)
+        : soloDigitos;
 
     try {
         const resultado = await pool.query(
-            'SELECT * FROM public.usuarios WHERE LOWER(correo) = $1 OR telefono = $1 OR telefono = $2',
-            [usuarioLimpio, `+52${usuarioLimpio.replace(/\D/g, '')}`]
+            'SELECT * FROM public.usuarios WHERE LOWER(correo) = $1 OR telefono = $2 OR telefono = $3',
+            [usuarioLimpio, diezDigitos, usuarioLimpio]
         );
 
         if (resultado.rows.length === 0) {
@@ -182,7 +186,10 @@ app.post('/api/login', async (req, res) => {
 app.put('/api/actualizar-perfil', async (req, res) => {
     let { id_usuario, correo, telefono } = req.body;
     const correoLimpio = correo ? correo.toLowerCase().trim() : '';
-    const telefonoLimpio = telefono ? telefono.trim() : '';
+    const soloDigitos = telefono ? telefono.replace(/\D/g, '') : '';
+    const telefonoLimpio = (soloDigitos.length === 12 && soloDigitos.startsWith('52'))
+        ? soloDigitos.slice(2)
+        : soloDigitos;
 
     try {
         const existe = await pool.query(
