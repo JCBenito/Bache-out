@@ -1,0 +1,384 @@
+
+/* CONTENIDO GENERAL */
+
+.contenido-estadisticas {
+    width: min(1100px, 100%);
+    margin: 0 auto;
+    padding: 28px 24px 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    color: #24343b;
+}
+
+/* FILTRO DE PERÍODO */
+
+.filtros-estadisticas {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 20px 24px;
+    background: #ffffff;
+    border: 1px solid #e1e8eb;
+    border-radius: 16px;
+    box-shadow: 0 4px 14px rgba(36, 52, 59, 0.05);
+}
+
+.filtro-texto {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.filtro-etiqueta,
+.etiqueta-seccion {
+    color: #159a9c;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1px;
+}
+
+.filtro-texto label {
+    color: #24343b;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+#periodoConsulta {
+    min-width: 190px;
+    padding: 12px 14px;
+    border: 1px solid #cbd8dc;
+    border-radius: 10px;
+    background: #ffffff;
+    color: #24343b;
+    font: inherit;
+    cursor: pointer;
+    outline: none;
+}
+
+#periodoConsulta:focus {
+    border-color: #159a9c;
+    box-shadow: 0 0 0 3px rgba(21, 154, 156, 0.12);
+}
+
+/* TARJETA DE PORCENTAJE */
+
+.tarjeta-porcentaje {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 30px;
+    padding: 30px;
+    background: #ffffff;
+    border: 1px solid #e1e8eb;
+    border-radius: 18px;
+    box-shadow: 0 4px 14px rgba(36, 52, 59, 0.05);
+}
+
+.informacion-porcentaje {
+    max-width: 600px;
+}
+
+.informacion-porcentaje h1 {
+    margin: 12px 0;
+    color: #2c3e50;
+    font-size: clamp(22px, 3vw, 30px);
+}
+
+.informacion-porcentaje p,
+.encabezado-grafica p {
+    margin: 8px 0 0;
+    color: #6b7c83;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.leyenda-porcentaje {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin-top: 22px;
+    color: #52656d;
+    font-size: 13px;
+}
+
+.punto-leyenda {
+    width: 10px;
+    height: 10px;
+    background: #159a9c;
+    border-radius: 50%;
+}
+
+/* CÍRCULO DE PROGRESO */
+
+.circulo-progreso {
+    position: relative;
+    flex: 0 0 160px;
+    width: 160px;
+    height: 160px;
+}
+
+.circulo-progreso svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+}
+
+.circulo-fondo,
+.circulo-valor {
+    fill: none;
+    stroke-width: 12;
+}
+
+.circulo-fondo {
+    stroke: #e8f0f1;
+}
+
+.circulo-valor {
+    stroke: #159a9c;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.5s ease;
+}
+
+.texto-circulo {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.texto-circulo span {
+    color: #2c3e50;
+    font-size: 32px;
+    font-weight: 800;
+}
+
+.texto-circulo small {
+    margin-top: 4px;
+    color: #718087;
+    font-size: 12px;
+}
+
+/* TARJETAS DE GRÁFICAS */
+
+.tarjeta-estadistica {
+    min-width: 0;
+    padding: 26px;
+    background: #ffffff;
+    border: 1px solid #e1e8eb;
+    border-radius: 18px;
+    box-shadow: 0 4px 14px rgba(36, 52, 59, 0.05);
+}
+
+.encabezado-grafica {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 25px;
+}
+
+.encabezado-grafica h2 {
+    margin: 8px 0 0;
+    color: #2c3e50;
+    font-size: 20px;
+}
+
+/* BARRAS DE GRÁFICAS */
+
+.grafica-estados,
+.grafica-colonias {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.fila-grafica {
+    display: grid;
+    grid-template-columns: minmax(100px, 155px) minmax(50px, 1fr) 35px;
+    align-items: center;
+    gap: 14px;
+}
+
+.nombre-grafica {
+    overflow-wrap: anywhere;
+    color: #43565e;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.fondo-barra {
+    width: 100%;
+    height: 12px;
+    overflow: hidden;
+    background: #edf2f3;
+    border-radius: 20px;
+}
+
+.relleno-barra {
+    height: 100%;
+    border-radius: 20px;
+    transition: width 0.4s ease;
+}
+
+.color-resuelto {
+    background: #65c58a;
+}
+
+.color-reparacion {
+    background: #69b4e8;
+}
+
+.color-pendiente {
+    background: #f3b36e;
+}
+
+.color-cancelado {
+    background: #e98585;
+}
+
+.color-colonia {
+    background: #159a9c;
+}
+
+.valor-grafica {
+    color: #2c3e50;
+    font-size: 13px;
+    font-weight: 800;
+    text-align: right;
+}
+
+.resumen-grafica {
+    margin: 22px 0 0;
+    color: #73838a;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+/* COLONIAS CON REPORTES PENDIENTES */
+
+.grafica-pendientes {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.item-pendiente {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+}
+
+.encabezado-pendiente {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.nombre-pendiente {
+    color: #43565e;
+    font-size: 13px;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+.cantidad-pendiente {
+    flex-shrink: 0;
+    color: #a66b2c;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.barra-pendiente {
+    width: 100%;
+    height: 9px;
+    overflow: hidden;
+    background: #f5eee5;
+    border-radius: 20px;
+}
+
+.relleno-pendiente {
+    height: 100%;
+    background: #efb36f;
+    border-radius: 20px;
+    transition: width 0.4s ease;
+}
+
+/* MENSAJES SIN DATOS */
+
+.mensaje-sin-datos {
+    padding: 24px 16px;
+    color: #718087;
+    background: #f7fafb;
+    border: 1px dashed #d5e0e3;
+    border-radius: 12px;
+    font-size: 13px;
+    text-align: center;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 700px) {
+    .contenido-estadisticas {
+        padding: 20px 14px 30px;
+        gap: 18px;
+    }
+
+    .filtros-estadisticas {
+        align-items: stretch;
+        flex-direction: column;
+        padding: 18px;
+    }
+
+    #periodoConsulta {
+        width: 100%;
+    }
+
+    .tarjeta-porcentaje {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 22px;
+    }
+
+    .circulo-progreso {
+        align-self: center;
+    }
+
+    .tarjeta-estadistica {
+        padding: 20px 16px;
+    }
+
+    .encabezado-grafica h2 {
+        font-size: 18px;
+    }
+
+    .fila-grafica {
+        grid-template-columns: minmax(80px, 110px) minmax(30px, 1fr) 25px;
+        gap: 9px;
+    }
+
+    .nombre-grafica,
+    .valor-grafica {
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 380px) {
+    .fila-grafica {
+        grid-template-columns: 85px minmax(25px, 1fr) 22px;
+        gap: 7px;
+    }
+
+    .nombre-grafica,
+    .valor-grafica {
+        font-size: 11px;
+    }
+
+    .cantidad-pendiente {
+        font-size: 11px;
+    }
+}
