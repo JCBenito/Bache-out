@@ -152,7 +152,7 @@ formulario.addEventListener("submit", async function (event) {
 
     // 3. Validación de teléfono de México (+52 o 52 seguido de 10 dígitos)
     const telefonoLimpio = telefono.replace(/[\s\-()]/g, '');
-    const regexTelefonoMexico = /^(\+?52)\d{10}$/;
+    const regexTelefonoMexico = /^(\+?52)\d{13}$/;
     if (!regexTelefonoMexico.test(telefonoLimpio)) {
         mostrarError("Error: el teléfono debe iniciar con la lada de México (+52 o 52) seguido de 10 dígitos (ej. +527441234567).");
         telefonoInput.focus();
