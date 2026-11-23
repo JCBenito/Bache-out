@@ -4,7 +4,6 @@ const bcrypt = require('bcryptjs');
 const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
-const nodemailer = require('nodemailer');
 const pool = require('./db');
 require('dotenv').config();
 
@@ -248,24 +247,10 @@ app.put('/api/actualizar-contrasena', async (req, res) => {
 });
 
 // ==========================================
-// RECUPERACIÓN DE CONTRASEÑA POR CORREO (NODEMAILER)
+// RECUPERACIÓN DE CONTRASEÑA POR CORREO (BREVO API HTTPS)
 // ==========================================
 
 const codigosRecuperacion = new Map();
-
-const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 587,
-    secure: false,
-    requireTLS: true,
-    connectionTimeout: 10000,
-    greetingTimeout: 10000,
-    socketTimeout: 15000,
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-    }
-});
 
 // PASO 1: SOLICITAR CÓDIGO DE RECUPERACIÓN
 app.post('/api/recuperar-solicitar', async (req, res) => {
@@ -273,6 +258,11 @@ app.post('/api/recuperar-solicitar', async (req, res) => {
 
     if (!correo) {
         return res.status(400).json({ error: 'Ingresa tu correo electrónico.' });
+    }
+
+    if (!process.env.BREVO_API_KEY) {
+        console.error('Falta configurar BREVO_API_KEY en las variables de entorno.');
+        return res.status(500).json({ error: 'Servicio de correo no configurado en el servidor.' });
     }
 
     try {
@@ -288,26 +278,48 @@ app.post('/api/recuperar-solicitar', async (req, res) => {
         const usuario = resultado.rows[0];
         const codigo = Math.floor(100000 + Math.random() * 900000).toString();
         const expiracion = Date.now() + 15 * 60 * 1000; // Válido por 15 minutos
+        const remitente = (process.env.EMAIL_FROM || 'david_godzila@hotmail.com').trim();
+
+        const respuestaBrevo = await fetch('https://api.brevo.com/v3/smtp/email', {
+            method: 'POST',
+            headers: {
+                'accept': 'application/json',
+                'api-key': process.env.BREVO_API_KEY.trim(),
+                'content-type': 'application/json'
+            },
+            body: JSON.stringify({
+                sender: {
+                    name: 'Bache out',
+                    email: remitente
+                },
+                to: [
+                    {
+                        email: correo,
+                        name: usuario.nombres
+                    }
+                ],
+                subject: 'Código de recuperación de contraseña - Bache-Out',
+                htmlContent: `
+                    <div style="font-family: Arial, sans-serif; max-width: 500px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
+                        <h2 style="color: #1e3a8a;">Recuperación de contraseña</h2>
+                        <p>Hola <strong>${usuario.nombres}</strong>,</p>
+                        <p>Recibimos una solicitud para restablecer tu contraseña en el portal ciudadano <strong>Bache-Out</strong>.</p>
+                        <p>Tu código de verificación es:</p>
+                        <div style="font-size: 28px; font-weight: bold; letter-spacing: 6px; text-align: center; background: #f1f5f9; padding: 15px; border-radius: 6px; color: #0f172a;">
+                            ${codigo}
+                        </div>
+                        <p style="font-size: 13px; color: #64748b; margin-top: 15px;">Este código expira en 15 minutos. Si no solicitaste este cambio, ignora este mensaje.</p>
+                    </div>
+                `
+            })
+        });
+
+        if (!respuestaBrevo.ok) {
+            const detalleError = await respuestaBrevo.text();
+            throw new Error(`Brevo API (${respuestaBrevo.status}): ${detalleError}`);
+        }
 
         codigosRecuperacion.set(correo, { codigo, expiracion, id_usuario: usuario.id_usuario });
-
-        await transporter.sendMail({
-            from: `"Soporte Bache-Out" <${process.env.EMAIL_USER}>`,
-            to: correo,
-            subject: 'Código de recuperación de contraseña - Bache-Out',
-            html: `
-                <div style="font-family: Arial, sans-serif; max-width: 500px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
-                    <h2 style="color: #1e3a8a;">Recuperación de contraseña</h2>
-                    <p>Hola <strong>${usuario.nombres}</strong>,</p>
-                    <p>Recibimos una solicitud para restablecer tu contraseña en el portal ciudadano <strong>Bache-Out</strong>.</p>
-                    <p>Tu código de verificación es:</p>
-                    <div style="font-size: 28px; font-weight: bold; letter-spacing: 6px; text-align: center; background: #f1f5f9; padding: 15px; border-radius: 6px; color: #0f172a;">
-                        ${codigo}
-                    </div>
-                    <p style="font-size: 13px; color: #64748b; margin-top: 15px;">Este código expira en 15 minutos. Si no solicitaste este cambio, ignora este mensaje.</p>
-                </div>
-            `
-        });
 
         res.json({ mensaje: 'Código enviado. Revisa tu bandeja de entrada o carpeta de spam.' });
     } catch (error) {
@@ -315,7 +327,6 @@ app.post('/api/recuperar-solicitar', async (req, res) => {
         res.status(500).json({ error: 'No se pudo enviar el correo de verificación.' });
     }
 });
-
 
 // PASO INTERMEDIO: VERIFICAR QUE EL CÓDIGO DE 6 DÍGITOS SEA CORRECTO ANTES DE CAMBIAR CONTRASEÑA
 app.post('/api/recuperar-verificar-codigo', (req, res) => {
