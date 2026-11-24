@@ -75,35 +75,40 @@ formulario.addEventListener("submit", async function (event) {
         }
 
         // 3. Guardar el código validado en sessionStorage para la pantalla de nueva contraseña
-       // 3. Guardar el código validado
-sessionStorage.setItem("codigoRecuperacion", codigo);
+      
+        // 3. Guardar el código validado
+        sessionStorage.setItem("codigoRecuperacion", codigo);
 
-// 4. Identificar el motivo de la verificación
-const motivo = sessionStorage.getItem("motivoVerificacion");
+        // 4. Obtener el motivo directamente del servidor
+        const motivo = datos.motivo;
 
-mostrarMensaje("¡Código verificado correctamente! Redirigiendo...", true);
+        mostrarMensaje("¡Código verificado correctamente! Redirigiendo...", true);
 
-setTimeout(() => {
+        setTimeout(() => {
 
-    if (motivo === "recuperacion") {
+            if (motivo === "recuperacion") {
 
-        // Dirigir a establecer una nueva contraseña
-        window.location.href = "contraseña.html";
+                window.location.href = "contraseña.html";
 
-    } else if (motivo === "desbloqueo") {
+            } else if (motivo === "desbloqueo") {
 
-        // Dirigir al inicio de sesión
-        window.location.href = "login.html";
+                // Limpiar los datos temporales del desbloqueo
+                sessionStorage.removeItem("motivoVerificacion");
+                sessionStorage.removeItem("correoRecuperacion");
+                sessionStorage.removeItem("codigoRecuperacion");
+                sessionStorage.removeItem("intentosFallidos");
 
-    } else {
+                window.location.href = "login.html";
 
-        // Si no se reconoce el motivo
-        alert("No se pudo identificar el motivo de la verificación.");
-        window.location.href = "login.html";
+            } else {
 
-    }
+                alert("No se pudo identificar el motivo de la verificación.");
+                window.location.href = "login.html";
 
-}, 1200);
+            }
+
+        }, 1200);
+
 
     } catch (error) {
         mostrarMensaje(error.message || "Error al verificar el código.", false);
