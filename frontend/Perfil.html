@@ -296,10 +296,14 @@
 
                         <div class="contenedor-input-contrasena">
 
-                            <input
+                           <input
                                 type="password"
                                 id="contrasenaActual"
+                                name="contrasena_actual_manual"
                                 placeholder="Ingresa tu contraseña actual"
+                                autocomplete="off"
+                                readonly
+                                onfocus="this.removeAttribute('readonly')"
                             >
 
                             <button
