@@ -454,31 +454,76 @@ Equipo de Soporte de Bache-Out</p>
     }
 });
 
+
 app.post('/api/recuperar-verificar-codigo', (req, res) => {
     const correo = req.body.correo ? req.body.correo.toLowerCase().trim() : '';
     const { codigo } = req.body;
 
     if (!correo) {
-        return res.status(400).json({ error: 'Sesión de recuperación expirada. Vuelve a ingresar tu correo.' });
+        return res.status(400).json({
+            error: 'Sesión de recuperación expirada. Vuelve a ingresar tu correo.'
+        });
     }
 
     const registro = codigosRecuperacion.get(correo);
 
     if (!registro) {
-        return res.status(400).json({ error: 'No hay una solicitud activa para este correo o el código ya expiró.' });
+        return res.status(400).json({
+            error: 'No hay una solicitud activa para este correo o el código ya expiró.'
+        });
     }
 
     if (Date.now() > registro.expiracion) {
         codigosRecuperacion.delete(correo);
-        return res.status(400).json({ error: 'El código ha expirado. Solicita uno nuevo.' });
+
+        return res.status(400).json({
+            error: 'El código ha expirado. Solicita uno nuevo.'
+        });
     }
 
     if (registro.codigo !== String(codigo).trim()) {
-        return res.status(400).json({ error: 'El código de verificación es incorrecto.' });
+        return res.status(400).json({
+            error: 'El código de verificación es incorrecto.'
+        });
     }
 
-    res.json({ mensaje: 'Código verificado correctamente.' });
+    // Si el código corresponde al desbloqueo de cuenta
+    if (registro.motivo === 'desbloqueo') {
+
+        // Eliminar el bloqueo asociado al correo
+        intentosLogin.delete(correo);
+
+        // Eliminar también el bloqueo asociado al teléfono
+        // si el usuario inició sesión utilizando su número.
+        // Se buscará el teléfono de la cuenta.
+        pool.query(
+            'SELECT telefono FROM public.usuarios WHERE LOWER(correo) = $1',
+            [correo]
+        ).then(resultado => {
+            if (resultado.rows.length > 0) {
+                const telefono = resultado.rows[0].telefono;
+
+                if (telefono) {
+                    const soloDigitos = telefono.replace(/\D/g, '');
+                    const diezDigitos = soloDigitos.length === 12 && soloDigitos.startsWith('52')
+                        ? soloDigitos.slice(2)
+                        : soloDigitos;
+
+                    intentosLogin.delete(telefono.toLowerCase().trim());
+                    intentosLogin.delete(diezDigitos);
+                }
+            }
+        }).catch(error => {
+            console.error('Error al limpiar bloqueo por teléfono:', error);
+        });
+    }
+
+    res.json({
+        mensaje: 'Código verificado correctamente.',
+        motivo: registro.motivo
+    });
 });
+
 
 app.post('/api/recuperar-restablecer', async (req, res) => {
     const correo = req.body.correo ? req.body.correo.toLowerCase().trim() : '';
