@@ -296,6 +296,13 @@ app.put('/api/actualizar-contrasena', async (req, res) => {
 // ==========================================
 const codigosRecuperacion = new Map();
 
+// =========================================
+// CONTROL DE INTENTOS Y BLOQUEO DE CUENTAS
+// =========================================
+const intentosLogin = new Map();
+const MAX_INTENTOS = 3;
+
+
 app.post('/api/recuperar-solicitar', async (req, res) => {
     const correo = req.body.correo ? req.body.correo.toLowerCase().trim() : '';
 
