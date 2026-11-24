@@ -172,15 +172,33 @@ app.post('/api/registro', async (req, res) => {
 // ==========================================
 // LOGIN (DISTINGUE ROL ADMIN 1-5 vs CIUDADANO 6)
 // ==========================================
+
 app.post('/api/login', async (req, res) => {
     let { usuario, contrasena } = req.body;
+
     const usuarioLimpio = usuario ? usuario.toLowerCase().trim() : '';
     const soloDigitos = usuarioLimpio.replace(/\D/g, '');
+
     const diezDigitos = (soloDigitos.length === 12 && soloDigitos.startsWith('52'))
         ? soloDigitos.slice(2)
         : soloDigitos;
 
+    // Identificador para controlar los intentos de este usuario
+    const claveIntentos = usuarioLimpio;
+
     try {
+
+        // 1. Verificar si el usuario ya está bloqueado
+        const registroIntentos = intentosLogin.get(claveIntentos);
+
+        if (registroIntentos && registroIntentos.bloqueado) {
+            return res.status(403).json({
+                error: 'Tu cuenta está bloqueada. Verifica tu correo electrónico para desbloquearla.',
+                bloqueado: true
+            });
+        }
+
+        // 2. Buscar al usuario en la base de datos
         const resultado = await pool.query(
             `SELECT u.*, r.nombre_rol
              FROM public.usuarios u
@@ -192,18 +210,57 @@ app.post('/api/login', async (req, res) => {
         );
 
         if (resultado.rows.length === 0) {
-            return res.status(400).json({ error: 'Usuario no encontrado.' });
+            return res.status(400).json({
+                error: 'Usuario no encontrado.'
+            });
         }
 
         const usuarioBD = resultado.rows[0];
-        const esValida = await bcrypt.compare(contrasena, usuarioBD.contrasena);
+
+        // 3. Comprobar contraseña
+        const esValida = await bcrypt.compare(
+            contrasena,
+            usuarioBD.contrasena
+        );
+
         if (!esValida) {
-            return res.status(400).json({ error: 'Contraseña incorrecta.' });
+
+            // Recuperar los intentos anteriores
+            const intentosActuales = intentosLogin.get(claveIntentos) || {
+                cantidad: 0,
+                bloqueado: false
+            };
+
+            // Aumentar intento fallido
+            intentosActuales.cantidad++;
+
+            // Comprobar si alcanzó el límite
+            if (intentosActuales.cantidad >= MAX_INTENTOS) {
+                intentosActuales.bloqueado = true;
+            }
+
+            intentosLogin.set(claveIntentos, intentosActuales);
+
+            if (intentosActuales.bloqueado) {
+                return res.status(403).json({
+                    error: 'Has superado los 3 intentos. Debes verificar tu correo electrónico para desbloquear tu cuenta.',
+                    bloqueado: true
+                });
+            }
+
+            return res.status(400).json({
+                error: 'Contraseña incorrecta.',
+                intentosRestantes: MAX_INTENTOS - intentosActuales.cantidad
+            });
         }
+
+        // 4. Contraseña correcta: limpiar intentos
+        intentosLogin.delete(claveIntentos);
 
         const idRol = Number(usuarioBD.id_rol);
         const esAdmin = ROLES_ADMIN.includes(idRol);
 
+        // 5. Responder inicio de sesión exitoso
         res.json({
             mensaje: 'Inicio de sesión exitoso',
             usuario: {
@@ -218,11 +275,15 @@ app.post('/api/login', async (req, res) => {
                 telefono: usuarioBD.telefono
             }
         });
+
     } catch (error) {
         console.error('Error en login:', error);
-        res.status(500).json({ error: 'Error al iniciar sesión.' });
+        res.status(500).json({
+            error: 'Error al iniciar sesión.'
+        });
     }
 });
+
 
 // ==========================================
 // PERFIL Y CONTRASEÑA (CIUDADANO / GENERAL)
