@@ -63,6 +63,8 @@ if (formulario) {
 
             // 4. Guardar el correo verificado en sessionStorage para la pantalla del código
             sessionStorage.setItem("correoRecuperacion", correo);
+            // Identificar que el motivo es desbloquear la cuenta
+            sessionStorage.setItem("motivoVerificacion", "desbloqueo");
 
             alert(
                 "Hemos enviado un código de verificación de 6 dígitos a tu correo electrónico. " +
