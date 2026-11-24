@@ -4,7 +4,7 @@
 
 const cuerpoReportes = document.getElementById("listaReportes");
 
-const buscarFolio = document.getElementById("buscarFolio");
+const buscarId = document.getElementById("buscarId") || document.getElementById("buscarFolio");
 const filtroEstado = document.getElementById("filtroEstado");
 const filtroColonia = document.getElementById("filtroColonia");
 const filtroFecha = document.getElementById("filtroFecha");
@@ -15,7 +15,7 @@ const modalEstado = document.getElementById("modalEstado");
 const contenidoDetalles = document.getElementById("contenidoDetalles");
 const nuevoEstado = document.getElementById("nuevoEstado");
 
-let folioSeleccionado = null;
+let reporteSeleccionadoClave = null;
 
 
 /* =========================================
@@ -105,8 +105,12 @@ function agregarCelda(fila, contenido) {
     return celda;
 }
 
-function obtenerFolio(reporte) {
-    return String(reporte.folio ?? reporte.id ?? "Sin folio");
+function obtenerIdBD(reporte) {
+    return String(reporte.id ?? reporte.id_reporte ?? reporte.folio ?? "Sin ID");
+}
+
+function obtenerClaveApi(reporte) {
+    return String(reporte.folio ?? reporte.id ?? reporte.id_reporte ?? "");
 }
 
 function obtenerColonia(reporte) {
@@ -193,14 +197,14 @@ function cargarColonias() {
 function renderizarReportes() {
     const lista = obtenerListaReportes();
 
-    const folioBuscado = normalizar(buscarFolio.value);
+    const idBuscado = normalizar(buscarId?.value);
     const estadoBuscado = filtroEstado.value;
     const coloniaBuscada = filtroColonia.value;
     const fechaBuscada = filtroFecha.value;
 
     const filtrados = lista.filter(reporte => {
-        const coincideFolio = normalizar(obtenerFolio(reporte))
-            .includes(folioBuscado);
+        const coincideId = normalizar(obtenerIdBD(reporte))
+            .includes(idBuscado);
 
         const coincideEstado =
             !estadoBuscado || obtenerEstado(reporte) === estadoBuscado;
@@ -212,7 +216,7 @@ function renderizarReportes() {
             !fechaBuscada || obtenerFechaFiltro(reporte) === fechaBuscada;
 
         return (
-            coincideFolio &&
+            coincideId &&
             coincideEstado &&
             coincideColonia &&
             coincideFecha
@@ -227,12 +231,13 @@ function renderizarReportes() {
 
     filtrados.forEach(reporte => {
         const fila = document.createElement("tr");
+        const claveApi = obtenerClaveApi(reporte);
 
-        const folio = document.createElement("span");
-        folio.className = "folio-reporte";
-        folio.textContent = obtenerFolio(reporte);
+        const idTexto = document.createElement("span");
+        idTexto.className = "folio-reporte";
+        idTexto.textContent = obtenerIdBD(reporte);
 
-        agregarCelda(fila, folio);
+        agregarCelda(fila, idTexto);
         agregarCelda(fila, obtenerColonia(reporte));
         agregarCelda(fila, reporte.user ?? "No disponible");
         agregarCelda(fila, obtenerFecha(reporte));
@@ -247,7 +252,7 @@ function renderizarReportes() {
         botonDetalles.textContent = "Ver detalles";
 
         botonDetalles.addEventListener("click", () => {
-            mostrarDetalles(obtenerFolio(reporte));
+            mostrarDetalles(claveApi);
         });
 
         const botonEstado = document.createElement("button");
@@ -256,7 +261,7 @@ function renderizarReportes() {
         botonEstado.textContent = "Cambiar estado";
 
         botonEstado.addEventListener("click", () => {
-            abrirCambiarEstado(obtenerFolio(reporte));
+            abrirCambiarEstado(claveApi);
         });
 
         acciones.append(botonDetalles, botonEstado);
@@ -271,12 +276,13 @@ function renderizarReportes() {
 
 
 /* =========================================
-   BUSCAR REPORTE POR FOLIO
+   BUSCAR REPORTE
 ========================================= */
 
-function buscarReportePorFolio(folio) {
+function buscarReportePorClave(clave) {
     return obtenerListaReportes().find(reporte =>
-        obtenerFolio(reporte) === String(folio)
+        obtenerClaveApi(reporte) === String(clave) ||
+        obtenerIdBD(reporte) === String(clave)
     );
 }
 
@@ -285,15 +291,15 @@ function buscarReportePorFolio(folio) {
    VER DETALLES
 ========================================= */
 
-function mostrarDetalles(folio) {
-    const reporte = buscarReportePorFolio(folio);
+function mostrarDetalles(clave) {
+    const reporte = buscarReportePorClave(clave);
 
     if (!reporte) {
         alert("No se encontró el reporte seleccionado.");
         return;
     }
 
-    folioSeleccionado = obtenerFolio(reporte);
+    reporteSeleccionadoClave = obtenerClaveApi(reporte);
     contenidoDetalles.replaceChildren();
 
     function agregarDetalle(etiqueta, valor) {
@@ -320,7 +326,7 @@ function mostrarDetalles(folio) {
         contenidoDetalles.appendChild(fila);
     }
 
-    agregarDetalle("Folio", obtenerFolio(reporte));
+    agregarDetalle("ID", obtenerIdBD(reporte));
     agregarDetalle("Colonia", obtenerColonia(reporte));
     agregarDetalle("Dirección", reporte.dir);
     agregarDetalle("Ciudadano", reporte.user);
@@ -361,15 +367,15 @@ function mostrarDetalles(folio) {
    CAMBIAR ESTADO
 ========================================= */
 
-function abrirCambiarEstado(folio) {
-    const reporte = buscarReportePorFolio(folio);
+function abrirCambiarEstado(clave) {
+    const reporte = buscarReportePorClave(clave);
 
     if (!reporte) {
         alert("No se encontró el reporte seleccionado.");
         return;
     }
 
-    folioSeleccionado = obtenerFolio(reporte);
+    reporteSeleccionadoClave = obtenerClaveApi(reporte);
 
     const estadoClave = obtenerEstado(reporte);
     const estadoActual = nombreEstado(estadoClave);
@@ -393,7 +399,7 @@ function abrirCambiarEstado(folio) {
 ========================================= */
 
 async function guardarCambioEstado() {
-    const reporte = buscarReportePorFolio(folioSeleccionado);
+    const reporte = buscarReportePorClave(reporteSeleccionadoClave);
 
     if (!reporte) {
         alert("No se encontró el reporte que deseas actualizar.");
@@ -417,7 +423,7 @@ async function guardarCambioEstado() {
 
     try {
         if (typeof actualizarEstadoEnServidor === "function") {
-            await actualizarEstadoEnServidor(obtenerFolio(reporte), estadoClaveNuevo);
+            await actualizarEstadoEnServidor(obtenerClaveApi(reporte), estadoClaveNuevo);
         }
 
         reporte.estado = estadoClaveNuevo;
@@ -458,7 +464,7 @@ async function guardarCambioEstado() {
 ========================================= */
 
 document.getElementById("limpiarFiltros").addEventListener("click", () => {
-    buscarFolio.value = "";
+    if (buscarId) buscarId.value = "";
     filtroEstado.value = "";
     filtroColonia.value = "";
     filtroFecha.value = "";
@@ -471,7 +477,7 @@ document.getElementById("limpiarFiltros").addEventListener("click", () => {
    EVENTOS DE LOS FILTROS
 ========================================= */
 
-buscarFolio.addEventListener("input", renderizarReportes);
+if (buscarId) buscarId.addEventListener("input", renderizarReportes);
 filtroEstado.addEventListener("change", renderizarReportes);
 filtroColonia.addEventListener("change", renderizarReportes);
 filtroFecha.addEventListener("change", renderizarReportes);
@@ -482,9 +488,9 @@ document.getElementById("guardarEstado").addEventListener(
 );
 
 document.getElementById("irCambiarEstado").addEventListener("click", () => {
-    if (folioSeleccionado) {
+    if (reporteSeleccionadoClave) {
         modalDetalles.hidden = true;
-        abrirCambiarEstado(folioSeleccionado);
+        abrirCambiarEstado(reporteSeleccionadoClave);
     }
 });
 
