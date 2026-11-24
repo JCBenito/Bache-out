@@ -186,16 +186,6 @@ app.post('/api/login', async (req, res) => {
 
     try {
 
-        // 1. Verificar si el usuario ya está bloqueado
-        const registroIntentos = intentosLogin.get(claveIntentos);
-
-        if (registroIntentos && registroIntentos.bloqueado) {
-            return res.status(403).json({
-                error: 'Tu cuenta está bloqueada. Verifica tu correo electrónico para desbloquearla.',
-                bloqueado: true
-            });
-        }
-
         // 2. Buscar al usuario en la base de datos
         const resultado = await pool.query(
             `SELECT u.*, r.nombre_rol
@@ -214,6 +204,18 @@ app.post('/api/login', async (req, res) => {
         }
 
         const usuarioBD = resultado.rows[0];
+        // Identificar la cuenta mediante su correo registrado
+        const claveIntentos = usuarioBD.correo.toLowerCase().trim();
+        
+        // Comprobar si esta cuenta está bloqueada
+        const registroCuenta = intentosLogin.get(claveIntentos);
+        
+        if (registroCuenta && registroCuenta.bloqueado) {
+            return res.status(403).json({
+                error: 'Tu cuenta está bloqueada. Verifica tu correo electrónico para desbloquearla.',
+                bloqueado: true
+            });
+        }
 
         // 3. Comprobar contraseña
         const esValida = await bcrypt.compare(
