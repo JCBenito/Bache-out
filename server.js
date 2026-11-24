@@ -341,17 +341,22 @@ app.post('/api/recuperar-solicitar', async (req, res) => {
                         name: usuario.nombres
                     }
                 ],
-                subject: 'Código de recuperación de contraseña - Bache-Out',
+                subject: 'Soporte Tecnico - Bache out',
                 htmlContent: `
                     <div style="font-family: Arial, sans-serif; max-width: 500px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
-                        <h2 style="color: #1e3a8a;">Recuperación de contraseña</h2>
+                        <h2 style="color: #1e3a8a;">Soporte Tecnico de Bache out</h2>
                         <p>Hola <strong>${usuario.nombres}</strong>,</p>
-                        <p>Recibimos una solicitud para restablecer tu contraseña en el portal ciudadano <strong>Bache-Out</strong>.</p>
+                        <p>Recibimos una solicitud en tu cuenta del portal ciudadano Bache-Out. Para continuar con el proceso, ingresa el siguiente código de un solo uso en la plataforma: <strong>Bache-Out</strong>.</p>
                         <p>Tu código de verificación es:</p>
                         <div style="font-size: 28px; font-weight: bold; letter-spacing: 6px; text-align: center; background: #f1f5f9; padding: 15px; border-radius: 6px; color: #0f172a;">
                             ${codigo}
                         </div>
-                        <p style="font-size: 13px; color: #64748b; margin-top: 15px;">Este código expira en 15 minutos. Si no solicitaste este cambio, ignora este mensaje.</p>
+                        <p style="font-size: 13px; color: #64748b; margin-top: 15px;">Información importante:
+• Este código es temporal y expirará en 15 minutos.
+• Por tu seguridad, no compartas este código con nadie. El equipo de Bache-Out nunca te lo solicitará.
+• Si no realizaste esta solicitud, puedes ignorar este mensaje de forma segura.
+Atentamente,
+Equipo de Soporte de Bache-Out</p>
                     </div>
                 `
             })
