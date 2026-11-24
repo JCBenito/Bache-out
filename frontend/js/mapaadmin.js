@@ -18,7 +18,7 @@ let ajusteInicialHecho = false;
 
 const pintar = () => {
   const lista = filtrados();
-  ponerPines(capa, lista);
+  ponerPines(capa, lista, false);
   if (!ajusteInicialHecho && lista.length) {
     ajustarMapa(map, lista);
     ajusteInicialHecho = true;
