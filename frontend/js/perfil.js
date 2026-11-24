@@ -59,7 +59,12 @@ function mostrarFotoPerfil(origen) {
 ========================================= */
 
 document.addEventListener("DOMContentLoaded", async () => {
-
+    // Evitar que el navegador rellene la contraseña automáticamente
+    if (contrasenaActual) {
+        contrasenaActual.value = "";
+        contrasenaActual.type = "password";
+    }
+   
     // 1. Validar sesión
     const usuarioLogueado = obtenerUsuarioSesion();
 
