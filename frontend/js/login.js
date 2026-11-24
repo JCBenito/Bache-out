@@ -13,8 +13,8 @@ const botonLogin = formulario.querySelector('button[type="submit"]');
 let intentosFallidos = Number(sessionStorage.getItem("intentosFallidos")) || 0;
 const MAX_INTENTOS = 3;
 
-// Roles administrativos: 1 Admin BBDD, 2 Project Manager, 3 Backend, 4 Frontend 1, 5 Frontend 2; 6 Ciudadano
-const ROLES_ADMIN = [1, 2, 3, 4, 5];
+// Roles administrativos: 1 Admin BBDD, 2 Project Manager, 3 Backend, 4 Frontend 1, 5 Frontend 2; 6 Ciudadano[cite: 1]
+const ROLES_ADMIN = [1, 2, 3, 4, 5];[cite: 1]
 
 
 // ========================================
@@ -144,7 +144,6 @@ formulario.addEventListener("submit", async function (event) {
         localStorage.setItem("usuario", JSON.stringify(usuarioData));
         localStorage.setItem("nombreUsuario", usuarioData.nombres || "");
 
-        // Si en tus pantallas de admin lees "admin" o "rol", también queda disponible
         if (esAdmin) {
             localStorage.setItem("admin", JSON.stringify(usuarioData));
         } else {
@@ -153,8 +152,8 @@ formulario.addEventListener("submit", async function (event) {
 
         mostrarMensaje("¡Inicio de sesión exitoso! Redirigiendo...", true);
 
-        // Cambia "admin.html" por el nombre exacto de tu archivo HTML principal del administrador
-        const destino = esAdmin ? "administrador.html" : "index.html";
+        // Roles 1-5 van al panel de administrador (resumen.html); rol 6 y demás van a index.html[cite: 1, 8]
+        const destino = esAdmin ? "resumen.html" : "index.html";
 
         setTimeout(() => {
             window.location.href = destino;
