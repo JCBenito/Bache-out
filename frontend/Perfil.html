@@ -327,10 +327,14 @@
 
                         <div class="contenedor-input-contrasena">
 
-                            <input
+                           <input
                                 type="password"
                                 id="nuevaContrasena"
+                                name="nueva_contrasena_manual"
                                 placeholder="Ingresa tu nueva contraseña"
+                                autocomplete="new-password"
+                                readonly
+                                onfocus="this.removeAttribute('readonly')"
                             >
 
                             <button
@@ -370,7 +374,11 @@
                             <input
                                 type="password"
                                 id="confirmarContrasena"
+                                name="confirmar_nueva_contrasena_manual"
                                 placeholder="Confirma tu nueva contraseña"
+                                autocomplete="new-password"
+                                readonly
+                                onfocus="this.removeAttribute('readonly')"
                             >
 
                             <button
