@@ -1,14 +1,14 @@
 /* Bache-Out · Panel de administrador
-   comun.js: datos reales, sesión y piezas compartidas por todas las páginas (menos login) */
+   comun.js: datos reales, sesión y piezas compartidas por todas las páginas del panel */
 
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 
-/* ====== NOMBRES DE ARCHIVO ====== */
+/* ====== NOMBRES DE ARCHIVO (mismo nivel en frontend/) ====== */
 const RUTAS = {
-  login: "../login.html",
+  login: "login.html",
   resumen: "resumen.html",
-  reportes: "reportes.html",
+  reportes: "reportesadmin.html",
   mapa: "mapaadmin.html",
   estadisticas: "estadisticas.html",
   administrador: "administrador.html"
@@ -40,9 +40,13 @@ function borrarSesion() {
 }
 
 const usuarioSesion = leerUsuarioSesion();
+const rolSesion = Number(usuarioSesion?.id_rol);
 
-if (!usuarioSesion || !ROLES_ADMIN.includes(Number(usuarioSesion.id_rol))) {
+if (!usuarioSesion || !Number.isFinite(rolSesion)) {
   location.replace(RUTAS.login);
+} else if (!ROLES_ADMIN.includes(rolSesion)) {
+  // Si es Ciudadano (rol 6) u otro rol no administrativo, va a index.html[cite: 1, 8]
+  location.replace("index.html");
 }
 
 const nombreCompletoSesion = usuarioSesion
