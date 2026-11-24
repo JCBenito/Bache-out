@@ -37,7 +37,7 @@ document.addEventListener("DOMContentLoaded", function () {
         'a[href="index.html"], ' +
         'a[href="Reporte.html"], ' +
         'a[href="Detalles.html"], ' +
-        'a[href="Mapa.html"], ' +
+        'a[href="mapa.html"], ' +
         'a[href="Perfil.html"]'
     );
 
