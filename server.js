@@ -31,8 +31,36 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 // ==========================================
+// CONSTANTES DE ROLES Y ESTADOS (BD)
+// ==========================================
+// 1: Admin BBDD, 2: Project Manager, 3: Backend, 4: Frontend 1, 5: Frontend 2; 6: Ciudadano
+const ROLES_ADMIN = [1, 2, 3, 4, 5];
+
+// 1: Pendiente, 2: En Reparación, 3: Resuelto, 4: Rechazado[cite: 4]
+const MAPA_ESTADO_A_ID = {
+    pendiente: 1,
+    reparacion: 2,
+    'en reparacion': 2,
+    resuelto: 3,
+    rechazado: 4,
+    cancelado: 4
+};
+
+function normalizarEstadoSlug(valor = '') {
+    const limpio = String(valor)
+        .trim()
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '');
+
+    if (limpio.includes('reparacion') || limpio.includes('proceso')) return 'reparacion';
+    if (limpio.includes('resuelto') || limpio.includes('terminado') || limpio.includes('finalizado')) return 'resuelto';
+    if (limpio.includes('rechazado') || limpio.includes('cancelado')) return 'cancelado';
+    return 'pendiente';
+}
+
+// ==========================================
 // 1. FORZAR QUE LA PÁGINA PRINCIPAL SEA "nosotros.html"
-// (Debe ir antes de express.static para que intercepte la ruta raíz "/")
 // ==========================================
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'frontend', 'nosotros.html'));
@@ -42,18 +70,20 @@ app.get('/', (req, res) => {
 app.use(express.static('frontend'));
 app.use('/uploads', express.static(uploadDir));
 
+// ==========================================
+// REGISTRO CIUDADANO (id_rol = 6)
+// ==========================================
 app.post('/api/registro', async (req, res) => {
     let { nombres, apellido_paterno, apellido_materno, telefono, correo, contrasena } = req.body;
-    
+
     nombres = nombres ? nombres.toLowerCase().trim().replace(/\s+/g, ' ') : '';
     apellido_paterno = apellido_paterno ? apellido_paterno.toLowerCase().trim().replace(/\s+/g, ' ') : '';
     apellido_materno = apellido_materno ? apellido_materno.toLowerCase().trim().replace(/\s+/g, ' ') : '';
     correo = correo ? correo.toLowerCase().trim() : '';
     telefono = telefono ? telefono.replace(/[\s\-()]/g, '').trim() : '';
 
-    // 1. Validación estricta de nombres y apellidos reales (solo letras, acentos, ñ, diéresis y espacios)
     const regexSoloLetras = /^[a-záéíóúüñA-ZÁÉÍÓÚÜÑ\s]{2,50}$/;
-    
+
     if (!regexSoloLetras.test(nombres)) {
         return res.status(400).json({ error: 'El nombre solo debe contener letras reales (sin números ni caracteres especiales).' });
     }
@@ -64,7 +94,6 @@ app.post('/api/registro', async (req, res) => {
         return res.status(400).json({ error: 'El apellido materno solo debe contener letras reales.' });
     }
 
-    // 2. Validación de correo electrónico: sin puntos ni caracteres al inicio o antes/después del @, y con dominios reales
     const dominiosPermitidos = [
         'gmail.com',
         'hotmail.com',
@@ -86,7 +115,6 @@ app.post('/api/registro', async (req, res) => {
     ];
 
     const partesCorreo = correo.split('@');
-    // Inicia y termina obligatoriamente con letra o número antes del @, mínimo 3 caracteres, sin puntos consecutivos
     const regexUsuarioCorreo = /^[a-z0-9](?:[a-z0-9._-]*[a-z0-9])?$/;
 
     if (
@@ -96,12 +124,11 @@ app.post('/api/registro', async (req, res) => {
         !regexUsuarioCorreo.test(partesCorreo[0]) ||
         !dominiosPermitidos.includes(partesCorreo[1])
     ) {
-        return res.status(400).json({ 
-            error: 'El correo no debe llevar puntos ni símbolos al inicio o antes/después del @, y debe usar un dominio válido (ej. @gmail.com, @hotmail.com, @outlook.com, @yahoo.com).' 
+        return res.status(400).json({
+            error: 'El correo no debe llevar puntos ni símbolos al inicio o antes/después del @, y debe usar un dominio válido (ej. @gmail.com, @hotmail.com, @outlook.com, @yahoo.com).'
         });
     }
 
-    // 3. Validación de teléfono mexicano (exactamente 10 dígitos numéricos sin +52 para ajustarse a VARCHAR(10))
     const soloDigitosTelefono = telefono.replace(/\D/g, '');
     let diezDigitos = soloDigitosTelefono;
 
@@ -128,10 +155,11 @@ app.post('/api/registro', async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const contrasenaHash = await bcrypt.hash(contrasena, salt);
 
+        // id_rol = 6 corresponde a Ciudadano[cite: 3]
         const resultado = await pool.query(
             `INSERT INTO public.usuarios (id_rol, nombres, apellido_paterno, apellido_materno, telefono, correo, contrasena)
              VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id_usuario`,
-            [1, nombres, apellido_paterno, apellido_materno, telefono, correo, contrasenaHash]
+            [6, nombres, apellido_paterno, apellido_materno, telefono, correo, contrasenaHash]
         );
 
         res.status(201).json({ mensaje: 'Usuario registrado con éxito', id: resultado.rows[0].id_usuario });
@@ -141,6 +169,9 @@ app.post('/api/registro', async (req, res) => {
     }
 });
 
+// ==========================================
+// LOGIN (DISTINGUE ROL ADMIN 1-5 vs CIUDADANO 6)
+// ==========================================
 app.post('/api/login', async (req, res) => {
     let { usuario, contrasena } = req.body;
     const usuarioLimpio = usuario ? usuario.toLowerCase().trim() : '';
@@ -151,7 +182,12 @@ app.post('/api/login', async (req, res) => {
 
     try {
         const resultado = await pool.query(
-            'SELECT * FROM public.usuarios WHERE LOWER(correo) = $1 OR telefono = $2 OR telefono = $3',
+            `SELECT u.*, r.nombre_rol
+             FROM public.usuarios u
+             LEFT JOIN public.roles r ON u.id_rol = r.id_rol
+             WHERE LOWER(u.correo) = $1
+                OR ($2 <> '' AND u.telefono = $2)
+                OR ($3 <> '' AND u.telefono = $3)`,
             [usuarioLimpio, diezDigitos, usuarioLimpio]
         );
 
@@ -165,10 +201,16 @@ app.post('/api/login', async (req, res) => {
             return res.status(400).json({ error: 'Contraseña incorrecta.' });
         }
 
+        const idRol = Number(usuarioBD.id_rol);
+        const esAdmin = ROLES_ADMIN.includes(idRol);
+
         res.json({
             mensaje: 'Inicio de sesión exitoso',
-            usuario: { 
-                id: usuarioBD.id_usuario, 
+            usuario: {
+                id: usuarioBD.id_usuario,
+                id_rol: idRol,
+                nombre_rol: usuarioBD.nombre_rol || (esAdmin ? 'Administrador' : 'Ciudadano'),
+                es_admin: esAdmin,
                 nombres: usuarioBD.nombres,
                 apellido_paterno: usuarioBD.apellido_paterno,
                 apellido_materno: usuarioBD.apellido_materno,
@@ -182,6 +224,9 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
+// ==========================================
+// PERFIL Y CONTRASEÑA (CIUDADANO / GENERAL)
+// ==========================================
 app.put('/api/actualizar-perfil', async (req, res) => {
     let { id_usuario, correo, telefono } = req.body;
     const correoLimpio = correo ? correo.toLowerCase().trim() : '';
@@ -249,10 +294,8 @@ app.put('/api/actualizar-contrasena', async (req, res) => {
 // ==========================================
 // RECUPERACIÓN DE CONTRASEÑA POR CORREO (BREVO API HTTPS)
 // ==========================================
-
 const codigosRecuperacion = new Map();
 
-// PASO 1: SOLICITAR CÓDIGO DE RECUPERACIÓN
 app.post('/api/recuperar-solicitar', async (req, res) => {
     const correo = req.body.correo ? req.body.correo.toLowerCase().trim() : '';
 
@@ -277,7 +320,7 @@ app.post('/api/recuperar-solicitar', async (req, res) => {
 
         const usuario = resultado.rows[0];
         const codigo = Math.floor(100000 + Math.random() * 900000).toString();
-        const expiracion = Date.now() + 15 * 60 * 1000; // Válido por 15 minutos
+        const expiracion = Date.now() + 15 * 60 * 1000;
         const remitente = (process.env.EMAIL_FROM || 'david_godzila@hotmail.com').trim();
 
         const respuestaBrevo = await fetch('https://api.brevo.com/v3/smtp/email', {
@@ -328,7 +371,6 @@ app.post('/api/recuperar-solicitar', async (req, res) => {
     }
 });
 
-// PASO INTERMEDIO: VERIFICAR QUE EL CÓDIGO DE 6 DÍGITOS SEA CORRECTO ANTES DE CAMBIAR CONTRASEÑA
 app.post('/api/recuperar-verificar-codigo', (req, res) => {
     const correo = req.body.correo ? req.body.correo.toLowerCase().trim() : '';
     const { codigo } = req.body;
@@ -355,7 +397,6 @@ app.post('/api/recuperar-verificar-codigo', (req, res) => {
     res.json({ mensaje: 'Código verificado correctamente.' });
 });
 
-// PASO 2: VERIFICAR CÓDIGO Y RESTABLECER CONTRASEÑA
 app.post('/api/recuperar-restablecer', async (req, res) => {
     const correo = req.body.correo ? req.body.correo.toLowerCase().trim() : '';
     const { codigo, nuevaContrasena } = req.body;
@@ -397,9 +438,8 @@ app.post('/api/recuperar-restablecer', async (req, res) => {
 });
 
 // ==========================================
-// GESTIÓN DE FOTO DE PERFIL EN DISCO (Sin modificar PostgreSQL)
+// GESTIÓN DE FOTO DE PERFIL EN DISCO
 // ==========================================
-
 app.post('/api/foto-perfil', upload.single('foto_perfil'), (req, res) => {
     const { id_usuario } = req.body;
     const archivo = req.file;
@@ -423,9 +463,9 @@ app.post('/api/foto-perfil', upload.single('foto_perfil'), (req, res) => {
 
         fs.renameSync(archivo.path, rutaDestino);
 
-        res.json({ 
-            mensaje: 'Foto de perfil guardada.', 
-            foto_perfil: `/uploads/${nombreFijo}?t=${Date.now()}` 
+        res.json({
+            mensaje: 'Foto de perfil guardada.',
+            foto_perfil: `/uploads/${nombreFijo}?t=${Date.now()}`
         });
     } catch (error) {
         console.error('Error al guardar foto de perfil:', error);
@@ -466,7 +506,7 @@ app.delete('/api/foto-perfil/:id_usuario', (req, res) => {
 });
 
 // ==========================================
-// API: CREAR UN NUEVO REPORTE (Acepta hasta 3 fotografías con upload.array)
+// REPORTES CIUDADANOS
 // ==========================================
 app.post('/api/reportes', upload.array('fotografia', 3), async (req, res) => {
     const { id_usuario, id_estado, descripcion, calle_referencia, latitud, longitud, id_colonia } = req.body;
@@ -484,25 +524,24 @@ app.post('/api/reportes', upload.array('fotografia', 3), async (req, res) => {
         }
 
         const queryReporte = `
-            INSERT INTO public.reporte 
+            INSERT INTO public.reporte
             (id_usuario, id_estado, id_colonia, descripcion, calle_referencia, latitud, longitud)
             VALUES ($1, $2, $3, $4, $5, $6, $7)
             RETURNING id_reporte;
         `;
         const valuesReporte = [
-            id_usuario, 
-            id_estado || 1, 
-            coloniaIdFinal, 
-            descripcion, 
-            calle_referencia || 'Ubicación GPS', 
-            latitud, 
+            id_usuario,
+            id_estado || 1,
+            coloniaIdFinal,
+            descripcion,
+            calle_referencia || 'Ubicación GPS',
+            latitud,
             longitud
         ];
 
         const resultadoReporte = await pool.query(queryReporte, valuesReporte);
         const id_reporte = resultadoReporte.rows[0].id_reporte;
 
-        // Guardar cada archivo subido en la tabla de evidencias
         for (const file of archivos) {
             const fotografiaUrl = `/uploads/${file.filename}`;
             const queryEvidencia = `
@@ -512,27 +551,27 @@ app.post('/api/reportes', upload.array('fotografia', 3), async (req, res) => {
             await pool.query(queryEvidencia, [id_reporte, fotografiaUrl]);
         }
 
-        res.status(201).json({ 
-            mensaje: 'Reporte creado con éxito', 
-            id_reporte: id_reporte 
+        res.status(201).json({
+            mensaje: 'Reporte creado con éxito',
+            id_reporte: id_reporte
         });
     } catch (error) {
-        console.error("Error al crear el reporte:", error);
-        res.status(500).json({ error: "Error interno del servidor al registrar el reporte." });
+        console.error('Error al crear el reporte:', error);
+        res.status(500).json({ error: 'Error interno del servidor al registrar el reporte.' });
     }
 });
 
 app.get('/api/reportes', async (req, res) => {
     try {
         const query = `
-            SELECT 
-                r.id_reporte, 
-                r.descripcion, 
-                r.calle_referencia, 
-                r.latitud, 
-                r.longitud, 
-                r.fecha_creacion AS fecha_reporte, 
-                r.id_estado, 
+            SELECT
+                r.id_reporte,
+                r.descripcion,
+                r.calle_referencia,
+                r.latitud,
+                r.longitud,
+                r.fecha_creacion AS fecha_reporte,
+                r.id_estado,
                 c.nombre_colonia AS colonia,
                 COALESCE(fotos.fotografias, '[]') AS fotografias
             FROM public.reporte r
@@ -547,38 +586,216 @@ app.get('/api/reportes', async (req, res) => {
         const resultado = await pool.query(query);
         res.json(resultado.rows);
     } catch (error) {
-        console.error("Error al obtener los reportes para el mapa:", error);
-        res.status(500).json({ error: "Error interno del servidor al consultar los reportes." });
+        console.error('Error al obtener los reportes para el mapa:', error);
+        res.status(500).json({ error: 'Error interno del servidor al consultar los reportes.' });
     }
 });
 
-// API: OBTENER REPORTES DE UN USUARIO (Agrupa todas las fotos en un arreglo JSON de forma segura)
 app.route('/api/reportes/usuario/:id_usuario')
-.get(async (req, res) => {
-    const { id_usuario } = req.params;
+    .get(async (req, res) => {
+        const { id_usuario } = req.params;
+        try {
+            const query = `
+                SELECT
+                    r.id_reporte,
+                    r.descripcion,
+                    r.calle_referencia,
+                    r.fecha_creacion AS fecha_reporte,
+                    r.id_estado,
+                    COALESCE(fotos.fotografias, '[]') AS fotografias
+                FROM public.reporte r
+                LEFT JOIN LATERAL (
+                    SELECT json_agg(e.fotografia) AS fotografias
+                    FROM public.evidencia_fotografica e
+                    WHERE e.id_reporte = r.id_reporte
+                ) fotos ON true
+                WHERE r.id_usuario = $1
+                ORDER BY r.fecha_creacion DESC;
+            `;
+            const resultado = await pool.query(query, [id_usuario]);
+            res.json(resultado.rows);
+        } catch (error) {
+            console.error('Error al obtener los reportes:', error);
+            res.status(500).json({ error: 'Error interno del servidor al consultar los reportes.' });
+        }
+    });
+
+// ==========================================
+// PANEL DE ADMINISTRACIÓN
+// ==========================================
+app.get('/api/admin/reportes', async (req, res) => {
     try {
         const query = `
-            SELECT 
-                r.id_reporte, 
-                r.descripcion, 
-                r.calle_referencia, 
-                r.fecha_creacion AS fecha_reporte, 
-                r.id_estado, 
+            SELECT
+                r.id_reporte,
+                r.descripcion,
+                r.calle_referencia,
+                r.latitud,
+                r.longitud,
+                r.fecha_creacion,
+                r.id_estado,
+                er.nombre_estado,
+                c.nombre_colonia AS colonia,
+                u.nombres,
+                u.apellido_paterno,
+                u.apellido_materno,
+                u.correo AS correo_ciudadano,
                 COALESCE(fotos.fotografias, '[]') AS fotografias
             FROM public.reporte r
+            LEFT JOIN public.estado_reporte er ON r.id_estado = er.id_estado
+            LEFT JOIN public.colonia c ON r.id_colonia = c.id_colonia
+            LEFT JOIN public.usuarios u ON r.id_usuario = u.id_usuario
             LEFT JOIN LATERAL (
                 SELECT json_agg(e.fotografia) AS fotografias
                 FROM public.evidencia_fotografica e
                 WHERE e.id_reporte = r.id_reporte
             ) fotos ON true
-            WHERE r.id_usuario = $1 
-            ORDER BY r.fecha_creacion DESC;
+            ORDER BY r.fecha_creacion DESC, r.id_reporte DESC;
         `;
-        const resultado = await pool.query(query, [id_usuario]);
-        res.json(resultado.rows);
+        const { rows } = await pool.query(query);
+
+        const formateados = rows.map((row) => {
+            const nombreCiudadano = [row.nombres, row.apellido_paterno, row.apellido_materno]
+                .filter(Boolean)
+                .join(' ') || row.correo_ciudadano || 'Ciudadano';
+
+            const rawFecha = row.fecha_creacion || '';
+            const fechaISO = rawFecha instanceof Date
+                ? rawFecha.toISOString().slice(0, 10)
+                : String(rawFecha).slice(0, 10);
+
+            const fotosArr = Array.isArray(row.fotografias) ? row.fotografias.filter(Boolean) : [];
+            const idNum = Number(row.id_reporte);
+
+            return {
+                id_reporte: idNum,
+                folio: `BCH-${String(idNum).padStart(4, '0')}`,
+                colonia: row.colonia || 'Sin colonia',
+                dir: row.calle_referencia || 'Dirección no especificada',
+                fecha: fechaISO,
+                estado: normalizarEstadoSlug(row.nombre_estado || row.id_estado),
+                id_estado: Number(row.id_estado || 1),
+                nombre_estado: row.nombre_estado || 'Pendiente',
+                user: nombreCiudadano,
+                desc: row.descripcion || '',
+                foto: fotosArr[0] || '',
+                fotografias: fotosArr,
+                lat: Number(row.latitud ?? 16.8531),
+                lng: Number(row.longitud ?? -99.8237)
+            };
+        });
+
+        res.json({ reportes: formateados });
     } catch (error) {
-        console.error("Error al obtener los reportes:", error);
-        res.status(500).json({ error: "Error interno del servidor al consultar los reportes." });
+        console.error('Error en GET /api/admin/reportes:', error);
+        res.status(500).json({ error: 'No se pudieron cargar los reportes desde la base de datos.' });
+    }
+});
+
+app.put('/api/admin/reportes/:folio/estado', async (req, res) => {
+    try {
+        const { folio } = req.params;
+        const { estado } = req.body;
+
+        const slug = normalizarEstadoSlug(estado);
+        const idEstado = MAPA_ESTADO_A_ID[slug] || MAPA_ESTADO_A_ID[String(estado || '').toLowerCase()];
+
+        if (!idEstado) {
+            return res.status(400).json({ error: 'Estado no válido.' });
+        }
+
+        const coincideFolio = /^BCH-(\d+)$/i.exec(String(folio).trim());
+        const idReportado = coincideFolio
+            ? Number(coincideFolio[1])
+            : (/^\d+$/.test(String(folio).trim()) ? Number(folio) : null);
+
+        if (!idReportado) {
+            return res.status(400).json({ error: 'Folio o identificador de reporte no válido.' });
+        }
+
+        const actualizacion = await pool.query(
+            `UPDATE public.reporte
+             SET id_estado = $1
+             WHERE id_reporte = $2
+             RETURNING id_reporte, id_estado`,
+            [idEstado, idReportado]
+        );
+
+        if (actualizacion.rows.length === 0) {
+            return res.status(404).json({ error: 'Reporte no encontrado.' });
+        }
+
+        const estadoBD = await pool.query(
+            'SELECT nombre_estado FROM public.estado_reporte WHERE id_estado = $1',
+            [idEstado]
+        );
+
+        res.json({
+            mensaje: 'Estado actualizado correctamente',
+            folio: `BCH-${String(idReportado).padStart(4, '0')}`,
+            id_estado: idEstado,
+            estado: slug,
+            nombre_estado: estadoBD.rows[0]?.nombre_estado || 'Pendiente'
+        });
+    } catch (error) {
+        console.error('Error en PUT /api/admin/reportes/:folio/estado:', error);
+        res.status(500).json({ error: 'No se pudo actualizar el estado del reporte.' });
+    }
+});
+
+app.put('/api/admin/perfil/:id', async (req, res) => {
+    try {
+        const idUsuario = Number(req.params.id);
+        const { nombre, correo, telefono } = req.body;
+
+        if (!idUsuario) {
+            return res.status(400).json({ error: 'ID de usuario no válido.' });
+        }
+
+        const correoLimpio = String(correo || '').trim().toLowerCase();
+        const telLimpio = String(telefono || '').replace(/\D/g, '').slice(-10);
+
+        if (correoLimpio || telLimpio) {
+            const duplicado = await pool.query(
+                `SELECT id_usuario FROM public.usuarios
+                 WHERE id_usuario != $1
+                   AND (($2 <> '' AND LOWER(correo) = $2) OR ($3 <> '' AND telefono = $3))`,
+                [idUsuario, correoLimpio, telLimpio]
+            );
+
+            if (duplicado.rows.length > 0) {
+                return res.status(400).json({ error: 'El correo o teléfono ya está en uso por otra cuenta.' });
+            }
+        }
+
+        const partesNombre = String(nombre || '').trim().split(/\s+/).filter(Boolean);
+        const nombres = partesNombre[0] || '';
+        const apellidoPaterno = partesNombre[1] || '';
+        const apellidoMaterno = partesNombre.slice(2).join(' ') || '';
+
+        const actualizacion = await pool.query(
+            `UPDATE public.usuarios
+             SET nombres = COALESCE(NULLIF($1, ''), nombres),
+                 apellido_paterno = $2,
+                 apellido_materno = $3,
+                 correo = COALESCE(NULLIF($4, ''), correo),
+                 telefono = COALESCE(NULLIF($5, ''), telefono)
+             WHERE id_usuario = $6
+             RETURNING id_usuario, id_rol, nombres, apellido_paterno, apellido_materno, correo, telefono`,
+            [nombres, apellidoPaterno, apellidoMaterno, correoLimpio, telLimpio, idUsuario]
+        );
+
+        if (actualizacion.rows.length === 0) {
+            return res.status(404).json({ error: 'Administrador no encontrado.' });
+        }
+
+        res.json({
+            mensaje: 'Perfil actualizado correctamente',
+            usuario: actualizacion.rows[0]
+        });
+    } catch (error) {
+        console.error('Error en PUT /api/admin/perfil/:id:', error);
+        res.status(500).json({ error: 'No se pudo actualizar el perfil del administrador.' });
     }
 });
 
