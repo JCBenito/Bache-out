@@ -535,6 +535,13 @@ app.post('/api/recuperar-restablecer', async (req, res) => {
         return res.status(400).json({ error: 'No hay una solicitud activa para este correo o el código ya fue usado.' });
     }
 
+    // Comprobar que el código sea exclusivamente de recuperación
+    if (registro.motivo !== 'recuperacion') {
+        return res.status(403).json({
+            error: 'Este código no puede utilizarse para recuperar la contraseña.'
+        });
+    }
+
     if (Date.now() > registro.expiracion) {
         codigosRecuperacion.delete(correo);
         return res.status(400).json({ error: 'El código ha expirado. Solicita uno nuevo.' });
