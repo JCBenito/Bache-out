@@ -1,4 +1,3 @@
-
 /* =========================================
    BACHE-OUT | RESUMEN DEL ADMINISTRADOR
 ========================================= */
@@ -7,6 +6,12 @@
 const mini = baseMap("miniMap", 12);
 const capa = L.layerGroup().addTo(mini);
 
+const conCoordenadas = items =>
+    items.filter(r =>
+        Number.isFinite(Number(r.lat)) &&
+        Number.isFinite(Number(r.lng))
+    );
+
 
 /* =========================================
    ACTUALIZAR TABLA, MAPA Y GRÁFICAS
@@ -14,6 +19,7 @@ const capa = L.layerGroup().addTo(mini);
 
 function pintar() {
     const lista = Array.isArray(reportes) ? reportes : [];
+    const listaMapa = conCoordenadas(lista);
 
     // Ordenar los reportes del más reciente al más antiguo
     const recientes = [...lista].sort((a, b) => {
@@ -22,20 +28,22 @@ function pintar() {
         );
     });
 
-    // Mostrar los seis reportes más recientes
+    // Mostrar los seis reportes más recientes (sin columna de acciones y con ID de reporte)
     $("#tRecent").innerHTML = rows(
         recientes.slice(0, 6),
         false
     );
 
-    // Actualizar los marcadores del mapa
-    ponerPines(capa, lista);
+    // Actualizar los marcadores del minimapa sin botón "Gestionar"
+    ponerPines(capa, listaMapa, false);
 
     // Actualizar las gráficas
     renderCharts();
 
     // Ajustar el mapa a las ubicaciones disponibles
-    ajustarMapa(mini, lista);
+    ajustarMapa(mini, listaMapa);
+
+    setTimeout(() => mini.invalidateSize(), 50);
 }
 
 
