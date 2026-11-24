@@ -15,7 +15,7 @@ const RUTAS = {
 };
 
 /* ====== SESIÓN Y PERFIL DEL ADMINISTRADOR ====== */
-const ROLES_ADMIN = [1, 2, 3, 4, 5];[cite: 1]
+const ROLES_ADMIN = [1, 2, 3, 4, 5];
 
 function leerUsuarioSesion() {
   try {
@@ -45,7 +45,7 @@ const rolSesion = Number(usuarioSesion?.id_rol);
 if (!usuarioSesion || !Number.isFinite(rolSesion)) {
   location.replace(RUTAS.login);
 } else if (!ROLES_ADMIN.includes(rolSesion)) {
-  // Si es Ciudadano (rol 6) u otro rol no administrativo, va a index.html[cite: 1, 8]
+  // Si es Ciudadano (rol 6) u otro rol no administrativo, va a index.html
   location.replace("index.html");
 }
 
