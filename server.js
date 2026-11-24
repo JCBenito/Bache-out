@@ -213,7 +213,8 @@ app.post('/api/login', async (req, res) => {
         if (registroCuenta && registroCuenta.bloqueado) {
             return res.status(403).json({
                 error: 'Tu cuenta está bloqueada. Verifica tu correo electrónico para desbloquearla.',
-                bloqueado: true
+                bloqueado: true,
+                correo: usuarioBD.correo
             });
         }
 
@@ -245,6 +246,7 @@ app.post('/api/login', async (req, res) => {
                 return res.status(403).json({
                     error: 'Has superado los 3 intentos. Debes verificar tu correo electrónico para desbloquear tu cuenta.',
                     bloqueado: true
+                    correo: usuarioBD.correo
                 });
             }
 
