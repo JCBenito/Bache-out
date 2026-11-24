@@ -5,6 +5,17 @@
 const formulario = document.querySelector("form");
 const correoInput = document.querySelector('input[type="email"], input[type="text"]');
 const botonEnviar = formulario ? formulario.querySelector('button[type="submit"]') : null;
+// Obtener el motivo de la verificación
+const motivoVerificacion = sessionStorage.getItem("motivoVerificacion");
+
+// Obtener el correo real de la cuenta bloqueada
+const correoGuardado = sessionStorage.getItem("correoRecuperacion");
+
+// Si es desbloqueo, mostrar el correo registrado y evitar que lo cambien
+if (motivoVerificacion === "desbloqueo" && correoGuardado && correoInput) {
+    correoInput.value = correoGuardado;
+    correoInput.readOnly = true;
+}
 
 // Bloquear espacios y caracteres inválidos al inicio mientras escribe
 if (correoInput) {
@@ -17,7 +28,9 @@ if (formulario) {
     formulario.addEventListener("submit", async function (event) {
         event.preventDefault();
 
-        const correo = correoInput ? correoInput.value.trim().toLowerCase() : "";
+       const correo = motivoVerificacion === "desbloqueo"
+    ? (correoGuardado || "").trim().toLowerCase()
+    : (correoInput ? correoInput.value.trim().toLowerCase() : "");
 
         // 1. Validar que se haya escrito un correo
         if (correo === "") {
