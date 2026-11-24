@@ -75,13 +75,35 @@ formulario.addEventListener("submit", async function (event) {
         }
 
         // 3. Guardar el código validado en sessionStorage para la pantalla de nueva contraseña
-        sessionStorage.setItem("codigoRecuperacion", codigo);
+       // 3. Guardar el código validado
+sessionStorage.setItem("codigoRecuperacion", codigo);
 
-        mostrarMensaje("¡Código verificado correctamente! Redirigiendo...", true);
+// 4. Identificar el motivo de la verificación
+const motivo = sessionStorage.getItem("motivoVerificacion");
 
-        setTimeout(() => {
-            window.location.href = "contraseña.html";
-        }, 1200);
+mostrarMensaje("¡Código verificado correctamente! Redirigiendo...", true);
+
+setTimeout(() => {
+
+    if (motivo === "recuperacion") {
+
+        // Dirigir a establecer una nueva contraseña
+        window.location.href = "contraseña.html";
+
+    } else if (motivo === "desbloqueo") {
+
+        // Dirigir al inicio de sesión
+        window.location.href = "login.html";
+
+    } else {
+
+        // Si no se reconoce el motivo
+        alert("No se pudo identificar el motivo de la verificación.");
+        window.location.href = "login.html";
+
+    }
+
+}, 1200);
 
     } catch (error) {
         mostrarMensaje(error.message || "Error al verificar el código.", false);
