@@ -1,4 +1,3 @@
-
 /* =========================================
    BACHE-OUT | GESTIÓN DE REPORTES
 ========================================= */
@@ -57,9 +56,18 @@ function obtenerEstado(reporte) {
         return "resuelto";
     }
 
-    if (estado.includes("cancelado")) return "cancelado";
+    if (estado.includes("cancelado") || estado.includes("rechazado")) return "cancelado";
 
     return "desconocido";
+}
+
+function claveEstadoSelect(valorSelect) {
+    const n = normalizar(valorSelect);
+    if (n.includes("pendiente")) return "pendiente";
+    if (n.includes("reparacion") || n.includes("proceso")) return "reparacion";
+    if (n.includes("resuelto") || n.includes("terminado") || n.includes("finalizado")) return "resuelto";
+    if (n.includes("cancelado") || n.includes("rechazado")) return "cancelado";
+    return "pendiente";
 }
 
 function nombreEstado(estado) {
@@ -363,10 +371,13 @@ function abrirCambiarEstado(folio) {
 
     folioSeleccionado = obtenerFolio(reporte);
 
-    const estadoActual = nombreEstado(obtenerEstado(reporte));
+    const estadoClave = obtenerEstado(reporte);
+    const estadoActual = nombreEstado(estadoClave);
 
     const opcionActual = [...nuevoEstado.options].find(
-        opcion => normalizar(opcion.value) === normalizar(estadoActual)
+        opcion =>
+            normalizar(opcion.value) === normalizar(estadoActual) ||
+            claveEstadoSelect(opcion.value) === estadoClave
     );
 
     nuevoEstado.value = opcionActual
@@ -381,7 +392,7 @@ function abrirCambiarEstado(folio) {
    GUARDAR CAMBIO DE ESTADO
 ========================================= */
 
-function guardarCambioEstado() {
+async function guardarCambioEstado() {
     const reporte = buscarReportePorFolio(folioSeleccionado);
 
     if (!reporte) {
@@ -389,36 +400,56 @@ function guardarCambioEstado() {
         return;
     }
 
-    const estadoNuevo = nuevoEstado.value;
+    const estadoClaveNuevo = claveEstadoSelect(nuevoEstado.value);
 
-    if (obtenerEstado(reporte) === normalizar(estadoNuevo)) {
+    if (obtenerEstado(reporte) === estadoClaveNuevo) {
         modalEstado.hidden = true;
         return;
     }
 
+    const btnGuardar = document.getElementById("guardarEstado");
     const estadoAnterior = reporte.estado;
 
-    reporte.estado = estadoNuevo;
-
-    try {
-        localStorage.setItem(
-            "bo_reportes",
-            JSON.stringify(obtenerListaReportes())
-        );
-    } catch (error) {
-        reporte.estado = estadoAnterior;
-
-        console.error("No se pudieron guardar los reportes:", error);
-        alert("No fue posible guardar el cambio en el navegador.");
-        return;
+    if (btnGuardar) {
+        btnGuardar.disabled = true;
+        btnGuardar.textContent = "Guardando...";
     }
 
-    modalEstado.hidden = true;
+    try {
+        if (typeof actualizarEstadoEnServidor === "function") {
+            await actualizarEstadoEnServidor(obtenerFolio(reporte), estadoClaveNuevo);
+        }
 
-    document.dispatchEvent(new Event("reportes:cambio"));
+        reporte.estado = estadoClaveNuevo;
 
-    cargarColonias();
-    renderizarReportes();
+        if (typeof guardarReportes === "function") {
+            guardarReportes();
+        } else {
+            localStorage.setItem("bo_reportes", JSON.stringify(obtenerListaReportes()));
+        }
+
+        modalEstado.hidden = true;
+
+        if (typeof renderKpis === "function") renderKpis();
+        if (typeof renderCharts === "function") renderCharts();
+        document.dispatchEvent(new Event("reportes:cambio"));
+
+        cargarColonias();
+        renderizarReportes();
+
+        if (typeof toast === "function") {
+            toast("Estado actualizado a " + nombreEstado(estadoClaveNuevo));
+        }
+    } catch (error) {
+        reporte.estado = estadoAnterior;
+        console.error("Error al guardar el cambio de estado:", error);
+        alert(error.message || "No fue posible guardar el cambio de estado.");
+    } finally {
+        if (btnGuardar) {
+            btnGuardar.disabled = false;
+            btnGuardar.textContent = "Guardar cambios";
+        }
+    }
 }
 
 
