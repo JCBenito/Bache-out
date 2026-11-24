@@ -183,8 +183,6 @@ app.post('/api/login', async (req, res) => {
         ? soloDigitos.slice(2)
         : soloDigitos;
 
-    // Identificador para controlar los intentos de este usuario
-    const claveIntentos = usuarioLimpio;
 
     try {
 
