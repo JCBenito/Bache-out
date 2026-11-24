@@ -1,0 +1,58 @@
+/* =========================================
+   PIE DE PÁGINA
+========================================= */
+
+.pie-pagina {
+    width: 100%;
+    background-color: #E9FFFB;
+    border-top: 1px solid #dce5e7;
+    padding: 25px 20px;
+    margin-top: 40px;
+}
+
+.contenido-pie {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 8px;
+}
+
+.contenido-pie h3 {
+    color: #173F4A;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 18px;
+    font-weight: 800;
+}
+
+.contenido-pie p {
+    color: #53666d;
+    font-size: 13px;
+}
+
+.contenido-pie span {
+    color: #7b898e;
+    font-size: 11px;
+    margin-top: 5px;
+}
+
+
+/* =========================================
+   CELULARES
+========================================= */
+
+@media (max-width: 600px) {
+
+    .pie-pagina {
+        padding: 22px 15px;
+    }
+
+    .contenido-pie p {
+        font-size: 12px;
+    }
+
+    .contenido-pie span {
+        font-size: 10px;
+    }
+
+}
