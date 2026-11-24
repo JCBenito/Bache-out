@@ -14,7 +14,7 @@ let intentosFallidos = Number(sessionStorage.getItem("intentosFallidos")) || 0;
 const MAX_INTENTOS = 3;
 
 // Roles administrativos: 1 Admin BBDD, 2 Project Manager, 3 Backend, 4 Frontend 1, 5 Frontend 2; 6 Ciudadano[cite: 1]
-const ROLES_ADMIN = [1, 2, 3, 4, 5];[cite: 1]
+const ROLES_ADMIN = [1, 2, 3, 4, 5];[cite: 1];
 
 
 // ========================================
