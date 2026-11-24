@@ -13,6 +13,9 @@ const botonLogin = formulario.querySelector('button[type="submit"]');
 let intentosFallidos = Number(sessionStorage.getItem("intentosFallidos")) || 0;
 const MAX_INTENTOS = 3;
 
+// Roles administrativos: 1 Admin BBDD, 2 Project Manager, 3 Backend, 4 Frontend 1, 5 Frontend 2; 6 Ciudadano
+const ROLES_ADMIN = [1, 2, 3, 4, 5];
+
 
 // ========================================
 // MOSTRAR / OCULTAR CONTRASEÑA
@@ -131,18 +134,30 @@ formulario.addEventListener("submit", async function (event) {
         // INICIO DE SESIÓN EXITOSO
         // =================================
 
-        // Reiniciar contador de intentos
         sessionStorage.removeItem("intentosFallidos");
         sessionStorage.setItem("sesionIniciada", "true");
 
-        // GUARDAR DATOS EXACTOS PARA EL INDEX.HTML (Clave "usuario")
-        localStorage.setItem("usuario", JSON.stringify(datos.usuario));
-        localStorage.setItem("nombreUsuario", datos.usuario.nombres); // Respaldo adicional
+        const usuarioData = datos.usuario || {};
+        const rolId = Number(usuarioData.id_rol);
+        const esAdmin = ROLES_ADMIN.includes(rolId);
+
+        localStorage.setItem("usuario", JSON.stringify(usuarioData));
+        localStorage.setItem("nombreUsuario", usuarioData.nombres || "");
+
+        // Si en tus pantallas de admin lees "admin" o "rol", también queda disponible
+        if (esAdmin) {
+            localStorage.setItem("admin", JSON.stringify(usuarioData));
+        } else {
+            localStorage.removeItem("admin");
+        }
 
         mostrarMensaje("¡Inicio de sesión exitoso! Redirigiendo...", true);
 
+        // Cambia "admin.html" por el nombre exacto de tu archivo HTML principal del administrador
+        const destino = esAdmin ? "admin.html" : "index.html";
+
         setTimeout(() => {
-            window.location.href = "index.html";
+            window.location.href = destino;
         }, 1000);
 
     } catch (error) {
