@@ -236,13 +236,21 @@ function detalle(r) {
   </div>`;
 }
 function rows(list, full) {
-  if (!list.length) return `<tbody><tr><td class="empty" colspan="6">No hay reportes con esos filtros. Prueba con otra búsqueda.</td></tr></tbody>`;
-  return `<thead><tr><th>Folio</th><th>Colonia</th>${full ? "<th>Ciudadano</th>" : ""}<th>Fecha</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>` +
+  const cols = full ? 6 : 4;
+  if (!list.length) {
+    return `<tbody><tr><td class="empty" colspan="${cols}">No hay reportes con esos filtros. Prueba con otra búsqueda.</td></tr></tbody>`;
+  }
+
+  return `<thead><tr><th>${full ? "Folio" : "ID de reporte"}</th><th>Colonia</th>${full ? "<th>Ciudadano</th>" : ""}<th>Fecha</th><th>Estado</th>${full ? "<th>Acciones</th>" : ""}</tr></thead><tbody>` +
     list.map(r => {
       const ab = abiertos.has(r.folio);
-      return `<tr><td><b>#${r.folio}</b></td><td>${r.colonia}</td>${full ? `<td>${r.user}</td>` : ""}<td>${fmt(r.fecha)}</td><td>${badge(r.estado)}</td>
-        <td><div class="acts">${full ? `<button class="link ${ab ? "on" : ""}" data-det="${r.folio}" aria-expanded="${ab}">${ab ? "Ocultar detalles" : "Ver detalles"}</button>` : ""}<button class="link" data-open="${r.folio}">Gestionar</button></div></td></tr>` +
-        (full && ab ? `<tr class="detrow"><td colspan="6">${detalle(r)}</td></tr>` : "");
+      const identificador = full ? r.folio : (r.id ?? r.id_reporte ?? r.folio);
+      return `<tr><td><b>#${identificador}</b></td><td>${r.colonia}</td>${full ? `<td>${r.user}</td>` : ""}<td>${fmt(r.fecha)}</td><td>${badge(r.estado)}</td>` +
+        (full
+          ? `<td><div class="acts"><button class="link ${ab ? "on" : ""}" data-det="${r.folio}" aria-expanded="${ab}">${ab ? "Ocultar detalles" : "Ver detalles"}</button><button class="link" data-open="${r.folio}">Gestionar</button></div></td>`
+          : "") +
+        `</tr>` +
+        (full && ab ? `<tr class="detrow"><td colspan="${cols}">${detalle(r)}</td></tr>` : "");
     }).join("") + `</tbody>`;
 }
 
