@@ -598,6 +598,10 @@ label.btn-seleccionar-fotos:hover {
     .barra-navegacion a.activo {
         color: #159a9c;
     }
+   
+   .barra-navegacion a.activo::after {
+    bottom: 3px;
+}
 
     /* Contenido del reporte */
 
