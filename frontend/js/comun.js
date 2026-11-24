@@ -1,12 +1,10 @@
 /* Bache-Out · Panel de administrador
-   comun.js: datos, sesión y piezas compartidas por todas las páginas (menos login) */
+   comun.js: datos reales, sesión y piezas compartidas por todas las páginas (menos login) */
 
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 
-/* ====== NOMBRES DE ARCHIVO ======
-   Si renombraste alguna página (por ejemplo login.html → loginadmin.html),
-   cambia aquí el nombre y todos los enlaces del panel se ajustan solos. */
+/* ====== NOMBRES DE ARCHIVO ====== */
 const RUTAS = {
   login: "../login.html",
   resumen: "resumen.html",
@@ -16,58 +14,146 @@ const RUTAS = {
   administrador: "administrador.html"
 };
 
-/* ====== SESIÓN ====== */
-/* Sesión: usa sessionStorage y, si el navegador lo bloquea (pasa al abrir archivos con doble clic), window.name */
-function leerSesion() {
-  try { const s = sessionStorage.getItem("bo_sesion"); if (s) return s; } catch (e) {}
-  const m = /(?:^|;)bo_sesion=([^;]*)/.exec(window.name || ""); return m ? decodeURIComponent(m[1]) : null;
+/* ====== SESIÓN Y PERFIL DEL ADMINISTRADOR ====== */
+const ROLES_ADMIN = [1, 2, 3, 4, 5];[cite: 1]
+
+function leerUsuarioSesion() {
+  try {
+    const rawAdmin = localStorage.getItem("admin");
+    if (rawAdmin) return JSON.parse(rawAdmin);
+    const rawUser = localStorage.getItem("usuario");
+    if (rawUser) return JSON.parse(rawUser);
+  } catch (e) {}
+  return null;
 }
-function guardarSesion(c) { try { sessionStorage.setItem("bo_sesion", c); } catch (e) {} window.name = "bo_sesion=" + encodeURIComponent(c); }
-function borrarSesion() { try { sessionStorage.removeItem("bo_sesion"); } catch (e) {} window.name = ""; }
-const sesion = leerSesion();
-//if (!sesion) location.replace(RUTAS.login);
 
-/* ====== DATOS ====== (reemplaza REPORTES_BASE con tu base de datos) */
-const ESTADOS = { pendiente: "Pendiente", reparacion: "En reparación", resuelto: "Resuelto", cancelado: "Cancelado" };
-const COLORES = { pendiente: "#ffbb77", reparacion: "#8cc4ee", resuelto: "#8fd9a8", cancelado: "#f08a82" };
-const REPORTES_BASE = [
-  { folio: "8CH-0031", colonia: "Icacos", dir: "Calle Icacos esq. Av. Universidad", fecha: "2026-10-05", estado: "pendiente", user: "Laura Pineda", desc: "Bache profundo frente a la parada del camión, los autos tienen que invadir el otro carril.", foto: "", lat: 16.8465, lng: -99.8760 },
-  { folio: "8CH-0030", colonia: "Costa Azul", dir: "Av. Costera Miguel Alemán", fecha: "2026-10-04", estado: "reparacion", user: "Jorge Nava", desc: "Bache de gran tamaño ubicado sobre el carril derecho de la avenida.", foto: "", lat: 16.8630, lng: -99.8650 },
-  { folio: "8CH-0029", colonia: "Renacimiento", dir: "Av. Renacimiento 120", fecha: "2026-10-03", estado: "reparacion", user: "Karen Ortiz", desc: "Hundimiento del pavimento después de las lluvias, cerca de una escuela.", foto: "", lat: 16.8760, lng: -99.7980 },
-  { folio: "8CH-0028", colonia: "Mozimba", dir: "Calle Mozimba s/n", fecha: "2026-10-02", estado: "resuelto", user: "Iván Castro", desc: "Varios baches pequeños seguidos sobre la calle principal.", foto: "", lat: 16.8590, lng: -99.8890 },
-  { folio: "8CH-0027", colonia: "Centro", dir: "Calle La Quebrada y 5 de Mayo", fecha: "2026-10-01", estado: "pendiente", user: "Paola Reyes", desc: "Bache en el cruce que dificulta el paso de bicicletas y motos.", foto: "", lat: 16.8512, lng: -99.9100 },
-  { folio: "8CH-0026", colonia: "Costa Azul", dir: "Blvd. Costa Azul 45", fecha: "2026-09-30", estado: "reparacion", user: "Hugo Mendoza", desc: "Bache junto a la banqueta, ya dañó llantas de varios vehículos.", foto: "", lat: 16.8280, lng: -99.8650 },
-  { folio: "8CH-0025", colonia: "Farallón", dir: "Camino al Farallón km 2", fecha: "2026-09-29", estado: "resuelto", user: "Daniela Gil", desc: "Grieta amplia con desprendimiento de asfalto en la curva.", foto: "", lat: 16.8395, lng: -99.8530 },
-  { folio: "8CH-0024", colonia: "El Cayaco", dir: "C. 10 de Mayo, El Cayaco", fecha: "2026-09-28", estado: "pendiente", user: "Raúl Herrera", desc: "Bache grande lleno de agua, no se ve de noche.", foto: "", lat: 16.9010, lng: -99.8200 },
-  { folio: "8CH-0023", colonia: "Alta Tensión", dir: "C. Alta Tensión 78", fecha: "2026-09-27", estado: "reparacion", user: "Mónica Soto", desc: "Bache en la entrada de la colonia, afecta a camiones de carga.", foto: "", lat: 16.8720, lng: -99.8520 },
-  { folio: "8CH-0022", colonia: "Hornos", dir: "Av. Hornos esq. Gran Vía Tropical", fecha: "2026-09-26", estado: "resuelto", user: "Andrés Lara", desc: "Bache en el carril central, frente a un comercio.", foto: "", lat: 16.8340, lng: -99.8910 }
-];
+function borrarSesion() {
+  try {
+    sessionStorage.removeItem("bo_sesion");
+    sessionStorage.removeItem("sesionIniciada");
+    localStorage.removeItem("admin");
+    localStorage.removeItem("usuario");
+    localStorage.removeItem("nombreUsuario");
+    localStorage.removeItem("bo_admin");
+  } catch (e) {}
+  window.name = "";
+}
 
-/* Los reportes (y sus cambios de estado) se guardan en el navegador para que
-   todas las páginas los compartan. Con tu servidor, cámbialo por fetch(). */
-let reportes;
-try {
-  const g = JSON.parse(localStorage.getItem("bo_reportes"));
-  reportes = Array.isArray(g) ? g : REPORTES_BASE.map(r => ({ ...r }));
-} catch (e) { reportes = REPORTES_BASE.map(r => ({ ...r })); }
-const guardarReportes = () => { try { localStorage.setItem("bo_reportes", JSON.stringify(reportes)); } catch (e) {} };
+const usuarioSesion = leerUsuarioSesion();
 
-/* ====== PERFIL ====== */
-const PERFIL_BASE = { nombre: "Administrador Bache-Out", correo: "admin@bache-out.mx", tel: "+52 744 000 0000", cargo: "Administrador del sistema" };
+if (!usuarioSesion || !ROLES_ADMIN.includes(Number(usuarioSesion.id_rol))) {
+  location.replace(RUTAS.login);
+}
+
+const nombreCompletoSesion = usuarioSesion
+  ? [usuarioSesion.nombres, usuarioSesion.apellido_paterno, usuarioSesion.apellido_materno]
+      .filter(Boolean)
+      .join(" ")
+  : "Administrador Bache-Out";
+
+const PERFIL_BASE = {
+  id: usuarioSesion?.id || usuarioSesion?.id_usuario || null,
+  nombre: nombreCompletoSesion || "Administrador Bache-Out",
+  correo: usuarioSesion?.correo || "admin@bache-out.mx",
+  tel: usuarioSesion?.telefono || "",
+  cargo: usuarioSesion?.nombre_rol || "Administrador del sistema"
+};
+
 let perfil = { ...PERFIL_BASE };
 try {
   const g = localStorage.getItem("bo_admin");
-  if (g) perfil = { ...perfil, ...JSON.parse(g) }; else perfil.correo = sesion || perfil.correo;
+  if (g) {
+    const guardado = JSON.parse(g);
+    if (!perfil.id || guardado.id === perfil.id) {
+      perfil = { ...perfil, ...guardado };
+    }
+  }
 } catch (e) {}
+
 const iniciales = n => n.trim().split(/\s+/).slice(0, 2).map(w => w[0]).join("").toUpperCase() || "AD";
 
+/* ====== ESTADOS Y REPORTES DESDE POSTGRESQL ====== */
+const ESTADOS = {
+  pendiente: "Pendiente",
+  reparacion: "En reparación",
+  resuelto: "Resuelto",
+  cancelado: "Rechazado"
+};
+
+const COLORES = {
+  pendiente: "#ffbb77",
+  reparacion: "#8cc4ee",
+  resuelto: "#8fd9a8",
+  cancelado: "#f08a82"
+};
+
+let reportes = [];
+window.reportes = reportes;
+
+const guardarReportes = () => {
+  try {
+    localStorage.setItem("bo_reportes", JSON.stringify(reportes));
+  } catch (e) {}
+};
+
+async function cargarReportesServidor() {
+  try {
+    const respuesta = await fetch("/api/admin/reportes");
+    if (!respuesta.ok) throw new Error("No se pudieron obtener los reportes del servidor.");
+
+    const datos = await respuesta.json();
+    reportes = Array.isArray(datos.reportes) ? datos.reportes : [];
+    window.reportes = reportes;
+
+    guardarReportes();
+    renderKpis();
+    avisarCambio();
+  } catch (error) {
+    console.error("Error al cargar reportes desde PostgreSQL:", error);
+    try {
+      const respaldo = JSON.parse(localStorage.getItem("bo_reportes"));
+      if (Array.isArray(respaldo)) {
+        reportes = respaldo;
+        window.reportes = reportes;
+      }
+    } catch (e) {}
+    renderKpis();
+    avisarCambio();
+    toast("No se pudo conectar con el servidor para actualizar reportes.");
+  }
+}
+
+async function actualizarEstadoEnServidor(folio, estadoNuevo) {
+  const respuesta = await fetch(`/api/admin/reportes/${encodeURIComponent(folio)}/estado`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ estado: estadoNuevo })
+  });
+
+  const datos = await respuesta.json().catch(() => ({}));
+  if (!respuesta.ok) {
+    throw new Error(datos.error || "No se pudo actualizar el estado en la base de datos.");
+  }
+  return datos;
+}
+
 /* ====== UTILIDADES ====== */
-const fmt = d => d.split("-").reverse().join("/");
+const fmt = d => (d ? d.split("-").reverse().join("/") : "Sin fecha");
 const MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
-const fechaLarga = d => { const [y, m, dd] = d.split("-"); return `${dd} de ${MESES[+m - 1]} de ${y}`; };
-const badge = e => `<span class="badge b-${e}">${ESTADOS[e]}</span>`;
+const fechaLarga = d => {
+  if (!d || !d.includes("-")) return d || "Fecha no disponible";
+  const [y, m, dd] = d.split("-");
+  return `${dd} de ${MESES[+m - 1]} de ${y}`;
+};
+const badge = e => `<span class="badge b-${e}">${ESTADOS[e] || "Pendiente"}</span>`;
 const count = e => reportes.filter(r => r.estado === e).length;
-function toast(m) { const t = $("#toast"); t.textContent = m; t.classList.add("on"); setTimeout(() => t.classList.remove("on"), 2200); }
+function toast(m) {
+  const t = $("#toast");
+  if (!t) return;
+  t.textContent = m;
+  t.classList.add("on");
+  setTimeout(() => t.classList.remove("on"), 2200);
+}
 const avisarCambio = () => document.dispatchEvent(new Event("reportes:cambio"));
 
 /* ====== ESTRUCTURA COMÚN (encabezado, menú, ventanas) ====== */
@@ -95,7 +181,7 @@ document.body.insertAdjacentHTML("beforeend", `
     <option value="pendiente">Pendiente</option>
     <option value="reparacion">En reparación</option>
     <option value="resuelto">Resuelto</option>
-    <option value="cancelado">Cancelado</option>
+    <option value="cancelado">Rechazado</option>
   </select>
   <div class="row"><button class="btn ghost" id="dCerrar">Cancelar</button><button class="btn" id="dGuardar">Guardar cambios</button></div>
 </dialog>
@@ -112,9 +198,13 @@ if (document.body.dataset.hero) {
 }
 function renderKpis() {
   const k = $("#kpis"); if (!k) return;
-  const d = [["", "Total de reportes", reportes.length, "Reportes generales"], ["ok", "Resueltos", count("resuelto"), "Incidentes finalizados"],
-             ["rep", "En reparación", count("reparacion"), "Cuadrillas asignadas"], ["pen", "Pendientes", count("pendiente"), "Revisión pendiente"],
-             ["can", "Cancelados", count("cancelado"), "Reportes descartados"]];
+  const d = [
+    ["", "Total de reportes", reportes.length, "Reportes generales"],
+    ["ok", "Resueltos", count("resuelto"), "Incidentes finalizados"],
+    ["rep", "En reparación", count("reparacion"), "Cuadrillas asignadas"],
+    ["pen", "Pendientes", count("pendiente"), "Revisión pendiente"],
+    ["can", "Rechazados", count("cancelado"), "Reportes descartados"]
+  ];
   k.innerHTML = d.map(([c, t, n, s]) => `<div class="kpi ${c}"><small>${t}</small><strong>${n}</strong><span>${s}</span></div>`).join("");
 }
 function renderLeyenda() {
@@ -154,10 +244,21 @@ function rows(list, full) {
 
 /* ====== GRÁFICAS ====== */
 function renderCharts() {
-  const por = {}; reportes.forEach(r => por[r.colonia] = (por[r.colonia] || 0) + 1);
-  const arr = Object.entries(por).sort((a, b) => b[1] - a[1]), max = arr[0][1];
-  $$("[data-bars]").forEach(b => b.innerHTML = arr.map(([c, n]) => `<div class="bar"><span>${c}</span><div><i style="width:${n / max * 100}%"></i></div><b>${n}</b></div>`).join(""));
-  const t = reportes.length; let acc = 0;
+  const por = {};
+  reportes.forEach(r => por[r.colonia] = (por[r.colonia] || 0) + 1);
+  const arr = Object.entries(por).sort((a, b) => b[1] - a[1]);
+  const max = arr.length ? arr[0][1] : 1;
+  $$("[data-bars]").forEach(b => b.innerHTML = arr.length
+    ? arr.map(([c, n]) => `<div class="bar"><span>${c}</span><div><i style="width:${n / max * 100}%"></i></div><b>${n}</b></div>`).join("")
+    : `<p style="color:#65757b;font-size:14px">Sin reportes registrados todavía.</p>`);
+
+  const t = reportes.length;
+  if (!t) {
+    $$("[data-donut]").forEach(d => d.innerHTML = `<div class="donut" style="background:#e2e8f0"><div>0<small>reportes</small></div></div>`);
+    return;
+  }
+
+  let acc = 0;
   const ORDEN = ["resuelto", "reparacion", "pendiente", "cancelado"];
   const seg = ORDEN.map(e => { const p = count(e) / t * 100, s = `${COLORES[e]} ${acc}% ${acc + p}%`; acc += p; return s; }).join(",");
   const lg = ORDEN.map(e => `<div><i style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${COLORES[e]};margin-right:6px"></i>${ESTADOS[e]} (${Math.round(count(e) / t * 100)}%)</div>`).join("");
@@ -179,7 +280,6 @@ function ponerPines(capa, lista) {
   lista.forEach(r => L.marker([r.lat, r.lng], { icon: pinIcon(r.estado), title: "#" + r.folio }).addTo(capa).bindPopup(popupReporte(r)));
 }
 function ajustarMapa(m, lista) { if (lista.length && !ubic) m.fitBounds(L.latLngBounds(lista.map(r => [r.lat, r.lng])).pad(.2)); }
-/* Sigue la ubicación real del dispositivo y la dibuja en uno o varios mapas */
 function seguirUbicacion(mapas, estado) {
   const mk = [], ci = []; let centrado = false;
   if (!("geolocation" in navigator)) { estado("Tu navegador no admite geolocalización.", false); return null; }
@@ -205,15 +305,37 @@ let actual = null;
 document.addEventListener("click", e => {
   const b = e.target.closest("[data-open]"); if (!b) return;
   actual = reportes.find(r => r.folio === b.dataset.open);
+  if (!actual) return;
   $("#dFolio").textContent = "Reporte #" + actual.folio;
-  $("#dBadge").className = "badge b-" + actual.estado; $("#dBadge").textContent = ESTADOS[actual.estado];
-  $("#dUbic").textContent = actual.dir + ", Acapulco"; $("#dFecha").textContent = fmt(actual.fecha); $("#dUser").textContent = actual.user;
-  $("#dEstado").value = actual.estado; $("#dlg").showModal();
+  $("#dBadge").className = "badge b-" + actual.estado;
+  $("#dBadge").textContent = ESTADOS[actual.estado];
+  $("#dUbic").textContent = actual.dir + ", Acapulco";
+  $("#dFecha").textContent = fmt(actual.fecha);
+  $("#dUser").textContent = actual.user;
+  $("#dEstado").value = actual.estado;
+  $("#dlg").showModal();
 });
 $("#dCerrar").onclick = () => $("#dlg").close();
-$("#dGuardar").onclick = () => {
-  actual.estado = $("#dEstado").value; guardarReportes(); /* aquí harías fetch/PUT a tu servidor */
-  $("#dlg").close(); avisarCambio(); toast("Estado actualizado a " + ESTADOS[actual.estado]);
+$("#dGuardar").onclick = async () => {
+  if (!actual) return;
+  const nuevoEstado = $("#dEstado").value;
+  const btnGuardar = $("#dGuardar");
+  btnGuardar.disabled = true;
+  btnGuardar.textContent = "Guardando...";
+
+  try {
+    await actualizarEstadoEnServidor(actual.folio, nuevoEstado);
+    actual.estado = nuevoEstado;
+    guardarReportes();
+    $("#dlg").close();
+    avisarCambio();
+    toast("Estado actualizado a " + ESTADOS[actual.estado]);
+  } catch (error) {
+    toast(error.message || "Error al actualizar estado");
+  } finally {
+    btnGuardar.disabled = false;
+    btnGuardar.textContent = "Guardar cambios";
+  }
 };
 
 /* ====== EXPORTAR CSV ====== */
@@ -225,4 +347,6 @@ document.addEventListener("click", e => {
 });
 
 document.addEventListener("reportes:cambio", renderKpis);
-renderKpis(); renderLeyenda();
+renderKpis();
+renderLeyenda();
+cargarReportesServidor();
