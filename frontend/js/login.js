@@ -154,7 +154,7 @@ formulario.addEventListener("submit", async function (event) {
         mostrarMensaje("¡Inicio de sesión exitoso! Redirigiendo...", true);
 
         // Cambia "admin.html" por el nombre exacto de tu archivo HTML principal del administrador
-        const destino = esAdmin ? "admin.html" : "index.html";
+        const destino = esAdmin ? "administrador.html" : "index.html";
 
         setTimeout(() => {
             window.location.href = destino;
