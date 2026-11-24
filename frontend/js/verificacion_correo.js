@@ -46,7 +46,10 @@ if (formulario) {
                 headers: {
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({ correo })
+                body: JSON.stringify({
+                    correo,
+                    motivo: "desbloqueo"
+                })
             });
 
             const datos = await respuesta.json();
