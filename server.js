@@ -366,6 +366,11 @@ const MAX_INTENTOS = 3;
 
 app.post('/api/recuperar-solicitar', async (req, res) => {
     const correo = req.body.correo ? req.body.correo.toLowerCase().trim() : '';
+    const motivo = req.body.motivo;
+    
+    if (!['desbloqueo', 'recuperacion'].includes(motivo)) {
+        return res.status(400).json({ error: 'El motivo de verificación no es válido.' });
+    }
 
     if (!correo) {
         return res.status(400).json({ error: 'Ingresa tu correo electrónico.' });
@@ -435,7 +440,12 @@ Equipo de Soporte de Bache-Out</p>
             throw new Error(`Brevo API (${respuestaBrevo.status}): ${detalleError}`);
         }
 
-        codigosRecuperacion.set(correo, { codigo, expiracion, id_usuario: usuario.id_usuario });
+       codigosRecuperacion.set(correo, {
+    codigo,
+    expiracion,
+    id_usuario: usuario.id_usuario,
+    motivo
+});
 
         res.json({ mensaje: 'Código enviado. Revisa tu bandeja de entrada o carpeta de spam.' });
     } catch (error) {
