@@ -135,7 +135,7 @@ formulario.addEventListener("submit", async function (event) {
         // INICIO DE SESIÓN EXITOSO
         // =================================
 
-        sessionStorage.removeItem("intentosFallidos");
+
         sessionStorage.setItem("sesionIniciada", "true");
 
         const usuarioData = datos.usuario || {};
