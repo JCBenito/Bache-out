@@ -196,7 +196,6 @@ if (document.body.dataset.hero) {
   $("main").insertAdjacentHTML("afterbegin", `
   <section class="hero">
     <div><h1>Panel de <span>administración</span></h1><p>Revisa los reportes ciudadanos, actualiza su estado y da seguimiento a las reparaciones.</p></div>
-    <div style="display:flex;gap:10px"><a class="btn" href="${RUTAS.reportes}?estado=pendiente">Ver pendientes</a><button class="btn ghost" id="exportCsv">Exportar CSV</button></div>
   </section>
   <div class="kpis" id="kpis"></div>`);
 }
@@ -349,14 +348,6 @@ $("#dGuardar").onclick = async () => {
     btnGuardar.textContent = "Guardar cambios";
   }
 };
-
-/* ====== EXPORTAR CSV ====== */
-document.addEventListener("click", e => {
-  if (e.target.id !== "exportCsv") return;
-  const csv = "Folio,Ubicación,Ciudadano,Fecha,Estado\n" + reportes.map(r => [r.folio, `"${r.dir}"`, r.user, r.fecha, ESTADOS[r.estado]].join(",")).join("\n");
-  const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" })); a.download = "reportes-bache-out.csv"; a.click();
-  toast("Archivo CSV descargado");
-});
 
 document.addEventListener("reportes:cambio", renderKpis);
 renderKpis();
