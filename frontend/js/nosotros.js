@@ -1,3 +1,4 @@
+
 // =========================================
 // VERIFICAR SI EXISTE UNA SESIÓN
 // =========================================
@@ -15,6 +16,22 @@ function tieneSesion() {
 
 document.addEventListener("DOMContentLoaded", function () {
 
+    // =========================================
+    // OCULTAR BOTONES SI EXISTE UNA SESIÓN
+    // =========================================
+
+    if (tieneSesion()) {
+
+        document.querySelector(".btn-sesion")?.remove();
+
+        document.querySelector(".btn-proposito")?.remove();
+
+    }
+
+
+    // =========================================
+    // PROTEGER LOS ENLACES DE LA BARRA
+    // =========================================
 
     const enlacesPrivados = document.querySelectorAll(
         'a[href="index.html"], ' +
@@ -27,19 +44,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
     enlacesPrivados.forEach(function (enlace) {
 
-
         enlace.addEventListener("click", function (evento) {
-
 
             if (!tieneSesion()) {
 
                 evento.preventDefault();
 
-
                 alert(
                     "Debes iniciar sesión para acceder a esta sección."
                 );
-
 
                 window.location.href = "login.html";
 
