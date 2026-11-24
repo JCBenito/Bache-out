@@ -487,35 +487,9 @@ app.post('/api/recuperar-verificar-codigo', (req, res) => {
         });
     }
 
-    // Si el código corresponde al desbloqueo de cuenta
+   // Desbloquear la cuenta si el código corresponde a desbloqueo
     if (registro.motivo === 'desbloqueo') {
-
-        // Eliminar el bloqueo asociado al correo
         intentosLogin.delete(correo);
-
-        // Eliminar también el bloqueo asociado al teléfono
-        // si el usuario inició sesión utilizando su número.
-        // Se buscará el teléfono de la cuenta.
-        pool.query(
-            'SELECT telefono FROM public.usuarios WHERE LOWER(correo) = $1',
-            [correo]
-        ).then(resultado => {
-            if (resultado.rows.length > 0) {
-                const telefono = resultado.rows[0].telefono;
-
-                if (telefono) {
-                    const soloDigitos = telefono.replace(/\D/g, '');
-                    const diezDigitos = soloDigitos.length === 12 && soloDigitos.startsWith('52')
-                        ? soloDigitos.slice(2)
-                        : soloDigitos;
-
-                    intentosLogin.delete(telefono.toLowerCase().trim());
-                    intentosLogin.delete(diezDigitos);
-                }
-            }
-        }).catch(error => {
-            console.error('Error al limpiar bloqueo por teléfono:', error);
-        });
     }
 
     res.json({
