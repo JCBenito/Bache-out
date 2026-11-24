@@ -285,10 +285,21 @@ function baseMap(id, z) {
   L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: "&copy; Colaboradores de OpenStreetMap" }).addTo(m);
   return m;
 }
-const popupReporte = r => `<b>#${r.folio}</b><br>${r.colonia}, Acapulco<br>${fmt(r.fecha)}<br>${badge(r.estado)}<br><button class="link" data-open="${r.folio}">Gestionar</button>`;
-function ponerPines(capa, lista) {
+const popupReporte = (r, mostrarGestionar = true) => {
+  const idReporte = r.id ?? r.id_reporte ?? r.folio;
+  const btnGestionar = mostrarGestionar
+    ? `<br><button class="link" data-open="${r.folio}">Gestionar</button>`
+    : "";
+  return `<b>#${idReporte}</b><br>${r.colonia}, Acapulco<br>${fmt(r.fecha)}<br>${badge(r.estado)}${btnGestionar}`;
+};
+function ponerPines(capa, lista, mostrarGestionar = true) {
   capa.clearLayers();
-  lista.forEach(r => L.marker([r.lat, r.lng], { icon: pinIcon(r.estado), title: "#" + r.folio }).addTo(capa).bindPopup(popupReporte(r)));
+  lista.forEach(r => {
+    const idReporte = r.id ?? r.id_reporte ?? r.folio;
+    L.marker([r.lat, r.lng], { icon: pinIcon(r.estado), title: "#" + idReporte })
+      .addTo(capa)
+      .bindPopup(popupReporte(r, mostrarGestionar));
+  });
 }
 function ajustarMapa(m, lista) { if (lista.length && !ubic) m.fitBounds(L.latLngBounds(lista.map(r => [r.lat, r.lng])).pad(.2)); }
 function seguirUbicacion(mapas, estado) {
