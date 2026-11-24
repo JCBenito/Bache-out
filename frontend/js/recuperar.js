@@ -63,6 +63,8 @@ formularioRecuperar.addEventListener("submit", async function (event) {
 
         // Guardamos el correo verificado en sessionStorage para usarlo en la siguiente página
         sessionStorage.setItem("correoRecuperacion", correo);
+       // Identificar que el motivo es recuperar contraseña
+       sessionStorage.setItem("motivoVerificacion", "recuperacion");
 
         // Redirige a la pantalla donde se ingresa el código y la nueva contraseña
         // (Cambia "verificacion_codigo.html" por "contraseña.html" si ese es el nombre que usarás)
