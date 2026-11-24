@@ -9,9 +9,6 @@ const mostrarPassword = document.getElementById("mostrarPassword");
 const mensaje = document.getElementById("mensaje");
 const botonLogin = formulario.querySelector('button[type="submit"]');
 
-// Contador de intentos incorrectos
-let intentosFallidos = Number(sessionStorage.getItem("intentosFallidos")) || 0;
-const MAX_INTENTOS = 3;
 
 // Roles administrativos: 1 Admin BBDD, 2 Project Manager, 3 Backend, 4 Frontend 1, 5 Frontend 2; 6 Ciudadano
 const ROLES_ADMIN = [1, 2, 3, 4, 5];
@@ -95,33 +92,37 @@ formulario.addEventListener("submit", async function (event) {
             throw new Error("El servidor devolvió una respuesta no válida.");
         }
 
+       // =================================
+        // CUENTA BLOQUEADA
+        // =================================
+        
+        if (respuesta.status === 403 && datos.bloqueado) {
+        
+            // Guardar el correo real de la cuenta
+            sessionStorage.setItem("correoVerificacion", datos.correo);
+            sessionStorage.setItem("correoRecuperacion", datos.correo);
+            sessionStorage.setItem("motivoVerificacion", "desbloqueo");
+        
+            alert(
+                "Tu cuenta ha sido bloqueada por superar los 3 intentos.\n\n" +
+                "Debes verificar tu correo electrónico para recuperar el acceso."
+            );
+        
+            window.location.href = "verificacion_correo.html";
+            return;
+        }
+        
         // =================================
         // CREDENCIALES INCORRECTAS
         // =================================
-
-        if (respuesta.status === 401 || (respuesta.status === 400 && datos.error && !datos.usuario)) {
-
-            intentosFallidos++;
-            sessionStorage.setItem("intentosFallidos", intentosFallidos);
-
-            if (intentosFallidos >= MAX_INTENTOS) {
-                sessionStorage.setItem("correoVerificacion", usuarioValor);
-
-                alert(
-                    "Has superado el límite de intentos de inicio de sesión.\n\n" +
-                    "Por seguridad, necesitas verificar tu identidad mediante tu correo electrónico.\n\n" +
-                    "Presiona Aceptar para continuar."
-                );
-
-                window.location.href = "verificacion_correo.html";
-                return;
-            }
-
+        
+        if (respuesta.status === 400 || respuesta.status === 401) {
+        
             mostrarMensaje(datos.error || "Correo o contraseña incorrectos.");
-
+        
             botonLogin.disabled = false;
             botonLogin.textContent = "Iniciar sesión";
-
+        
             return;
         }
 
