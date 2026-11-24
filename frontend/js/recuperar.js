@@ -51,7 +51,10 @@ formularioRecuperar.addEventListener("submit", async function (event) {
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({ correo })
+            body: JSON.stringify({
+                correo,
+                motivo: "recuperacion"
+            })
         });
 
         const datos = await respuesta.json();
