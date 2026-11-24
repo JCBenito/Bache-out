@@ -36,7 +36,7 @@ const upload = multer({ storage: storage });
 // 1: Admin BBDD, 2: Project Manager, 3: Backend, 4: Frontend 1, 5: Frontend 2; 6: Ciudadano
 const ROLES_ADMIN = [1, 2, 3, 4, 5];
 
-// 1: Pendiente, 2: En Reparación, 3: Resuelto, 4: Rechazado[cite: 4]
+// 1: Pendiente, 2: En Reparación, 3: Resuelto, 4: Rechazado
 const MAPA_ESTADO_A_ID = {
     pendiente: 1,
     reparacion: 2,
@@ -155,7 +155,7 @@ app.post('/api/registro', async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const contrasenaHash = await bcrypt.hash(contrasena, salt);
 
-        // id_rol = 6 corresponde a Ciudadano[cite: 3]
+        // id_rol = 6 corresponde a Ciudadano
         const resultado = await pool.query(
             `INSERT INTO public.usuarios (id_rol, nombres, apellido_paterno, apellido_materno, telefono, correo, contrasena)
              VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id_usuario`,
@@ -183,9 +183,7 @@ app.post('/api/login', async (req, res) => {
         ? soloDigitos.slice(2)
         : soloDigitos;
 
-
     try {
-
         // 2. Buscar al usuario en la base de datos
         const resultado = await pool.query(
             `SELECT u.*, r.nombre_rol
@@ -206,10 +204,10 @@ app.post('/api/login', async (req, res) => {
         const usuarioBD = resultado.rows[0];
         // Identificar la cuenta mediante su correo registrado
         const claveIntentos = usuarioBD.correo.toLowerCase().trim();
-        
+
         // Comprobar si esta cuenta está bloqueada
         const registroCuenta = intentosLogin.get(claveIntentos);
-        
+
         if (registroCuenta && registroCuenta.bloqueado) {
             return res.status(403).json({
                 error: 'Tu cuenta está bloqueada. Verifica tu correo electrónico para desbloquearla.',
@@ -225,7 +223,6 @@ app.post('/api/login', async (req, res) => {
         );
 
         if (!esValida) {
-
             // Recuperar los intentos anteriores
             const intentosActuales = intentosLogin.get(claveIntentos) || {
                 cantidad: 0,
@@ -245,7 +242,7 @@ app.post('/api/login', async (req, res) => {
             if (intentosActuales.bloqueado) {
                 return res.status(403).json({
                     error: 'Has superado los 3 intentos. Debes verificar tu correo electrónico para desbloquear tu cuenta.',
-                    bloqueado: true
+                    bloqueado: true,
                     correo: usuarioBD.correo
                 });
             }
@@ -285,7 +282,6 @@ app.post('/api/login', async (req, res) => {
         });
     }
 });
-
 
 // ==========================================
 // PERFIL Y CONTRASEÑA (CIUDADANO / GENERAL)
@@ -365,11 +361,10 @@ const codigosRecuperacion = new Map();
 const intentosLogin = new Map();
 const MAX_INTENTOS = 3;
 
-
 app.post('/api/recuperar-solicitar', async (req, res) => {
     const correo = req.body.correo ? req.body.correo.toLowerCase().trim() : '';
     const motivo = req.body.motivo;
-    
+
     if (!['desbloqueo', 'recuperacion'].includes(motivo)) {
         return res.status(400).json({ error: 'El motivo de verificación no es válido.' });
     }
@@ -442,12 +437,12 @@ Equipo de Soporte de Bache-Out</p>
             throw new Error(`Brevo API (${respuestaBrevo.status}): ${detalleError}`);
         }
 
-       codigosRecuperacion.set(correo, {
-    codigo,
-    expiracion,
-    id_usuario: usuario.id_usuario,
-    motivo
-});
+        codigosRecuperacion.set(correo, {
+            codigo,
+            expiracion,
+            id_usuario: usuario.id_usuario,
+            motivo
+        });
 
         res.json({ mensaje: 'Código enviado. Revisa tu bandeja de entrada o carpeta de spam.' });
     } catch (error) {
@@ -455,7 +450,6 @@ Equipo de Soporte de Bache-Out</p>
         res.status(500).json({ error: 'No se pudo enviar el correo de verificación.' });
     }
 });
-
 
 app.post('/api/recuperar-verificar-codigo', (req, res) => {
     const correo = req.body.correo ? req.body.correo.toLowerCase().trim() : '';
@@ -489,7 +483,7 @@ app.post('/api/recuperar-verificar-codigo', (req, res) => {
         });
     }
 
-   // Desbloquear la cuenta si el código corresponde a desbloqueo
+    // Desbloquear la cuenta si el código corresponde a desbloqueo
     if (registro.motivo === 'desbloqueo') {
         intentosLogin.delete(correo);
     }
@@ -499,7 +493,6 @@ app.post('/api/recuperar-verificar-codigo', (req, res) => {
         motivo: registro.motivo
     });
 });
-
 
 app.post('/api/recuperar-restablecer', async (req, res) => {
     const correo = req.body.correo ? req.body.correo.toLowerCase().trim() : '';
